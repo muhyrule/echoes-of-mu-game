@@ -35,7 +35,7 @@ def arena(name, theme, title, sub, music, boss, final_exit, back_label, pillars,
         if G.free(m, cx_, cy_):
             m.put(cx_, cy_, "c")
     m.put(CX, 36, "@")
-    m.put(CX, 9, "G")
+    m.put(CX, 14, "G")
     m.put(CX, 4, "X")
     m.door(CX, 39, "vaults" if name == "vault_arena" else "prague", back_label, "gate")
     m.save()

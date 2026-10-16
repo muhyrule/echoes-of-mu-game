@@ -3,6 +3,7 @@ extends CharacterBody2D
 ## Both are huge multi-phase foes with telegraphed, theme-specific attack patterns.
 
 const Art = preload("res://src/core/art.gd")
+const BossArt = preload("res://src/entities/boss_art.gd")
 const HazardScript = preload("res://src/entities/hazards.gd")
 const E := 1.0 / 3.2  # extras are authored at 3.2x body size
 
@@ -381,20 +382,6 @@ func _phase_line() -> String:
 
 # ---------------------------------------------------------- drawing
 
-func _gear(pos: Vector2, r: float, teeth: int, rot: float, col: Color) -> void:
-	var pts := PackedVector2Array()
-	for i in teeth * 2:
-		var rr := r if i % 2 == 0 else r * 0.82
-		for k in 2:
-			pts.append(pos + Vector2.from_angle(rot + TAU * (float(i) + k * 0.5) / float(teeth * 2)) * rr)
-	draw_colored_polygon(pts, Color(Art.OUT))
-	draw_circle(pos, r * 0.78, col)
-	draw_circle(pos, r * 0.3, Color("1c1520"))
-	for i in 4:
-		var a := rot + PI * 0.5 * i
-		draw_line(pos + Vector2.from_angle(a) * r * 0.3, pos + Vector2.from_angle(a) * r * 0.74, Color(Art.OUT), 1.6)
-
-
 func _draw() -> void:
 	var dormant := state == "dormant"
 	var rise := clampf(st / 1.6, 0.0, 1.0) if state == "intro" else (0.0 if dormant else 1.0)
@@ -405,84 +392,21 @@ func _draw() -> void:
 		tint = Color(1.0, 0.72 + 0.1 * sin(t * 8.0), 0.72)
 	if exposed > 0.0 and int(t * 12.0) % 2 == 0:
 		tint = Color(1.5, 1.4, 0.9)
-	if kind == "golem_giant":
-		tint = Color(tint.r * 1.1, tint.g * 0.82, tint.b * 0.62, tint.a)
 	if dormant:
 		tint = Color(0.55, 0.55, 0.65)
 	self_modulate = Color(tint, 0.45 + 0.55 * rise) if state == "intro" else tint
 	var bob := sin(t * 1.8) * 1.2 if not dormant else 0.0
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var k := 1.0 / scale.x
+	draw_set_transform(Vector2(0, 14.0 * k), 0.0, Vector2(k, k))
 	if kind == "kelpie_giant":
-		_draw_kelpie(bob)
+		BossArt.kelpie(self, t, phase, flash, winding, exposed)
 	else:
-		Art.colossus(self, facing, t, flash, winding)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2(E, E))
-		_draw_emet(bob)
+		BossArt.golem(self, t, phase, flash, winding, exposed, state == "idle" and velocity.length() > 4.0)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(E, E))
 	if exposed > 0.0 and state != "dying":
 		for i in 4:
 			var a := t * 4.0 + TAU * i / 4.0
-			draw_circle(Vector2(cos(a) * 26.0, -78.0 + sin(a * 2.0) * 4.0), 2.2, Color(1, 0.95, 0.5, 0.9))
+			draw_circle(Vector2(cos(a) * 46.0, -120.0 + sin(a * 2.0) * 6.0), 3.0, Color(1, 0.95, 0.5, 0.9))
 	if winding:
-		draw_arc(Vector2(0, -20), 52.0 + sin(t * 16.0) * 3.0, 0, TAU, 40, Color(_gold(), 0.45), 2.0)
+		draw_arc(Vector2(0, -70), 95.0 + sin(t * 16.0) * 4.0, 0, TAU, 40, Color(_gold(), 0.45), 2.0)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-
-
-func _draw_kelpie(off: float) -> void:
-	var o := Color(Art.OUT)
-	var hit := flash > 0.0
-	var body := Color("1f4a55") if not hit else Color.WHITE
-	var lite := Color("3a8a94") if not hit else Color.WHITE
-	for i in 3:
-		var r := 22.0 + i * 6.0 + fmod(t * 8.0, 6.0)
-		draw_arc(Vector2(0, 8), r, 0.2, PI - 0.2, 20, Color(0.5, 0.9, 0.95, 0.35 - i * 0.1), 1.0)
-		draw_arc(Vector2(0, 8), r, PI + 0.2, TAU - 0.2, 20, Color(0.5, 0.9, 0.95, 0.35 - i * 0.1), 1.0)
-	draw_circle(Vector2(0, 6), 20.0, Color(0.1, 0.3, 0.35, 0.8))
-	var sw := sin(t * 1.6) * 2.0 + (4.0 if winding else 0.0)
-	var neck := PackedVector2Array([Vector2(-14, 8), Vector2(-8, -24 + off), Vector2(-2 + sw, -40 + off), Vector2(10 + sw, -38 + off), Vector2(12, -26 + off), Vector2(14, 8)])
-	draw_colored_polygon(neck, o)
-	var neck_in := PackedVector2Array([Vector2(-12, 6), Vector2(-6, -23 + off), Vector2(-1 + sw, -38 + off), Vector2(9 + sw, -36 + off), Vector2(10, -26 + off), Vector2(12, 6)])
-	draw_colored_polygon(neck_in, body)
-	var hd := PackedVector2Array([Vector2(-6 + sw, -44 + off), Vector2(8 + sw, -46 + off), Vector2(22 + sw, -36 + off), Vector2(20 + sw, -31 + off), Vector2(6 + sw, -33 + off), Vector2(-4 + sw, -36 + off)])
-	draw_colored_polygon(hd, o)
-	var hd_in := PackedVector2Array([Vector2(-4 + sw, -43 + off), Vector2(8 + sw, -44.5 + off), Vector2(20 + sw, -36 + off), Vector2(19 + sw, -33 + off), Vector2(6 + sw, -34.5 + off), Vector2(-3 + sw, -37 + off)])
-	draw_colored_polygon(hd_in, lite)
-	draw_colored_polygon(PackedVector2Array([Vector2(-2 + sw, -44 + off), Vector2(0 + sw, -52 + off), Vector2(4 + sw, -44 + off)]), body)
-	var eye := Color(0.6, 1.0, 0.95) if exposed <= 0.0 else Color(1, 0.9, 0.4)
-	draw_circle(Vector2(8 + sw, -39 + off), 2.0, eye)
-	draw_circle(Vector2(8 + sw, -39 + off), 4.0, Color(eye, 0.25))
-	for i in 7:
-		var y := -42.0 + i * 7.0
-		var wv := sin(t * 2.2 + i) * 3.0
-		draw_line(Vector2(-4 + sw * (1.0 - i / 7.0), y + off), Vector2(-14 + wv, y + 8.0 + off), Color("2e7a4a"), 2.2)
-		draw_line(Vector2(-14 + wv, y + 8.0 + off), Vector2(-17 + wv * 1.4, y + 14.0 + off), Color("56b070"), 1.4)
-	for i in 5:
-		var dp := fmod(t * 14.0 + i * 9.0, 30.0)
-		draw_circle(Vector2(14.0 + i * 2.0 + sw, -30.0 + dp + off), 1.1, Color(0.7, 0.95, 1.0, 0.7))
-	var lp := Vector2(-6 + sw, -26 + off + sin(t * 2.0) * 1.5)
-	draw_circle(lp, 6.0, Color(1.0, 0.8, 0.3, 0.18))
-	draw_circle(lp, 2.2, Color("ffd060"))
-
-
-func _draw_emet(off: float) -> void:
-	var c := Vector2(0, -48 + off) * 1.0
-	var col := Color(1.0, 0.75, 0.3, 0.95) if phase < 3 else Color(1.0, 0.35 + 0.2 * sin(t * 10.0), 0.2, 1.0)
-	draw_circle(c, 17.0, Color(col, 0.12))
-	var glyphs := 3 if phase < 3 else 2
-	var start := -9.0 if phase < 3 else -3.0
-	for g in glyphs:
-		var gx := c.x + start + g * 9.0
-		var gy := c.y
-		match g + (0 if phase < 3 else 1):
-			0:
-				draw_line(Vector2(gx - 4, gy - 5), Vector2(gx + 3, gy - 5), col, 1.8)
-				draw_line(Vector2(gx + 3, gy - 5), Vector2(gx - 3, gy + 5), col, 1.8)
-				draw_line(Vector2(gx - 4, gy + 5), Vector2(gx + 4, gy + 5), col, 1.8)
-			1:
-				draw_line(Vector2(gx - 4, gy - 5), Vector2(gx + 4, gy - 5), col, 1.8)
-				draw_line(Vector2(gx + 4, gy - 5), Vector2(gx + 4, gy + 5), col, 1.8)
-				draw_line(Vector2(gx - 4, gy + 5), Vector2(gx - 4, gy + 1), col, 1.8)
-			_:
-				draw_line(Vector2(gx - 5, gy - 5), Vector2(gx + 5, gy - 5), col, 1.8)
-				draw_line(Vector2(gx, gy - 5), Vector2(gx, gy + 5), col, 1.8)
-				draw_line(Vector2(gx - 5, gy + 5), Vector2(gx + 5, gy + 5), col, 1.8)
