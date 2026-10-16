@@ -8,6 +8,7 @@ var flags: Dictionary = {}
 var max_hp := 6
 var base_hp := 6
 var gold := 0
+var weather := ""
 var supplies: Dictionary = {}
 var owned: Array = []
 var equip: Dictionary = {}
@@ -36,6 +37,7 @@ func _setup_input() -> void:
 		"form": [KEY_Q, KEY_K],
 		"reset_puzzle": [KEY_R],
 		"pause": [KEY_ESCAPE],
+		"status": [KEY_TAB, KEY_I],
 		"use_tonic": [KEY_1],
 		"use_elixir": [KEY_2],
 		"use_candle": [KEY_3],

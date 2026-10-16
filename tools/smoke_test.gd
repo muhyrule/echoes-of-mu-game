@@ -222,6 +222,16 @@ func run() -> void:
 	GS.load_game()
 	check(GS.gold == g0 and GS.equip["mu"]["armor"] == "mu_a1" and GS.max_hp == before_hp + 1, "gear and gold survive save and load")
 	check(Gear.atk_bonus() == 0 and Gear.def_total() >= 1, "gear stat maths")
+	GS.owned.append("mu_w_f")
+	check(Gear.owned_for("mu", "weapon").size() >= 1, "owned_for lists weapons")
+	lv.open_status()
+	await frames(5)
+	check(lv.frozen, "status screen opens and freezes")
+	for ch in lv.get_children():
+		if ch is CanvasLayer and ch.get_child_count() > 0 and ch.get_child(0).has_signal("closed") and not ch.get_child(0).has_method("_buy"):
+			ch.get_child(0).closed.emit()
+	await frames(10)
+	check(not lv.frozen, "status screen closes")
 
 	print("SMOKE TEST DONE, failures: %d" % fails)
 	quit(fails)

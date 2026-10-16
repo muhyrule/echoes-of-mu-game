@@ -10,6 +10,8 @@ const HudScript = preload("res://src/scenes/world/hud.gd")
 
 const TILE := 16
 const SOLID_CHARS := ["#", "o", "=", "H", "Z", "Y", "U", "T", "J", "F"]
+const GEAR_SECRETS := {"e_chest": "iso_w_f", "p_chest": "cor_a_f", "ar_helm": "iso_a_f", "wp_crate": "wre_w_f", "pw_crate": "cor_w_f"}
+const BOSS_GEAR := {"vaults": "mu_w_f", "prague": "mu_a_f"}
 const FURNITURE := ["Z", "Y", "U", "T", "J", "F", "C", "R"]
 const TOWN_THEMES := ["town_e", "town_p"]
 
@@ -39,6 +41,9 @@ var _nearest: Node2D
 var cam: Camera2D
 var shake_amt := 0.0
 var overlay: Node2D
+var tint_node: CanvasModulate
+var tint_base := Color.WHITE
+var weather: Node2D
 var fog: Array = []
 var windows: Array = []
 var gt := 0.0
@@ -77,6 +82,7 @@ func _ready() -> void:
 	_setup_hud()
 	_setup_fx()
 	_setup_atmosphere()
+	_setup_weather()
 	_spawn_followers()
 
 	Audio.play_music(meta.get("music", "crypt"))
@@ -324,7 +330,9 @@ func _setup_hud() -> void:
 
 func _setup_atmosphere() -> void:
 	var tint := CanvasModulate.new()
+	tint_node = tint
 	tint.color = {"vault": Color(0.38, 0.4, 0.56), "prague": Color(0.46, 0.46, 0.52), "chapel": Color(0.55, 0.5, 0.62), "town_e": Color(0.5, 0.52, 0.68), "town_p": Color(0.62, 0.56, 0.58), "interior": Color(0.78, 0.68, 0.62)}[theme]
+	tint_base = tint.color
 	add_child(tint)
 	var lamp := Art.make_light(Color("ffd9a0"), 2.0, 1.0)
 	player.add_child(lamp)
@@ -392,6 +400,23 @@ func _chimney_smoke() -> void:
 				sm.color = Color(0.7, 0.7, 0.78, 0.28)
 				sm.z_index = 12
 				add_child(sm)
+
+
+func set_weather_dark(d: float) -> void:
+	if tint_node:
+		tint_node.color = tint_base.lerp(tint_base * Color(0.7, 0.75, 0.9, 1.0), clampf(d * 3.0, 0.0, 1.0))
+
+
+func _setup_weather() -> void:
+	if theme not in TOWN_THEMES:
+		return
+	var layer := CanvasLayer.new()
+	layer.layer = 5
+	add_child(layer)
+	weather = Node2D.new()
+	weather.set_script(load("res://src/scenes/world/weather.gd"))
+	weather.level = self
+	layer.add_child(weather)
 
 
 func _setup_fx() -> void:
@@ -509,6 +534,7 @@ func _spawn_follower(id: String) -> void:
 	var f := Node2D.new()
 	f.set_script(FollowerScript)
 	entities.add_child(f)
+	f.hero = id
 	f.start(lead, FOLLOW_PAL[id])
 	followers[id] = f
 
@@ -623,6 +649,20 @@ func _draw() -> void:
 					fa = floor_a.lightened(0.12)
 					fb = floor_b.lightened(0.12)
 				draw_rect(r, fa if (x + y) % 2 == 0 else fb)
+				if theme in TOWN_THEMES:
+					var ph := (x * 92821 + y * 68917) % 23
+					if ph == 0:
+						draw_set_transform(r.position + Vector2(8, 10), 0.0, Vector2(1.0, 0.45))
+						draw_circle(Vector2.ZERO, 6.5, Color(0.1, 0.12, 0.2, 0.45))
+						draw_circle(Vector2(-1, -1), 4.0, Color(0.45, 0.55, 0.8, 0.22))
+						draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+					elif ph == 1 and theme == "town_e":
+						draw_rect(Rect2(r.position.x + 3, r.position.y + 9, 2, 3), Color(0.2, 0.4, 0.25, 0.7))
+						draw_rect(Rect2(r.position.x + 5, r.position.y + 10, 1, 2), Color(0.3, 0.5, 0.3, 0.7))
+						draw_rect(Rect2(r.position.x + 8, r.position.y + 8, 1, 4), Color(0.25, 0.45, 0.28, 0.7))
+					elif ph == 2:
+						draw_rect(Rect2(r.position.x + 4, r.position.y + 5, 7, 5), Color(0.28, 0.26, 0.32, 0.5))
+						draw_rect(Rect2(r.position.x + 5, r.position.y + 5, 5, 1), Color(1, 1, 1, 0.08))
 				draw_rect(Rect2(r.position.x, r.position.y, TILE, 1), Color(0, 0, 0, 0.22))
 				draw_rect(Rect2(r.position.x, r.position.y, 1, TILE), Color(0, 0, 0, 0.22))
 				draw_rect(Rect2(r.position.x + 1, r.position.y + 1, TILE - 1, 1), Color(1, 1, 1, 0.04))
@@ -917,6 +957,8 @@ func _process(_delta: float) -> void:
 			"barrel", "chest", "crate", "urn", "tomes":
 				text = "[E] Search"
 	hud.hint = text
+	if Input.is_action_just_pressed("status") and not frozen and not _busy and not Dialogue.blocking() and not hud.paused and not player.dead:
+		open_status()
 	if Input.is_action_just_pressed("reset_puzzle") and not frozen:
 		_reset_puzzle()
 
@@ -1040,6 +1082,9 @@ func _search(p: Node2D) -> void:
 		return
 	GameState.set_flag(fid)
 	var reward: String = d.get("reward", "")
+	var found_gear: String = GEAR_SECRETS.get(d.id, "")
+	if found_gear != "":
+		_grant_gear(found_gear)
 	if d.has("item"):
 		GameState.items.append(d.item)
 	match reward:
@@ -1058,12 +1103,29 @@ func _search(p: Node2D) -> void:
 	if d.has("item"):
 		var coin := int(18 * Gear.gold_mult())
 		GameState.gold += coin
-		hud.show_notice("Found: %s  (+%d gold)" % [d.item, coin])
+		hud.show_notice(("Found: %s  (+%d gold)" % [d.item, coin]) + (("  +  " + Gear.ITEMS[found_gear].name) if found_gear != "" else ""))
 	elif reward == "maxhp" or reward == "heal":
 		hud.show_notice("Vitality restored" if reward == "heal" else "Your vitality grows")
 	GameState.save_game()
 	await Dialogue.play_lines([{"who": "", "text": d.get("text", "")}])
 	p.queue_redraw()
+
+
+func open_status() -> void:
+	var sc := Control.new()
+	sc.set_script(load("res://src/scenes/world/status.gd"))
+	sc.level = self
+	var layer := CanvasLayer.new()
+	layer.layer = 20
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	layer.add_child(sc)
+	add_child(layer)
+	frozen = true
+	await sc.closed
+	layer.queue_free()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	frozen = false
 
 
 func open_shop(kind: String, tier: int) -> void:
@@ -1169,6 +1231,13 @@ func enemy_died(e: Node2D) -> void:
 		hp_prop.position = e.position
 
 
+func _grant_gear(id: String) -> void:
+	if id in GameState.owned:
+		return
+	GameState.owned.append(id)
+	hud.show_notice("Gear found: %s  (Tab to equip)" % Gear.ITEMS[id].name)
+
+
 func _boss_defeated(pos: Vector2) -> void:
 	for en in get_tree().get_nodes_in_group("enemies"):
 		if en != null and not en.is_boss:
@@ -1189,6 +1258,8 @@ func _boss_defeated(pos: Vector2) -> void:
 		GameState.refresh_stats()
 		hud.show_notice("%s leaves the party" % bi.leave.capitalize())
 	GameState.gold += int(80 * Gear.gold_mult())
+	if BOSS_GEAR.has(map_name):
+		_grant_gear(BOSS_GEAR[map_name])
 	var final_cell: Vector2i = marks.get("X", Vector2i(int(pos.x / TILE), int(pos.y / TILE)))
 	walkovers.append(_make_prop("final", final_cell))
 	GameState.hp = GameState.max_hp

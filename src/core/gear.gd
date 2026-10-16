@@ -47,6 +47,13 @@ const ITEMS := {
 	"cor_a1": {"name": "Gearwoven Robe", "hero": "corvin", "slot": "armor", "tier": 1, "atk": 0, "def": 0, "hp": 1, "price": 70, "desc": "Tiny cogs turn in the hem."},
 	"cor_a2": {"name": "Brass-Ribbed Mantle", "hero": "corvin", "slot": "armor", "tier": 2, "atk": 0, "def": 1, "hp": 2, "price": 170, "desc": "A rib cage of springs."},
 	"cor_a3": {"name": "Regulator's Vestments", "hero": "corvin", "slot": "armor", "tier": 3, "atk": 0, "def": 1, "hp": 3, "price": 340, "desc": "Keeps good time with the heart."},
+	"mu_w_f": {"name": "Warden's Own Blade", "hero": "mu", "slot": "weapon", "tier": 9, "atk": 2, "def": 0, "hp": 1, "price": 0, "desc": "Taken from the vault's first guardian. Still humming."},
+	"mu_a_f": {"name": "Ossuary Hauberk", "hero": "mu", "slot": "armor", "tier": 9, "atk": 0, "def": 2, "hp": 2, "price": 0, "desc": "Bone-white rings, strangely light."},
+	"iso_w_f": {"name": "Tomas's Bellmaul", "hero": "isolde", "slot": "weapon", "tier": 9, "atk": 4, "def": 0, "hp": 0, "price": 0, "desc": "Her brother's bell-hammer, bound in blue thread."},
+	"iso_a_f": {"name": "Founder's Plate", "hero": "isolde", "slot": "armor", "tier": 9, "atk": 0, "def": 2, "hp": 1, "price": 0, "desc": "Older than the Old Town itself."},
+	"wre_w_f": {"name": "Key-Shaped Blades", "hero": "wren", "slot": "weapon", "tier": 9, "atk": 2, "def": 0, "hp": 0, "price": 0, "desc": "They open more than locks."},
+	"cor_a_f": {"name": "Winder's Mantle", "hero": "corvin", "slot": "armor", "tier": 9, "atk": 0, "def": 1, "hp": 2, "price": 0, "desc": "Thirty years of clockwork oil in the weave."},
+	"cor_w_f": {"name": "Heartspring Staff", "hero": "corvin", "slot": "weapon", "tier": 9, "atk": 2, "def": 0, "hp": 1, "price": 0, "desc": "Wound tight, it never quite runs down."},
 }
 
 const SUPPLIES := {
@@ -64,6 +71,39 @@ const INN_MENU := [
 	{"id": "meal", "name": "Hot Meal", "price": 5, "heal": 2, "desc": "Bread, broth, a candle. +2 hearts."},
 	{"id": "rest", "name": "Rest the Night", "price": 15, "heal": 99, "desc": "A bed till dawn. Full health, and the game saves."},
 ]
+
+
+static func owned_for(hero: String, slot: String) -> Array:
+	var out: Array = [START_GEAR[hero][slot]]
+	for id in GameState.owned:
+		if ITEMS.has(id) and ITEMS[id].hero == hero and ITEMS[id].slot == slot and id not in out:
+			out.append(id)
+	return out
+
+
+static func tier_of(hero: String) -> int:
+	var d: Dictionary = ITEMS[equipped(hero, "armor")]
+	return int(d.tier) if d.tier < 9 else clampi(int(d.def) + 1, 1, 3)
+
+
+static func styled(hero: String, pal: Dictionary) -> Dictionary:
+	var t := tier_of(hero)
+	if t <= 0:
+		return pal
+	var p := pal.duplicate()
+	if t >= 2:
+		p["mail"] = true
+	var steel := Color("8a8fa0")
+	var gold := Color("c8a050")
+	if t == 1:
+		p["accent"] = Color(p.accent).lightened(0.15)
+	elif t == 2:
+		p["coat"] = Color(p.coat).lerp(steel, 0.28)
+		p["accent"] = gold.darkened(0.15)
+	else:
+		p["coat"] = Color(p.coat).lerp(steel, 0.5)
+		p["accent"] = gold
+	return p
 
 
 static func equipped(hero: String, slot: String) -> String:

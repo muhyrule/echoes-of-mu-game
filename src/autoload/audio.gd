@@ -607,11 +607,11 @@ static func _lowpass(buf: PackedFloat32Array, a: float) -> void:
 # tone smoothing, cheap comb/allpass room tail wrapped around the loop, then soft limiting
 func _smooth_and_verb(buf: PackedFloat32Array) -> void:
 	var n := buf.size()
-	_lowpass(buf, 0.42)
-	_lowpass(buf, 0.6)
+	_lowpass(buf, 0.38)
+	_lowpass(buf, 0.5)
 	var wet := PackedFloat32Array()
 	wet.resize(n)
-	for cfg in [[int(0.0297 * RATE), 0.62], [int(0.0371 * RATE), 0.6], [int(0.0411 * RATE), 0.58], [int(0.0437 * RATE), 0.56]]:
+	for cfg in [[int(0.0297 * RATE), 0.66], [int(0.0371 * RATE), 0.64], [int(0.0411 * RATE), 0.62], [int(0.0437 * RATE), 0.6]]:
 		var d: int = cfg[0]
 		var g: float = cfg[1]
 		var y := PackedFloat32Array()
@@ -622,12 +622,12 @@ func _smooth_and_verb(buf: PackedFloat32Array) -> void:
 				var j := i - d
 				if j < 0:
 					j += n
-				lp += 0.55 * (y[j] - lp)
+				lp += 0.45 * (y[j] - lp)
 				y[i] = buf[i] + g * lp
 		for i in n:
 			wet[i] += y[i] * 0.16
 	# a longer, darker tap pair adds a slow bloom
-	for cfg in [[int(0.113 * RATE), 0.5], [int(0.167 * RATE), 0.45]]:
+	for cfg in [[int(0.113 * RATE), 0.56], [int(0.167 * RATE), 0.52]]:
 		var d: int = cfg[0]
 		var g: float = cfg[1]
 		var y := PackedFloat32Array()
@@ -638,13 +638,18 @@ func _smooth_and_verb(buf: PackedFloat32Array) -> void:
 				var j := i - d
 				if j < 0:
 					j += n
-				lp += 0.3 * (y[j] - lp)
+				lp += 0.26 * (y[j] - lp)
 				y[i] = buf[i] + g * lp
 		for i in n:
 			wet[i] += y[i] * 0.14
-	_lowpass(wet, 0.35)
+	_lowpass(wet, 0.3)
+	var pre := int(0.022 * RATE)
+	var dry := buf.duplicate()
 	for i in n:
-		buf[i] = buf[i] * 0.8 + wet[i]
+		var j := i - pre
+		if j < 0:
+			j += n
+		buf[i] = dry[i] * 0.78 + wet[j] * 1.1
 	var peak := 0.001
 	for i in n:
 		peak = maxf(peak, absf(buf[i]))
@@ -678,6 +683,10 @@ func _render_note(buf: PackedFloat32Array, start: int, midi: int, dur: float, in
 	if f < 140.0:
 		gain *= 0.8
 	var vphase := fmod(float(start) * 0.37, TAU)
+	gain *= 1.0 + 0.05 * sin(TAU * float(start) / RATE / 7.0)
+	var chorus := inst == "strings" or inst == "organ"
+	var detune := 1.0 + (0.0017 if inst == "strings" else 0.0021)
+	var phase2 := 0.25
 	for i in n:
 		var t := float(i) / RATE
 		var v := 0.0
@@ -698,6 +707,11 @@ func _render_note(buf: PackedFloat32Array, start: int, midi: int, dur: float, in
 				var i0 := int(ph) % TS
 				var fr := ph - floorf(ph)
 				v = lerpf(tb[i0], tb[(i0 + 1) % TS], fr)
+				if chorus:
+					phase2 += f * vib * detune / RATE
+					var q := (phase2 - floorf(phase2)) * TS
+					var k0 := int(q) % TS
+					v = 0.62 * v + 0.38 * lerpf(tb[k0], tb[(k0 + 1) % TS], q - floorf(q))
 				var env := minf(t / att, 1.0)
 				env = env * env * (3.0 - 2.0 * env)
 				if inst == "piano":

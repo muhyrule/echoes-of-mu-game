@@ -8,6 +8,7 @@ var trail: Array = []
 var pal: Dictionary = Art.PAL_ISOLDE
 var facing := Vector2.DOWN
 var t := 0.0
+var hero := ""
 var moving := false
 const DELAY := 16
 
@@ -37,4 +38,4 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	Art.person(self, facing, t, pal, moving)
+	Art.person(self, facing, t, Gear.styled(hero, pal) if hero != "" else pal, moving)

@@ -13,6 +13,7 @@ var facing := Vector2.DOWN
 var attacking := 0.0
 var attack_cd := 0.0
 var invuln := 0.0
+var ward := 0.0
 var knock := Vector2.ZERO
 var push_t := 0.0
 var dead := false
@@ -41,6 +42,7 @@ func apply_form() -> void:
 func _physics_process(delta: float) -> void:
 	t += delta
 	invuln = maxf(0.0, invuln - delta)
+	ward = maxf(0.0, ward - delta)
 	attack_cd = maxf(0.0, attack_cd - delta)
 	attacking = maxf(0.0, attacking - delta)
 	if dead or Dialogue.blocking() or (level and level.frozen):
@@ -131,7 +133,7 @@ func use_supply(sid: String) -> void:
 		"elixir":
 			GameState.hp = GameState.max_hp
 		"candle":
-			invuln = maxf(invuln, 8.0)
+			ward = 8.0
 	Audio.sfx("switch")
 	if level:
 		level.spark(global_position, Color(1.0, 0.8, 0.4), 10)
@@ -150,7 +152,7 @@ func cycle_form() -> void:
 
 
 func hurt(dmg: int, from_dir: Vector2) -> void:
-	if invuln > 0.0 or dead:
+	if invuln > 0.0 or ward > 0.0 or dead:
 		return
 	if GameState.form == "gargoyle":
 		dmg = maxi(1, dmg - 1)
@@ -178,6 +180,12 @@ func _draw() -> void:
 	draw_set_transform(Vector2(0, yoff), 0.0, Vector2.ONE)
 	if garg:
 		_draw_wings()
+	if not wraith and not garg:
+		pal = Gear.styled("mu", pal)
+	if ward > 0.0:
+		var wa := 0.35 + 0.15 * sin(t * 8.0) if ward > 1.5 else 0.35 * (ward / 1.5)
+		draw_circle(Vector2(0, -6), 15.0, Color(1.0, 0.8, 0.4, wa * 0.5))
+		draw_arc(Vector2(0, -6), 15.0, 0, TAU, 28, Color(1.0, 0.9, 0.6, wa + 0.2), 1.2)
 	Art.person(self, facing, t, pal, moving, 0.75 if wraith else 1.0, attacking, yoff)
 	if garg:
 		_draw_horns()

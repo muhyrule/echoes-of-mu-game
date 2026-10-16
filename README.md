@@ -48,3 +48,9 @@ Prague (Ossuary Clock) → Transylvania → Paris Catacombs → Whitby Abbey →
 - Gold drops from enemies, bosses and secret relics. Supplies are used with keys 1 (Tonic), 2 (Elixir), 3 (Warding Candle). The Inn's "Rest" fully heals and saves; towns no longer heal on entry.
 - Shop UI: `src/scenes/world/shop.gd`. Maps use new furniture tiles (table `T`, counter `J`, rack `F`, chair `C`, rug `R`); regenerate with `python3 tools/gen_towns.py`.
 - Music was smoothed (softer timbres, low-pass, light room reverb, soft limiting); verified numerically only.
+
+## Party & Inventory, weather, gear
+- **Tab / I** opens the Party & Inventory screen: per-hero stats and portrait, equip owned weapons/armour (A/D hero, W/S choose, Q section, E use/equip), use healing supplies, review relics. Heroes visibly change look with armour tier.
+- Rare gear is found in secrets and dropped by bosses (never sold in shops).
+- Towns have dynamic weather: Edinburgh (mist, drizzle, rain, thunderstorm), Prague (snow, blizzard, mist), with ripples, lightning, tint and puddles on the ground.
+- Music was gently refined (warmer tone, longer reverb, ensemble detune).
