@@ -17,6 +17,7 @@ var ward := 0.0
 var knock := Vector2.ZERO
 var push_t := 0.0
 var dead := false
+var slow := 0.0
 var t := 0.0
 var moving := false
 var _hit_set: Array = []
@@ -61,6 +62,9 @@ func _physics_process(delta: float) -> void:
 	var spd := 118.0 if GameState.form == "wraith" else (70.0 if GameState.form == "gargoyle" else 88.0)
 	if attacking > 0.0:
 		spd *= 0.3
+	if slow > 0.0:
+		slow -= delta
+		spd *= 0.5
 	knock = knock.move_toward(Vector2.ZERO, 700.0 * delta)
 	velocity = dir * spd + knock
 	move_and_slide()

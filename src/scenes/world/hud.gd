@@ -109,7 +109,7 @@ func _draw() -> void:
 	if boss != null:
 		var bx := 640.0 - 128.0
 		_frame(Rect2(bx, 8, 120, 24))
-		_txt(Vector2(bx + 12, 17), "FOE", 6, GOLD)
+		_txt(Vector2(bx + 12, 17), str(boss.get("title") if boss.get("title") != null else "FOE"), 6, GOLD)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(3, 3))
 		var segs := 16
 		var fill := int(ceil(float(boss.hp) / float(boss.max_hp) * segs))

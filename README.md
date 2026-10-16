@@ -59,3 +59,10 @@ Prague (Ossuary Clock) → Transylvania → Paris Catacombs → Whitby Abbey →
 - ~40 more NPCs across Edinburgh, Prague and all interiors (see `tools/gen_more.py`, `tools/towns_text2.py`).
 - Ambient critters (cats, crows, pigeons, rats), falling leaves/petals, flower boxes, shutters, banners, candles, stalls.
 - The South Bridge Vaults are now 100x72: start hall, key gallery, optional Crypt of the Ringers and Cistern, ossuary, puzzle hall, shrine hall and warden's chamber, with new secrets (`tools/gen_vaults.py`, validated by BFS).
+
+## Boss arenas
+
+Each dungeon ends in a gate to its own arena map, holding a colossal multi-phase boss (phases at 66% / 33% HP, telegraphed attacks, exposed windows after a wall-crash take double damage).
+
+- **Hollow Warden** (Belfry of the Cracked Bell, Edinburgh): tolling shockwave rings with a gap to slip through, chain lashes, falling bells, bat summons, charging rush.
+- **Clockwork Revenant** (Great Gear of the Orloj, Prague): cog volleys, sweeping clock-hand beams, steam-vent rings, time rifts that slow you, charging rush.

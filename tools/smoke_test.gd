@@ -124,23 +124,52 @@ func run() -> void:
 	lv.player.cycle_form()
 	check(GS.form == "mu", "can shift back to Mu")
 
-	var boss: Node2D
-	for e in get_nodes_in_group("enemies"):
-		if e.kind == "warden":
-			boss = e
-	check(boss != null, "boss present")
-	lv.player.global_position = boss.global_position + Vector2(60, 0)
-	await frames(600)
-	check(boss.state != "dormant", "boss wakes")
-	boss.hp = 2
-	boss.hurt(2, Vector2.LEFT)
-	await frames(1200)
-	check(GS.flag("edinburgh_done"), "boss defeat completes the slice")
-	var portal_ok := false
-	for p in lv.walkovers:
-		if is_instance_valid(p) and p.kind == "final":
-			portal_ok = true
-	check(portal_ok, "return portal spawned")
+	var stair: Node2D
+	for e in lv.entries:
+		if e.def.map == "vault_arena":
+			stair = e
+	check(stair != null, "vaults end in a stair to the belfry arena")
+
+	for kind in ["bell_giant", "clock_giant"]:
+		var arena_name := "vault_arena" if kind == "bell_giant" else "prague_arena"
+		lv = await load_level(arena_name)
+		await frames(5)
+		check(lv.entries.size() == 1, kind + " arena has a retreat door")
+		var boss: Node2D
+		for e in get_nodes_in_group("enemies"):
+			if e.kind == kind:
+				boss = e
+		check(boss != null and boss.hp >= 60, kind + " arena holds a giant")
+		GS.max_hp = 999
+		GS.hp = 999
+		lv.player.global_position = boss.global_position + Vector2(0, 150)
+		await frames(600)
+		check(boss.state != "dormant", kind + " wakes")
+		var seen := {}
+		for i in 2:
+			for a in (["toll", "lash", "drop", "rush", "summon"] if kind == "bell_giant" else ["cogs", "hands", "vents", "rush", "rift"]):
+				if boss.has_method("_a_" + a):
+					boss.phase = 3
+					boss.state = "idle"
+					boss.queue.clear()
+					boss.fx.clear()
+					boss.call("_a_" + a)
+					seen[a] = true
+					await frames(60)
+		check(seen.size() == 5, kind + " every attack pattern runs without error")
+		boss.state = "idle"
+		boss.queue.clear()
+		boss.fx.clear()
+		boss.hp = 2
+		boss.hurt(2, Vector2.LEFT)
+		await frames(1500)
+		var flag: String = lv.meta.boss.done_flag
+		check(GS.flag(flag), kind + " defeat completes the chapter")
+		var portal_ok := false
+		for p in lv.walkovers:
+			if is_instance_valid(p) and p.kind == "final":
+				portal_ok = true
+		check(portal_ok, kind + " return portal spawned")
 
 	GS.save_game()
 	var before: Dictionary = GS.flags.duplicate()

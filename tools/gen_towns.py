@@ -522,6 +522,8 @@ if __name__ == "__main__":
     gen_more.main()
     import gen_vaults
     gen_vaults.check(gen_vaults.build())
+    import gen_arenas
+    gen_arenas.main()
     with open(os.path.join(ROOT, "data", "dialogue_towns.json"), "w") as f:
         json.dump(DIALOGUE, f, indent=1, ensure_ascii=False)
         f.write("\n")

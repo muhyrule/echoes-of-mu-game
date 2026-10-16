@@ -19,10 +19,8 @@ def build():
     m.meta["spawns"] = {"start": "@"}
     m.meta["triggers"] = {"1": "vault_enter", "2": "vault_puzzle", "3": "vault_shrine_hint", "4": "vault_bars"}
     m.meta["prefix"] = "vault"
-    m.meta["boss"] = {"kind": "warden", "done_flag": "edinburgh_done", "intro": "warden_intro", "defeated": "warden_defeated"}
     m.meta["exit"] = {"map": "edinburgh", "spawn": "door:vaults"}
     m.meta["shrine"] = {"form": "wraith", "dialogue": "shrine", "after": "shrine_after", "notice": "Wraith Form unlocked \u2014 press Q"}
-    m.meta["final_exit"] = {"map": "chapel", "spawn": "from_vaults"}
 
     R = m.rect
     p = m.put
@@ -56,8 +54,7 @@ def build():
     p(73, 38, "4")
     p(73, 41, "B")
     p(73, 42, "B")
-    p(78, 58, "G")
-    p(93, 67, "X")
+    m.door(78, 70, "vault_arena", "The Belfry Stair", "gate")
 
     def many(ch, pts):
         for x, y in pts:
@@ -161,9 +158,9 @@ def check(m):
     assert (px, py + 1) in r1 and all(g[py - i][px] in ".S" for i in (1, 2, 3)), "block path"
     assert pos("W") not in r1, "shrine reachable without gate"
     r2 = reach(start, "BP")
-    assert pos("W") in r2 and pos("G") not in r2, "boss reachable without bars"
+    assert pos("W") in r2 and (78, 69) not in r2, "boss room reachable without bars"
     r3 = reach(start, "P")
-    assert pos("G") in r3 and pos("X") in r3, "boss room unreachable"
+    assert (78, 69) in r3, "belfry stair unreachable"
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ extends Node2D
 const Art = preload("res://src/core/art.gd")
 const PlayerScript = preload("res://src/entities/player.gd")
 const EnemyScript = preload("res://src/entities/enemy.gd")
+const GiantScript = preload("res://src/entities/giant.gd")
 const PropScript = preload("res://src/entities/prop.gd")
 const FollowerScript = preload("res://src/entities/follower.gd")
 const CritterScript = preload("res://src/entities/critter.gd")
@@ -12,7 +13,7 @@ const HudScript = preload("res://src/scenes/world/hud.gd")
 const TILE := 16
 const SOLID_CHARS := ["#", "o", "=", "H", "Z", "Y", "U", "T", "J", "F"]
 const GEAR_SECRETS := {"e_chest": "iso_w_f", "p_chest": "cor_a_f", "ar_helm": "iso_a_f", "wp_crate": "wre_w_f", "pw_crate": "cor_w_f", "v_chest2": "wre_a_f"}
-const BOSS_GEAR := {"vaults": "mu_w_f", "prague": "mu_a_f"}
+const BOSS_GEAR := {"vault_arena": "mu_w_f", "prague_arena": "mu_a_f"}
 const FURNITURE := ["Z", "Y", "U", "T", "J", "F", "C", "R"]
 const TOWN_THEMES := ["town_e", "town_p"]
 
@@ -181,7 +182,7 @@ func _make_object(c: Vector2i, d: Dictionary) -> void:
 
 func spawn_enemy(kind: String, pos: Vector2) -> void:
 	var e := CharacterBody2D.new()
-	e.set_script(EnemyScript)
+	e.set_script(GiantScript if kind in ["bell_giant", "clock_giant"] else EnemyScript)
 	e.setup(kind, self)
 	e.position = pos
 	entities.add_child(e)
@@ -311,7 +312,7 @@ func _setup_camera() -> void:
 	cam.limit_top = 0
 	cam.limit_right = w * TILE
 	cam.limit_bottom = h * TILE
-	var z := maxf(2.6, maxf(1920.0 / (w * TILE), 1080.0 / (h * TILE)))
+	var z := maxf(2.0 if meta.has("boss") else 2.6, maxf(1920.0 / (w * TILE), 1080.0 / (h * TILE)))
 	cam.zoom = Vector2(z, z)
 	if theme in TOWN_THEMES:
 		cam.position_smoothing_enabled = true
