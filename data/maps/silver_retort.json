@@ -1,0 +1,97 @@
+{
+ "theme": "interior",
+ "title": "Ludek's Silver Retort",
+ "subtitle": "Glass vessels, quietly bubbling",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "a": {
+   "id": "pra_ludek",
+   "pal": {
+    "coat": "#3a3a5a",
+    "accent": "#c0a070",
+    "hair": "#4a4a4e",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "shop": "items",
+   "tier": 2
+  },
+  "f": {
+   "id": "pra_in_retort",
+   "pal": {
+    "coat": "#3a3a5a",
+    "accent": "#c0a070",
+    "hair": "#5a4a3a",
+    "skin": "#c4a083",
+    "style": "short",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "prague_town",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "d": {
+   "kind": "urn",
+   "id": "pa_jar",
+   "text": "A jar of black powder labelled 'NOT FOR THE CLOCK-KEEPER'. Probably wise.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "chest",
+   "id": "pa_chest",
+   "text": "Scales, a mortar and a note: 'Ask Zdenek about the bell metal. He pretends not to know.'",
+   "item": "Cartographer's Note",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "%": {
+   "kind": "barrel",
+   "empty": "Nothing but old stores and dust."
+  },
+  "+": {
+   "kind": "crate",
+   "empty": "Nothing but old stores and dust."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#.ZZZZZZZZ..ZZZZZ...ZZZZZZZZ.#",
+  "#..........................U.#",
+  "#.%.d........................#",
+  "#.+......l.........l.........#",
+  "#............................#",
+  "#.....JJJJJJJJaJJJJJJJJJ.....#",
+  "#............................#",
+  "#.................f..........#",
+  "#.........RRRRRRRRRR......l..#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#...TT....RRRRRRRRRR...TT....#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#..l.....................e.%.#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

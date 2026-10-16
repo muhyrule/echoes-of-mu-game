@@ -1,0 +1,99 @@
+{
+ "theme": "interior",
+ "title": "Dagmar's Guild Armoury",
+ "subtitle": "The last of the Bohemian Smiths",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "a": {
+   "id": "pra_dagmar",
+   "pal": {
+    "coat": "#5a4a3a",
+    "accent": "#8a8d98",
+    "hair": "#2a2a2e",
+    "skin": "#c4a083",
+    "style": "braid",
+    "mail": true,
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "shop": "armor",
+   "tier": 3
+  },
+  "f": {
+   "id": "pra_in_guild",
+   "pal": {
+    "coat": "#2c3a5a",
+    "accent": "#b0b0b8",
+    "hair": "#6a4a2a",
+    "skin": "#c4a083",
+    "style": "short",
+    "item": "none",
+    "mail": true
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "prague_town",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "d": {
+   "kind": "crate",
+   "id": "pr_rack",
+   "text": "A shield hung crooked. On the back, scratched in anger: 'The Guild forgot us.'",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "chest",
+   "id": "pr_trunk",
+   "text": "A trunk of tarnished spurs and a pouch of old Bohemian groschen.",
+   "item": "Bohemian Groschen",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "%": {
+   "kind": "barrel",
+   "empty": "Nothing but old stores and dust."
+  },
+  "+": {
+   "kind": "crate",
+   "empty": "Nothing but old stores and dust."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#..FFFFF...FFFFFFF....FFFFF..#",
+  "#..........................U.#",
+  "#.%.......d..................#",
+  "#.+......l.........l.........#",
+  "#............................#",
+  "#.....JJJJJJJJaJJJJJJJJJ.....#",
+  "#............................#",
+  "#.................f..........#",
+  "#.........RRRRRRRRRR......l..#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#...TT....RRRRRRRRRR...TT....#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#..l.....................e.%.#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

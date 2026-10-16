@@ -1,0 +1,119 @@
+{
+ "theme": "interior",
+ "title": "Rae's Masonry",
+ "subtitle": "Chisels, chalk and a very old arch",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "f": {
+   "id": "edin_duncan",
+   "pal": {
+    "coat": "#5a4a3a",
+    "accent": "#8a8d98",
+    "hair": "#aaaaae",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "edinburgh_done",
+     "id": "edin_duncan_after"
+    }
+   ]
+  },
+  "h": {
+   "id": "edin_kirsty",
+   "pal": {
+    "coat": "#4a5a4a",
+    "accent": "#c0a070",
+    "hair": "#4a2a1a",
+    "skin": "#c4a083",
+    "style": "braid"
+   },
+   "face": [
+    0,
+    1
+   ]
+  },
+  "i": {
+   "id": "edin_in_mason",
+   "pal": {
+    "coat": "#5a4a3a",
+    "accent": "#8a8d98",
+    "hair": "#6a4a2a",
+    "skin": "#c4a083",
+    "style": "short",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "edinburgh",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "a": {
+   "kind": "crate",
+   "id": "m_crate",
+   "text": "Tomas's chisel, wrapped in a rag. The handle is bound in blue thread.",
+   "item": "Tomas's Chisel",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "barrel",
+   "id": "m_barrel",
+   "text": "Slaked lime and old nails. Someone has chalked a bell on the lid.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "statue",
+   "id": "m_stone",
+   "text": "A half-dressed block. Faint marks across it: small bells, every seventh course.",
+   "item": "Bell-marked Stone",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "+": {
+   "kind": "crate",
+   "empty": "Nothing but old stores and dust."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#...................ZZZZZZ...#",
+  "#..l.......................l.#",
+  "#.....a.......e..............#",
+  "#............................#",
+  "#............................#",
+  "#............................#",
+  "#............................#",
+  "#...........f.....i..........#",
+  "#.........RRRRRRRRRR.........#",
+  "#...CC....RRRRRRRRRRh..CC....#",
+  "#..++T....RRRRRRRRRR...Td....#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#............................#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

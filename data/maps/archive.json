@@ -1,0 +1,123 @@
+{
+ "theme": "interior",
+ "title": "The Burgh Archive",
+ "subtitle": "Every name the town ever owned",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "f": {
+   "id": "edin_euphemia",
+   "pal": {
+    "coat": "#2c3a5a",
+    "accent": "#c0a070",
+    "hair": "#3a3a44",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "edinburgh_done",
+     "id": "edin_euphemia_after"
+    },
+    {
+     "if": "edin_writ",
+     "id": "edin_euphemia_again"
+    },
+    {
+     "if": "edin_duncan",
+     "id": "edin_euphemia_mark"
+    }
+   ]
+  },
+  "h": {
+   "id": "edin_ruaridh",
+   "pal": {
+    "coat": "#4a4a56",
+    "accent": "#8a7436",
+    "hair": "#2a2a2e",
+    "skin": "#c4a083",
+    "style": "short"
+   },
+   "face": [
+    0,
+    1
+   ]
+  },
+  "i": {
+   "id": "edin_in_archive",
+   "pal": {
+    "coat": "#2c3a4a",
+    "accent": "#c0a070",
+    "hair": "#8a8a90",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "edinburgh",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "a": {
+   "kind": "tomes",
+   "id": "a_tomes1",
+   "text": "The register of 1631, a single leaf torn out and kept: ink fading from the margin inward. Names, drifting away.",
+   "item": "Register Leaf of 1631",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "tomes",
+   "id": "a_tomes2",
+   "text": "'A History of the Seven Founders.' The chapter on the First Bell has been neatly razored out. The binding still smells of lamp-oil and iron.",
+   "item": "Razored History",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "urn",
+   "id": "a_urn",
+   "text": "A dusty jar of sealing wax and a Seal of the Burgh. Evidently the clerk has never been tempted. Evidently.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#.ZZZZZZZZ........ZZZZZZZZZZ.#",
+  "#...........a..d.............#",
+  "#..........l.................#",
+  "#............................#",
+  "#............................#",
+  "#.............f..............#",
+  "#............................#",
+  "#.................i..........#",
+  "#.........RRRRRRRRRR....h....#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#...TT....RRRRRRRRRR..lTT.e..#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#............................#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

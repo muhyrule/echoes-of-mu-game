@@ -1,0 +1,99 @@
+{
+ "theme": "interior",
+ "title": "Brenda's Armoury",
+ "subtitle": "Plate, mail and leather, hung for fittings",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "a": {
+   "id": "edin_brenda",
+   "pal": {
+    "coat": "#5a3a2a",
+    "accent": "#8a8d98",
+    "hair": "#6a3a24",
+    "skin": "#c4a083",
+    "style": "braid",
+    "mail": true,
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "shop": "armor",
+   "tier": 2
+  },
+  "f": {
+   "id": "edin_in_armoury",
+   "pal": {
+    "coat": "#2c3a5a",
+    "accent": "#b0b0b8",
+    "hair": "#4a3a2a",
+    "skin": "#c4a083",
+    "style": "short",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "edinburgh",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "d": {
+   "kind": "crate",
+   "id": "ar_helm",
+   "text": "A battered helm hung high on the rack. Inside the brim, scratched with a nail: 'T. was here, aged 11. Wearing it.'",
+   "item": "Tomas's Helm Scratch",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "chest",
+   "id": "ar_trunk",
+   "text": "A trunk of spare buckles. Under them, a handful of silver nobles somebody forgot to bank.",
+   "item": "Forgotten Nobles",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "%": {
+   "kind": "barrel",
+   "empty": "Nothing but old stores and dust."
+  },
+  "+": {
+   "kind": "crate",
+   "empty": "Nothing but old stores and dust."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#..FFFFF...FFFFFFF....FFFFF..#",
+  "#..........................U.#",
+  "#.%.......d..................#",
+  "#.+......l.........l.........#",
+  "#............................#",
+  "#.....JJJJJJJJaJJJJJJJJJ.....#",
+  "#............................#",
+  "#.................f..........#",
+  "#.........RRRRRRRRRR......l..#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#...TT....RRRRRRRRRR...TT....#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#..l.....................e.%.#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

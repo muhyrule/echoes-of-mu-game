@@ -1,0 +1,97 @@
+{
+ "theme": "interior",
+ "title": "The Rose and Hourglass",
+ "subtitle": "Clean linen and a clock that keeps its own time",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "a": {
+   "id": "pra_olga",
+   "pal": {
+    "coat": "#6a3a50",
+    "accent": "#e0d0b0",
+    "hair": "#2a1a1a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "shop": "inn",
+   "tier": 2
+  },
+  "f": {
+   "id": "pra_in_rose",
+   "pal": {
+    "coat": "#6a3a50",
+    "accent": "#e0b0c0",
+    "hair": "#4a2a1a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "prague_town",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "d": {
+   "kind": "chest",
+   "id": "pi_trunk",
+   "text": "A traveller's trunk. Inside, a sketched map of the Ossuary with one corridor circled and a single word: 'Run.' A purse is tucked beneath.",
+   "item": "Circled Corridor Map",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "barrel",
+   "id": "pi_cask",
+   "text": "A cask of honey mead, laid down the year the clock stopped. It tastes of better days.",
+   "reward": "heal",
+   "empty": "You've already searched here."
+  },
+  "%": {
+   "kind": "barrel",
+   "empty": "Nothing but old stores and dust."
+  },
+  "+": {
+   "kind": "crate",
+   "empty": "Nothing but old stores and dust."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#..Y.Y.Y...ZZZZZZZ...Y.Y.Y...#",
+  "#..........................U.#",
+  "#.%.e........................#",
+  "#.+......l.........l.........#",
+  "#............................#",
+  "#.....JJJJJJJJaJJJJJJJJJ.....#",
+  "#............................#",
+  "#.................f..........#",
+  "#.........RRRRRRRRRR......l..#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#...TT....RRRRRRRRRR...TT....#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#..l.....................d.%.#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

@@ -1,0 +1,558 @@
+{
+ "theme": "town_e",
+ "title": "Edinburgh \u2014 The Old Town",
+ "subtitle": "Nine storeys of houses leaning together against the dark",
+ "music": "edin",
+ "safe": true,
+ "spawns": {
+  "start": "@",
+  "from_chapel": "$"
+ },
+ "npcs": {
+  "p": {
+   "id": "edin_hamish",
+   "pal": {
+    "coat": "#3a2a30",
+    "accent": "#8a7436",
+    "hair": "#6a5a4a",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none",
+    "mail": true
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "edinburgh_done",
+     "id": "edin_hamish_after"
+    },
+    {
+     "if": "edin_writ",
+     "id": "edin_hamish_writ"
+    }
+   ]
+  },
+  "q": {
+   "id": "edin_peggy",
+   "pal": {
+    "coat": "#6a4a3a",
+    "accent": "#c0a070",
+    "hair": "#7a3a24",
+    "skin": "#c4a083",
+    "style": "braid"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "edinburgh_done",
+     "id": "edin_peggy_after"
+    }
+   ],
+   "wander": 3
+  },
+  "s": {
+   "id": "edin_rab",
+   "pal": {
+    "coat": "#4a4a56",
+    "accent": "#7a2a2e",
+    "hair": "#4a3a2a",
+    "skin": "#c4a083",
+    "style": "short"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "edinburgh_done",
+     "id": "edin_rab_after"
+    }
+   ],
+   "wander": 6
+  },
+  "t": {
+   "id": "edin_alasdair",
+   "pal": {
+    "coat": "#22212c",
+    "accent": "#6a6a74",
+    "hair": "#b8b8c0",
+    "skin": "#c4a083",
+    "style": "beard"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "edinburgh_done",
+     "id": "edin_alasdair_after"
+    }
+   ],
+   "wander": 2
+  },
+  "u": {
+   "id": "edin_bessie",
+   "pal": {
+    "coat": "#6a4a4a",
+    "accent": "#e0d0b0",
+    "hair": "#a05a2a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "edinburgh_done",
+     "id": "edin_bessie_after"
+    }
+   ],
+   "wander": 4
+  },
+  "v": {
+   "id": "edin_gideon",
+   "pal": {
+    "coat": "#4a3a2a",
+    "accent": "#8a8d98",
+    "hair": "#2a2a2e",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 3
+  },
+  "w": {
+   "id": "edin_nell",
+   "pal": {
+    "coat": "#5a5a6a",
+    "accent": "#c06a6a",
+    "hair": "#c08a4a",
+    "skin": "#c4a083",
+    "style": "braid"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 6
+  },
+  "y": {
+   "id": "edin_gilchrist",
+   "pal": {
+    "coat": "#3a3a4a",
+    "accent": "#9a9aa0",
+    "hair": "#c8c8d0",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 3
+  },
+  "z": {
+   "id": "edin_lachlan",
+   "pal": {
+    "coat": "#2c3a5a",
+    "accent": "#b0b0b8",
+    "hair": "#5a4a3a",
+    "skin": "#c4a083",
+    "style": "short",
+    "item": "none",
+    "mail": true
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "edinburgh_done",
+     "id": "edin_lachlan_after"
+    }
+   ],
+   "wander": 5
+  },
+  "O": {
+   "id": "edin_tam",
+   "pal": {
+    "coat": "#4a5a5a",
+    "accent": "#8a7436",
+    "hair": "#7a5a3a",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 4
+  },
+  "!": {
+   "id": "edin_cormac",
+   "pal": {
+    "coat": "#5a2a2e",
+    "accent": "#c0a070",
+    "hair": "#4a3a2a",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 4
+  },
+  "*": {
+   "id": "edin_jean",
+   "pal": {
+    "coat": "#6a5a6a",
+    "accent": "#e0d0b0",
+    "hair": "#7a5a3a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 4
+  },
+  "~": {
+   "id": "edin_ailsa",
+   "pal": {
+    "coat": "#7a3a4a",
+    "accent": "#c0a070",
+    "hair": "#2a1a1a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 3
+  },
+  "^": {
+   "id": "edin_dougal",
+   "pal": {
+    "coat": "#2c3a5a",
+    "accent": "#b0b0b8",
+    "hair": "#6a4a2a",
+    "skin": "#c4a083",
+    "style": "short",
+    "item": "none",
+    "mail": true
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 1
+  },
+  ";": {
+   "id": "edin_maisie",
+   "pal": {
+    "coat": "#4a5a6a",
+    "accent": "#c08a4a",
+    "hair": "#8a5a3a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 5
+  },
+  ":": {
+   "id": "edin_magnus",
+   "pal": {
+    "coat": "#3a3a3a",
+    "accent": "#8a7436",
+    "hair": "#b8b8c0",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none",
+    "mail": true
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  },
+  "?": {
+   "id": "edin_ina",
+   "pal": {
+    "coat": "#5a6a4a",
+    "accent": "#e0d0b0",
+    "hair": "#a05a2a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 5
+  },
+  "(": {
+   "id": "edin_fraser",
+   "pal": {
+    "coat": "#3a2a22",
+    "accent": "#8a8d98",
+    "hair": "#2a2a2e",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 5
+  },
+  ")": {
+   "id": "edin_beatrix",
+   "pal": {
+    "coat": "#22212c",
+    "accent": "#6a6a74",
+    "hair": "#c8c8d0",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 1
+  },
+  "<": {
+   "id": "edin_anselm",
+   "pal": {
+    "coat": "#4a3a2a",
+    "accent": "#c0a070",
+    "hair": "#8a8a90",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none",
+    "hood": true
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "marsh_cottage",
+   "label": "Enter Marsh Cottage",
+   "style": "door"
+  },
+  "6": {
+   "map": "mason_yard",
+   "label": "Enter the Mason's Yard",
+   "style": "door"
+  },
+  "7": {
+   "map": "drowned_candle",
+   "label": "Enter the Drowned Candle",
+   "style": "door"
+  },
+  "8": {
+   "map": "archive",
+   "label": "Enter the Archive",
+   "style": "door"
+  },
+  "9": {
+   "map": "chandlery",
+   "label": "Enter Peggy's Chandlery",
+   "style": "door"
+  },
+  "0": {
+   "map": "apothecary",
+   "label": "Enter the Apothecary",
+   "style": "door"
+  },
+  "\u0393": {
+   "map": "armoury",
+   "label": "Enter the Armoury",
+   "style": "door"
+  },
+  "\u0394": {
+   "map": "weaponsmith",
+   "label": "Enter the Weaponsmith",
+   "style": "door"
+  },
+  "\u0398": {
+   "map": "lantern_inn",
+   "label": "Enter the Lantern Rest",
+   "style": "door"
+  },
+  "\u039b": {
+   "map": "vaults",
+   "label": "Descend into the Vaults",
+   "style": "gate",
+   "requires": "edin_writ",
+   "locked": "edin_gate_locked"
+  }
+ },
+ "objects": {
+  "%": {
+   "kind": "barrel",
+   "empty": "Nothing but old stores and dust."
+  },
+  "+": {
+   "kind": "crate",
+   "empty": "Nothing but old stores and dust."
+  },
+  "a": {
+   "kind": "statue",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "barrel",
+   "id": "e_barrel",
+   "text": "The second barrel really does hold tea. It also holds a very small boy's footprint.",
+   "item": "Rab's Tea Tin",
+   "reward": "heal",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "crate",
+   "id": "e_crate",
+   "text": "A wedge of Duncan's chalk, and a lead Mason's Level, lighter than it looks. The bubble inside has stopped, forever, dead centre.",
+   "item": "Mason's Level",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "f": {
+   "kind": "chest",
+   "id": "e_chest",
+   "text": "The chest is crammed into a crack of the Close. Inside, wrapped in a child's mitten: a small red stone that beats like a heart. Your vitality grows.",
+   "item": "Heart of the Old Town",
+   "reward": "maxhp",
+   "empty": "You've already searched here."
+  },
+  "h": {
+   "kind": "grave",
+   "id": "e_grave1",
+   "text": "Here lies Agnes Thorn, bell-founder's widow. 'She rang once and the town remembered.' Moss has crept over the last word.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "i": {
+   "kind": "grave",
+   "id": "e_grave2",
+   "text": "Hugh Lennox, 1590-1644. 'He mended what others only measured.' A tiny bell is carved at the foot of the stone.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "j": {
+   "kind": "grave",
+   "id": "e_grave3",
+   "text": "The stone is smooth. No name, no date. A fresh posy lies at its foot, though nobody remembers whose it is.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "k": {
+   "kind": "statue",
+   "id": "e_statue",
+   "text": "A bronze founder, a bell cradled in her arms. 'MARGARET THE CASTER: She taught the town to speak with one voice.' The bell's lip is worn bright by a thousand hands.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "m": {
+   "kind": "urn",
+   "id": "e_urn",
+   "text": "Behind the urn, wrapped in oilcloth: a Silver Bell Pin. Rab was right.",
+   "item": "Silver Bell Pin",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "n": {
+   "kind": "grave",
+   "empty": "You've already searched here."
+  }
+ },
+ "triggers": {
+  "1": "edin_arrive"
+ },
+ "exit": {
+  "map": "chapel",
+  "spawn": "from_vaults"
+ },
+ "ascii": [
+  "################################################################################################################",
+  "################################################################################################################",
+  "########################################################\u039b#######################################################",
+  "#..............................................................................................................#",
+  "#.....HHHHHHHH........HHHHHHHHH.....HHHHHHHH...........p..............HHHHHHHHH.........HHHHHHHHH...HHHHHHHHH..#",
+  "#.....HHHHHHHH........HHHHHHHHH.....HHHHHHHH..........................HHHHHHHHH.........HHHHHHHHH...HHHHHHHHH..#",
+  "#.....HHHHHHHH........HHHHHHHHH.....HHHHHHHH.......l.........l........HHHHHHHHH.........HHHHHHHHH...HHHHHHHHH..#",
+  "#.....HHHH5HHH........HHHH6HHHH.....HHHHHHHH......^...................HHHH7HHHH.........HHHH8HHHH...HHHHHHHHH..#",
+  "#.......c...c...........c...c...........................................c...c.............c...c................#",
+  "#....+%.........%+............!....+%...............................%+................+%..........%+...........#",
+  "#.......l...........l...........l...........l...........l...........l...........l...........l...........l......#",
+  "#...................d.........................................................................;.............f..#",
+  "#.......................q.....................e....l.........l.................................................#",
+  "#..............................................................................................................#",
+  "#..............................................................................................................#",
+  "#.....HHHHHHHH......HHHHHHH.......HHHHHHHH............................HHHHHHHH......HHHHHHH....................#",
+  "#.....HHHHHHHH......HHHHHHH.......HHHHHHHH............................HHHHHHHH......HHHHHHH....................#",
+  "#.....HHHHHHHH......HHHHHHH.......HHHHHHHH............................HHHHHHHH......HHHHHHH....................#",
+  "#.....HHHH9HHH......HHH0HHH.......HHHH\u0393HHH.........l.........l........HHHH\u0394HHH......HHH\u0398HHH....................#",
+  "#.......c...c........c...c..........c...c...............................c...c........c...c.....................#",
+  "#....+%.......s..%+.............+%..................................%+..........+%.............................#",
+  "#.................................................................................................:.........<..#",
+  "#.............l...............l.............u.l.........a.....l...v...........l...........%+.+%................#",
+  "#.......?......................................................................................................#",
+  "#...............*..............................~...l.........l..................==============================.#",
+  "#...............................................................................=............................=.#",
+  "#.......................................%+.+%.%+.+%.............................=............................=.#",
+  "#...............................................................................=............................=.#",
+  "#.....HHHHHHHHH.....HHHHHHH.....................................................=.....h.....i.....j..........=.#",
+  "#.....HHHHHHHHH.....HHHHHHH.....................................................=............................=.#",
+  "#.....HHHHHHHHH.....HHHHHHH........................l....z....l..................=.t..........................=.#",
+  "#.....HHHHHHHHH.....HHHHHHH.....................................................=.........)..................=.#",
+  "#...............................................................................=............................=.#",
+  "#.............%+.+%..........................................................................................=.#",
+  "#.......l...........l.........w.l...........l...........l...........l...y.......=...........k...........l....=.#",
+  "#...............................................................................=............................=.#",
+  "#...........O......................................l111111111l..............(...=............................=.#",
+  "#...............................................................................=............................=.#",
+  "#.............l...............l...............l...............l...............l.=...n...n.....l.n.....n.m.n..=.#",
+  "#...............................................................................=............................=.#",
+  "#.......................................................$@......................=............................=.#",
+  "#...............................................................................==============================.#",
+  "#..............................................................................................................#",
+  "#####################################################EEEEEE#####################################################"
+ ]
+}

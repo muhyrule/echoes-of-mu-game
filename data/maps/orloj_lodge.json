@@ -1,0 +1,112 @@
+{
+ "theme": "interior",
+ "title": "The Clock-Keeper's Lodge",
+ "subtitle": "Thirty years of winding, and a cot in the attic",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "f": {
+   "id": "pra_lucie",
+   "pal": {
+    "coat": "#4a3a5a",
+    "accent": "#c0a070",
+    "hair": "#3a2a1a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "prague_done",
+     "id": "pra_lucie_after"
+    },
+    {
+     "if": "pra_pass",
+     "id": "pra_lucie_again"
+    },
+    {
+     "if": "pra_rumour",
+     "id": "pra_lucie_pass"
+    }
+   ]
+  },
+  "h": {
+   "id": "pra_in_lodge",
+   "pal": {
+    "coat": "#3a3a5a",
+    "accent": "#d6b25a",
+    "hair": "#8a8a90",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "prague_town",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "a": {
+   "kind": "chest",
+   "id": "l_trunk",
+   "text": "Corvin's Winding Notes: thirty years of wind-up schedules. The last entry, three weeks old: 'It's learning my tune. Do not let the boy near it.'",
+   "item": "Corvin's Winding Notes",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "tomes",
+   "id": "l_shelf",
+   "text": "A rack of tiny keys, each labelled with a clock-hand shape. One has a note: 'Key to the heart of the works. Do NOT lose.' It's already gone.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "crate",
+   "id": "l_pavel",
+   "text": "Pavel's tin soldier, painted blue, one arm chipped. You tuck it into your pack for Wren.",
+   "item": "Pavel's Tin Soldier",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  }
+ },
+ "triggers": {
+  "1": "pra_pavel_note"
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#.ZZZZZ......................#",
+  "#.......d.....l...........U..#",
+  "#............................#",
+  "#............................#",
+  "#............................#",
+  "#............................#",
+  "#..Y1..........f.............#",
+  "#..Y..............h..........#",
+  "#.........RRRRRRRRRR.........#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#.e.TT....RRRRRRRRRR...TT....#",
+  "#...aC....RRRRRRRRRR..lCC....#",
+  "#............................#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

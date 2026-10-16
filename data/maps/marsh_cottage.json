@@ -1,0 +1,106 @@
+{
+ "theme": "interior",
+ "title": "Marsh Cottage",
+ "subtitle": "A lamp is lit in the window",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "f": {
+   "id": "edin_marta",
+   "pal": {
+    "coat": "#5a3a4a",
+    "accent": "#c0a070",
+    "hair": "#9a9aa0",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "edinburgh_done",
+     "id": "edin_marta_after"
+    }
+   ]
+  },
+  "h": {
+   "id": "edin_in_cottage",
+   "pal": {
+    "coat": "#5a5a6a",
+    "accent": "#c0a070",
+    "hair": "#b8b8c0",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "edinburgh",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "a": {
+   "kind": "chest",
+   "id": "c_trunk",
+   "text": "Tomas's sketchbook. Page after page of vault arches, each with a tiny bell pencilled in every seventh course. Isolde would want this.",
+   "item": "Tomas's Sketchbook",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "tomes",
+   "id": "c_shelf",
+   "text": "Marta's spool of blue thread, half used. The tail is knotted to a note: 'For T. and I., so you can always find the door.'",
+   "item": "Marta's Blue Thread",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "urn",
+   "id": "c_urn",
+   "text": "A chipped blue mug marked 'ISOLDE'. Still faintly smelling of tea.",
+   "item": "Isolde's Blue Mug",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "%": {
+   "kind": "barrel",
+   "empty": "Nothing but old stores and dust."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#.ZZZZ.......................#",
+  "#.............l.......%...U..#",
+  "#.........d..................#",
+  "#............................#",
+  "#............................#",
+  "#.Y...........f..............#",
+  "#.Y..........................#",
+  "#.................h..........#",
+  "#.........RRRRRRRRRR.........#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#...aT....RRRRRRRRRR...TTe...#",
+  "#...CC....RRRRRRRRRR.l.CC....#",
+  "#............................#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

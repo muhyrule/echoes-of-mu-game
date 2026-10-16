@@ -1,0 +1,88 @@
+{
+ "theme": "interior",
+ "title": "Vit's Bakery",
+ "subtitle": "Bread that never stales between the chimes",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "e": {
+   "id": "pra_vit_shop",
+   "pal": {
+    "coat": "#6a5a3a",
+    "accent": "#e0d0b0",
+    "hair": "#4a3a2a",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ]
+  },
+  "f": {
+   "id": "pra_in_bakery",
+   "pal": {
+    "coat": "#6a5a3a",
+    "accent": "#e0d0b0",
+    "hair": "#3a2a1a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "prague_town",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "a": {
+   "kind": "crate",
+   "id": "bk_crate",
+   "text": "A sack of rye flour and a scrap of red cloth snagged on the lid. Wren was here.",
+   "item": "Scrap of Red Cloth",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "barrel",
+   "id": "bk_barrel",
+   "text": "A cask of barley water, cool and sweet. You feel refreshed.",
+   "item": "Barley Water",
+   "reward": "heal",
+   "empty": "You've already searched here."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#.ZZZZZ......................#",
+  "#........................UU..#",
+  "#.........a..........l.......#",
+  "#............................#",
+  "#............................#",
+  "#............................#",
+  "#.............e..............#",
+  "#.................f..........#",
+  "#.........RRRRRRRRRR.........#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#...TT....RRRRRRRRRR...Td....#",
+  "#...CC....lRRRRRRRRR...CC....#",
+  "#............................#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

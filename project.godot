@@ -1,43 +1,50 @@
-[gd_project]
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
 
-_meta={
-"class_max_size": 0,
-"class_name_max_length": 100,
-"custom_features": ["res://"],
-"scripts": [],
-"version": "5.0"
-}
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
 config/name="Echoes of Mu"
 config/version="0.1.0"
 run/main_scene="res://src/scenes/menu/MainMenu.tscn"
-config/features=PackedStringArray("4.0", "Forward Plus")
-config/icon="res://assets/ui/icon.png"
+config/features=PackedStringArray("4.7", "GL Compatibility")
 
-[display]
+[autoload]
 
-window/size/viewport_width=1280
-window/size/viewport_height=720
-window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
+GameState="*res://src/autoload/game_state.gd"
+Audio="*res://src/autoload/audio.gd"
+Dialogue="*res://src/autoload/dialogue.gd"
 
 [debug]
 
-gdscript/warnings/unused_variable=1
 gdscript/warnings/unused_argument=1
 
-[physics]
+[display]
 
-2d/physics_engine="GodotPhysics2D"
-2d/default_gravity=980.0
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=3840
+window/size/window_height_override=2160
+window/stretch/mode="canvas_items"
+
+[gd_project]
+
+config_version=5
 
 [rendering]
 
-textures/canvas_textures/default_texture_filter=0
-textures/vram_compression/import_etc2_astc=true
-lights_and_shadows/directional_shadow/size=4096
-anti_aliasing/screen_space_antialiasing/enabled=true
+textures/canvas_textures/default_texture_filter=1
+anti_aliasing/quality/msaa_2d=2
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.04, 0.03, 0.06, 1)

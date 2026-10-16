@@ -1,0 +1,122 @@
+{
+ "theme": "interior",
+ "title": "The Drowned Candle",
+ "subtitle": "Fire, ale and a bard with a verse for everyone",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "f": {
+   "id": "edin_morag",
+   "pal": {
+    "coat": "#6a3038",
+    "accent": "#c0a070",
+    "hair": "#7a3a24",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "shop": "pub",
+   "tier": 2
+  },
+  "h": {
+   "id": "edin_fergus",
+   "pal": {
+    "coat": "#2c4a5a",
+    "accent": "#c0a070",
+    "hair": "#4a3a2a",
+    "skin": "#c4a083",
+    "style": "short",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ]
+  },
+  "i": {
+   "id": "edin_in_candle",
+   "pal": {
+    "coat": "#4a3a2a",
+    "accent": "#8a7436",
+    "hair": "#5a3a24",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "edinburgh",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "+": {
+   "kind": "crate",
+   "empty": "Nothing but old stores and dust."
+  },
+  "a": {
+   "kind": "barrel",
+   "id": "i_barrel",
+   "text": "Peat whisky, strong enough to strip a boot. Fergus's Lost Whistle rattles at the bottom.",
+   "item": "Fergus's Whistle",
+   "reward": "heal",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "chest",
+   "id": "i_chest",
+   "text": "The innkeeper's strongbox, open. A single page inside: 'Ring the bells of the dead, and the dead will wait. Silence the bells, and the dead will walk.'",
+   "item": "The Warning Page",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "crate",
+   "id": "i_crate",
+   "text": "Tallow ends and rushlight stubs. A candle stub leans, stubbornly, toward the south.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "%": {
+   "kind": "barrel",
+   "empty": "Nothing but old stores and dust."
+  }
+ },
+ "ascii": [
+  "####################################",
+  "####################################",
+  "#..................................#",
+  "#..%.............UU................#",
+  "#.%a.............................d.#",
+  "#..................................#",
+  "#.........f........................#",
+  "#..................................#",
+  "#.......++++++.....................#",
+  "#..................................#",
+  "#..........................h.......#",
+  "#.....................i............#",
+  "#............RRRRRRRRRR............#",
+  "#...CC.......RRRRRRRRRR......CC....#",
+  "#...TT.......RRRRRRRRRR......TT..e.#",
+  "#...CCl......RRRRRRRRRR......Cl....#",
+  "#..................................#",
+  "#.................@................#",
+  "##################5#################",
+  "####################################"
+ ]
+}
