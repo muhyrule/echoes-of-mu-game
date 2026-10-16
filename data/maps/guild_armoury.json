@@ -25,6 +25,23 @@
    ],
    "shop": "armor",
    "tier": 3
+  },
+  "f": {
+   "id": "pra_in_guild",
+   "pal": {
+    "coat": "#2c3a5a",
+    "accent": "#b0b0b8",
+    "hair": "#6a4a2a",
+    "skin": "#c4a083",
+    "style": "short",
+    "item": "none",
+    "mail": true
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 2
   }
  },
  "doors": {
@@ -69,7 +86,7 @@
   "#............................#",
   "#.....JJJJJJJJaJJJJJJJJJ.....#",
   "#............................#",
-  "#............................#",
+  "#.................f..........#",
   "#.........RRRRRRRRRR......l..#",
   "#...CC....RRRRRRRRRR...CC....#",
   "#...TT....RRRRRRRRRR...TT....#",

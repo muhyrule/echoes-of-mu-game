@@ -6,11 +6,12 @@ const PlayerScript = preload("res://src/entities/player.gd")
 const EnemyScript = preload("res://src/entities/enemy.gd")
 const PropScript = preload("res://src/entities/prop.gd")
 const FollowerScript = preload("res://src/entities/follower.gd")
+const CritterScript = preload("res://src/entities/critter.gd")
 const HudScript = preload("res://src/scenes/world/hud.gd")
 
 const TILE := 16
 const SOLID_CHARS := ["#", "o", "=", "H", "Z", "Y", "U", "T", "J", "F"]
-const GEAR_SECRETS := {"e_chest": "iso_w_f", "p_chest": "cor_a_f", "ar_helm": "iso_a_f", "wp_crate": "wre_w_f", "pw_crate": "cor_w_f"}
+const GEAR_SECRETS := {"e_chest": "iso_w_f", "p_chest": "cor_a_f", "ar_helm": "iso_a_f", "wp_crate": "wre_w_f", "pw_crate": "cor_w_f", "v_chest2": "wre_a_f"}
 const BOSS_GEAR := {"vaults": "mu_w_f", "prague": "mu_a_f"}
 const FURNITURE := ["Z", "Y", "U", "T", "J", "F", "C", "R"]
 const TOWN_THEMES := ["town_e", "town_p"]
@@ -83,6 +84,7 @@ func _ready() -> void:
 	_setup_fx()
 	_setup_atmosphere()
 	_setup_weather()
+	_setup_life()
 	_spawn_followers()
 
 	Audio.play_music(meta.get("music", "crypt"))
@@ -400,6 +402,52 @@ func _chimney_smoke() -> void:
 				sm.color = Color(0.7, 0.7, 0.78, 0.28)
 				sm.z_index = 12
 				add_child(sm)
+
+
+func _setup_life() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(map_name)
+	var kinds: Array = []
+	if theme == "town_e":
+		kinds = ["cat", "cat", "cat", "cat", "crow", "crow", "crow", "crow", "crow", "rat", "rat", "rat", "pigeon", "pigeon"]
+	elif theme == "town_p":
+		kinds = ["cat", "cat", "cat", "pigeon", "pigeon", "pigeon", "pigeon", "pigeon", "pigeon", "pigeon", "crow", "crow", "rat", "rat"]
+	elif theme == "interior" and rng.randf() < 0.6:
+		kinds = ["cat"]
+	var tries := 0
+	for k in kinds:
+		while tries < 600:
+			tries += 1
+			var c := Vector2i(rng.randi_range(2, w - 3), rng.randi_range(3, h - 3))
+			if grid[c.y][c.x] != ".":
+				continue
+			if marks.has("@") and Vector2(c).distance_to(Vector2(marks["@"])) < 6.0:
+				continue
+			var cr := Node2D.new()
+			cr.set_script(CritterScript)
+			cr.setup(k, self, _cell_center(c))
+			entities.add_child(cr)
+			break
+	if theme in TOWN_THEMES:
+		var lv := CPUParticles2D.new()
+		lv.amount = 40
+		lv.lifetime = 9.0
+		lv.preprocess = 9.0
+		lv.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+		lv.emission_rect_extents = Vector2(330, 190)
+		lv.direction = Vector2(1, 0.5)
+		lv.spread = 40.0
+		lv.gravity = Vector2(4, 6)
+		lv.initial_velocity_min = 8.0
+		lv.initial_velocity_max = 22.0
+		lv.angular_velocity_min = -120.0
+		lv.angular_velocity_max = 120.0
+		lv.scale_amount_min = 0.9
+		lv.scale_amount_max = 1.8
+		lv.color = Color(0.55, 0.4, 0.22, 0.7) if theme == "town_e" else Color(0.95, 0.75, 0.8, 0.7)
+		lv.local_coords = false
+		lv.z_index = 15
+		player.add_child(lv)
 
 
 func set_weather_dark(d: float) -> void:
@@ -759,6 +807,22 @@ func _draw_house(r: Rect2, x: int, y: int) -> void:
 			draw_rect(Rect2(o.x + 7.5, o.y + 4, 1, 7), Color(Art.OUT))
 			draw_rect(Rect2(o.x + 4, o.y + 7.5, 8, 1), Color(Art.OUT))
 			draw_rect(Rect2(o.x + 2, o.y + 12, 12, 2), Color("3a3040"))
+			if theme == "town_p":
+				var fc: Array = [Color("c0334f"), Color("e0b040"), Color("d0d0e0"), Color("a050c0")]
+				draw_rect(Rect2(o.x + 2, o.y + 11, 12, 3), Color("4a3020"))
+				for fx in 5:
+					draw_circle(o + Vector2(3.5 + fx * 2.4, 11.0 + (fx % 2) * 0.6), 1.1, fc[(x + fx) % 4])
+			else:
+				draw_rect(Rect2(o.x + 1, o.y + 3, 2, 9), Color("3a2a22"))
+				draw_rect(Rect2(o.x + 13, o.y + 3, 2, 9), Color("3a2a22"))
+				draw_rect(Rect2(o.x + 1, o.y + 3, 1, 9), Color("5a4234"))
+				draw_rect(Rect2(o.x + 13, o.y + 3, 1, 9), Color("5a4234"))
+		elif (x - bx) % 3 == 0 and (x - bx) > 1 and left_h and right_h and (bx + x + y) % 2 == 0:
+			var bcs: Array = [Color("7a1e2e"), Color("2c4a7a"), Color("8a6a20"), Color("3a5a3a")]
+			var bcol: Color = bcs[(bx + x) % 4]
+			draw_rect(Rect2(o.x + 5, o.y + 1, 6, 1.2), Color("3a2a22"))
+			draw_colored_polygon(PackedVector2Array([Vector2(o.x + 5.5, o.y + 2.2), Vector2(o.x + 10.5, o.y + 2.2), Vector2(o.x + 10.5, o.y + 10.0), Vector2(o.x + 8, o.y + 8.0), Vector2(o.x + 5.5, o.y + 10.0)]), bcol)
+			draw_rect(Rect2(o.x + 7.4, o.y + 3.5, 1.2, 2.5), bcol.lightened(0.35))
 
 
 func _char_at(x: int, y: int) -> String:

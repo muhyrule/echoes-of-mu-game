@@ -54,3 +54,8 @@ Prague (Ossuary Clock) → Transylvania → Paris Catacombs → Whitby Abbey →
 - Rare gear is found in secrets and dropped by bosses (never sold in shops).
 - Towns have dynamic weather: Edinburgh (mist, drizzle, rain, thunderstorm), Prague (snow, blizzard, mist), with ripples, lightning, tint and puddles on the ground.
 - Music was gently refined (warmer tone, longer reverb, ensemble detune).
+
+## Living towns & the expanded Vaults
+- ~40 more NPCs across Edinburgh, Prague and all interiors (see `tools/gen_more.py`, `tools/towns_text2.py`).
+- Ambient critters (cats, crows, pigeons, rats), falling leaves/petals, flower boxes, shutters, banners, candles, stalls.
+- The South Bridge Vaults are now 100x72: start hall, key gallery, optional Crypt of the Ringers and Cistern, ossuary, puzzle hall, shrine hall and warden's chamber, with new secrets (`tools/gen_vaults.py`, validated by BFS).

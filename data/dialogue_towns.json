@@ -866,5 +866,489 @@
    "who": "Olga",
    "text": "I keep a candle burning for every guest. Don't blow them out when you leave."
   }
+ ],
+ "edin_cormac": [
+  {
+   "who": "Cormac",
+   "text": "Hear ye, hear ye! The South Bridge Vaults remain CLOSED by order of the Burgh! Anyone found ringing bells after curfew will be fined, and anyone found ringing them BEFORE curfew will be thanked, quietly."
+  },
+  {
+   "who": "Mu",
+   "text": "Why would anyone be thanked for ringing a bell?"
+  },
+  {
+   "who": "Cormac",
+   "text": "Because some nights the vaults ring on their own, and nobody's brave enough to answer. I say a bell that answers back is a friend. The Burgh says it's a nuisance."
+  }
+ ],
+ "edin_cormac_again": [
+  {
+   "who": "Cormac",
+   "text": "Hear ye! The crier's lungs are sound, but the news is getting worse."
+  }
+ ],
+ "edin_jean": [
+  {
+   "who": "Jean",
+   "text": "Washing doesn't dry in this town, it just sulks. And these sheets! Every one's come back from the line with a blue thread sewn through the hem. I never sewed it."
+  },
+  {
+   "who": "Isolde",
+   "text": "Blue thread. Mam's spool...?"
+  },
+  {
+   "who": "Jean",
+   "text": "Aye, I thought it might be hers. Take one if you like. Somebody out there is mending us."
+  }
+ ],
+ "edin_jean_again": [
+  {
+   "who": "Jean",
+   "text": "Another blue thread this morning. Whoever it is, they sew a lovely straight stitch."
+  }
+ ],
+ "edin_ailsa": [
+  {
+   "who": "Ailsa",
+   "text": "A song for the travellers? 'Seven Bells Below the Bridge'. It's new, and I swear I didn't write it. I woke up humming it. The words are all about a ringer who walked down and never came up."
+  },
+  {
+   "who": "Mu",
+   "text": "Does the song say whether he came back?"
+  },
+  {
+   "who": "Ailsa",
+   "text": "The last verse always changes. Last night it said: 'he's waiting for someone who remembers.'"
+  }
+ ],
+ "edin_ailsa_again": [
+  {
+   "who": "Ailsa",
+   "text": "Tonight the last verse said your name, young man. Don't look at me like that. I only sing them."
+  }
+ ],
+ "edin_dougal": [
+  {
+   "who": "Dougal",
+   "text": "Watch Recruit Dougal, reporting, sir! Madam! Whoever you are. Captain Hamish says I'm to stand here and look intimidating. Is it working?"
+  },
+  {
+   "who": "Isolde",
+   "text": "You're doing wonderfully, Dougal."
+  },
+  {
+   "who": "Dougal",
+   "text": "Truly? Only I've been standing here four hours and a goose has been staring me down the entire time."
+  }
+ ],
+ "edin_dougal_again": [
+  {
+   "who": "Dougal",
+   "text": "The goose has gone. I like to think I won."
+  }
+ ],
+ "edin_maisie": [
+  {
+   "who": "Maisie",
+   "text": "Herring! Fresh from the Forth. Well. Fresh from yesterday. The boats came back with no fish and a tangle of old bell-rope in the nets. Same rope as the ones they hung in the vaults, so they say."
+  },
+  {
+   "who": "Mu",
+   "text": "Rope from the vaults? In the harbour?"
+  },
+  {
+   "who": "Maisie",
+   "text": "Something is draining the vaults into the sea, pet. Or the sea is draining into them. Either way I'm selling herring."
+  }
+ ],
+ "edin_maisie_again": [
+  {
+   "who": "Maisie",
+   "text": "Herring! The smell's free, mind."
+  }
+ ],
+ "edin_magnus": [
+  {
+   "who": "Old Magnus",
+   "text": "Fought at Dunbar, I did. Lost an eye and half a knee and gained a very good story. The story's been getting better with age. The knee's been getting worse."
+  },
+  {
+   "who": "Mu",
+   "text": "Did you ever go into the vaults?"
+  },
+  {
+   "who": "Old Magnus",
+   "text": "Once, as a lad. The bells down there ring in the wrong order. Seven of them. If you ever hear them rung right... well. Run. Or stay, if you're the sort who can finish what the ringer started."
+  }
+ ],
+ "edin_magnus_again": [
+  {
+   "who": "Old Magnus",
+   "text": "Seven bells. Remember that. Seven."
+  }
+ ],
+ "edin_ina": [
+  {
+   "who": "Ina",
+   "text": "I sell herbs! Mostly weeds, but they smell nice. This one's feverfew. This one's mugwort. This one's... I don't know what this one is. It was growing out of a gravestone and humming."
+  }
+ ],
+ "edin_ina_again": [
+  {
+   "who": "Ina",
+   "text": "The humming one grew another leaf. I've named it Gerald."
+  }
+ ],
+ "edin_fraser": [
+  {
+   "who": "Fraser",
+   "text": "Ratcatcher. Fourteen shillings a hundred. Strange thing, though: the rats have all left the Cowgate. Marching out in a line, they were, all heading the same way. Toward the vaults."
+  },
+  {
+   "who": "Isolde",
+   "text": "Rats leaving a place, that's never a good sign."
+  },
+  {
+   "who": "Fraser",
+   "text": "Aye. Rats are the best judges of a bad idea. If they're going in, something down there is calling."
+  }
+ ],
+ "edin_fraser_again": [
+  {
+   "who": "Fraser",
+   "text": "Tell the rats I said hello. They never listen."
+  }
+ ],
+ "edin_beatrix": [
+  {
+   "who": "Beatrix",
+   "text": "Forty years I've laid a posy on that unmarked stone. I don't know whose it is. I only know the ground was cold the first day I came, and it seemed unkind to leave it that way."
+  },
+  {
+   "who": "Isolde",
+   "text": "That's the kindest reason I've heard in a long time."
+  }
+ ],
+ "edin_beatrix_again": [
+  {
+   "who": "Beatrix",
+   "text": "Violets this year. They were the only ones that didn't wilt."
+  }
+ ],
+ "edin_anselm": [
+  {
+   "who": "Brother Anselm",
+   "text": "Peace, children. I tend the kirk bell on the hill. It has not rung once since the collapse, yet I wake every night to its sound. Perhaps I am being called to listen rather than to ring."
+  },
+  {
+   "who": "Mu",
+   "text": "Called by whom?"
+  },
+  {
+   "who": "Brother Anselm",
+   "text": "That, I cannot say. But the sound has begun to carry a word. A name. I will not say whose, lest I be wrong, and lest I be right."
+  }
+ ],
+ "edin_anselm_again": [
+  {
+   "who": "Brother Anselm",
+   "text": "Go gently. The dark is not an enemy. It is simply unattended."
+  }
+ ],
+ "edin_in_candle": [
+  {
+   "who": "Ross",
+   "text": "I came in for one pint and I'm on my fourth story. They keep telling me the same one: a ringer, a bridge, a bell. I keep telling them it's not a story. It's my grandfather."
+  }
+ ],
+ "edin_in_archive": [
+  {
+   "who": "Clerk Pringle",
+   "text": "Silence, please. The Archive has been scolding me for thirty years. Today it's a draught from the east wall. Someone has been opening a door that isn't there."
+  }
+ ],
+ "edin_in_mason": [
+  {
+   "who": "Apprentice Callum",
+   "text": "Duncan says a mason must love stone. I do. I just wish it loved me back. This arch has fallen on me twice. I think it's personal."
+  }
+ ],
+ "edin_in_chandlery": [
+  {
+   "who": "Mistress Fenella",
+   "text": "Candles for the dead, candles for the living, and candles for the in-between. That last one's the biggest seller this winter."
+  }
+ ],
+ "edin_in_cottage": [
+  {
+   "who": "Old Tibby",
+   "text": "I keep Marta company on the long nights. She knits, I snore. Between us we've mended half of Edinburgh. Not the half we wanted."
+  }
+ ],
+ "edin_in_apoth": [
+  {
+   "who": "Patient Gavin",
+   "text": "I've been waiting an hour for a cough remedy. Ewan keeps tasting his own cough remedy and forgetting what's in it."
+  }
+ ],
+ "edin_in_armoury": [
+  {
+   "who": "Squire Alec",
+   "text": "I'm to carry my lord's helm and say nothing. I've now said nothing for six days. Please speak to me. About anything."
+  }
+ ],
+ "edin_in_forge": [
+  {
+   "who": "Bellows-boy Tom",
+   "text": "Iain says I'll be a smith one day if I stop burning my own eyebrows. I've been practising. They've come back thicker."
+  }
+ ],
+ "edin_in_inn": [
+  {
+   "who": "Traveller Esme",
+   "text": "I've slept in forty inns across the Isles, and this is the only one that tucks the blankets in before you've even sat down. I'm staying a week."
+  }
+ ],
+ "pra_karel": [
+  {
+   "who": "Karel",
+   "text": "Night watchman. Which is a lie, because I haven't seen the night in three weeks. The clock stops between chimes and it's always an hour I don't recognise. Today it's half past the thirteenth."
+  },
+  {
+   "who": "Isolde",
+   "text": "Half past the thirteenth? You're making that up."
+  },
+  {
+   "who": "Karel",
+   "text": "I wish. Ask the clock. It's been counting in the wrong direction since the Hour of Ravens."
+  }
+ ],
+ "pra_karel_again": [
+  {
+   "who": "Karel",
+   "text": "Still thirteen. Still half past. I'm getting used to it. That's the worst part."
+  }
+ ],
+ "pra_dorota": [
+  {
+   "who": "Dorota",
+   "text": "Flowers! Roses, lilies, forget-me-nots! Take a forget-me-not, traveller. They grow wild near the ossuary now. Faster than anyone can pick them. As if the dead are trying to say something."
+  },
+  {
+   "who": "Mu",
+   "text": "What do they want to say?"
+  },
+  {
+   "who": "Dorota",
+   "text": "'Remember us.' That's what the flowers say. I sell them anyway. Remembering is good business."
+  }
+ ],
+ "pra_dorota_again": [
+  {
+   "who": "Dorota",
+   "text": "Forget-me-nots, a penny. The best bargain in Prague."
+  }
+ ],
+ "pra_matyas": [
+  {
+   "who": "Matyas",
+   "text": "Behold! The Tale of the Brave Locksmith and the Seven Dancing Skeletons! Do you like skeletons? Everyone likes skeletons. They're the only honest actors, they've nothing left to hide."
+  },
+  {
+   "who": "Isolde",
+   "text": "Do the puppets ever move on their own?"
+  },
+  {
+   "who": "Matyas",
+   "text": "Only since the ossuary opened. I've started leaving a chair out for them. It's only polite."
+  }
+ ],
+ "pra_matyas_again": [
+  {
+   "who": "Matyas",
+   "text": "Tonight's show is sold out. The audience is all in the front row. They're very quiet."
+  }
+ ],
+ "pra_rebeka": [
+  {
+   "who": "Rebeka",
+   "text": "Scribe, translator, and keeper of other people's secrets. I copied a letter last week in a language I've never seen. By morning I understood every word. I wish I hadn't."
+  },
+  {
+   "who": "Isolde",
+   "text": "What did it say?"
+  },
+  {
+   "who": "Rebeka",
+   "text": "'The hour will be returned when the keeper is.' Whatever that means. I burned it. It didn't help. The words are still in my head."
+  }
+ ],
+ "pra_rebeka_again": [
+  {
+   "who": "Rebeka",
+   "text": "I've started writing in my sleep. The ink is always blue."
+  }
+ ],
+ "pra_pavel": [
+  {
+   "who": "Pavel",
+   "text": "I'm the astronomer's apprentice! Which means I wind the clock, dust the figures, and take the blame. Master Hynek has gone missing, so I've been running the whole thing myself. Badly. Very badly."
+  },
+  {
+   "who": "Mu",
+   "text": "Missing? Since when?"
+  },
+  {
+   "who": "Pavel",
+   "text": "The night the apostles stopped. He climbed the tower to look at the stars and the stairs just... went on a lot longer than they should."
+  }
+ ],
+ "pra_pavel_again": [
+  {
+   "who": "Pavel",
+   "text": "I counted the stairs again. Three hundred and eleven. Yesterday it was two hundred and six."
+  }
+ ],
+ "pra_zora": [
+  {
+   "who": "Zora",
+   "text": "Fiddle for a coin? I only know three tunes. A waltz, a lament, and one I think I dreamt. People ask for the dreamt one. They cry. I'm not sure whether to be proud."
+  },
+  {
+   "who": "Isolde",
+   "text": "Play the dreamt one."
+  },
+  {
+   "who": "Zora",
+   "text": "...All right. But hold onto something."
+  }
+ ],
+ "pra_zora_again": [
+  {
+   "who": "Zora",
+   "text": "Third verse changed again. It's gotten a lot sadder. Or I have."
+  }
+ ],
+ "pra_bohdan": [
+  {
+   "who": "Bohdan",
+   "text": "Toll-keeper for the Charles Bridge. The statues keep turning to watch the water. All thirty of them. I put a sack over one's head last night. In the morning the sack was folded on the parapet and he was smiling."
+  }
+ ],
+ "pra_bohdan_again": [
+  {
+   "who": "Bohdan",
+   "text": "Pay the toll. Statues don't, but you're not a statue. Probably."
+  }
+ ],
+ "pra_emil": [
+  {
+   "who": "Emil",
+   "text": "Lamplighter. Every night, the same lamps, in the same order. Lately there's one extra lamp at the end of the lane that I did not put there. It lights itself. It burns a very pale blue."
+  },
+  {
+   "who": "Mu",
+   "text": "Blue? Like the thread in Edinburgh?"
+  },
+  {
+   "who": "Emil",
+   "text": "I've no idea what that means, but I'll thank you not to be so calm about it."
+  }
+ ],
+ "pra_emil_again": [
+  {
+   "who": "Emil",
+   "text": "The blue lamp's burning again. Tell it I said it's not my fault."
+  }
+ ],
+ "pra_vaclav": [
+  {
+   "who": "Vaclav",
+   "text": "Spare a crumb? I'm not hungry. I just like to be given things. Everyone gets happier when they give. It's a trick I learned. Don't tell anyone."
+  }
+ ],
+ "pra_vaclav_again": [
+  {
+   "who": "Vaclav",
+   "text": "You're a good one. I can tell. Your shadow's got a nicer shape than most."
+  }
+ ],
+ "pra_ludmila": [
+  {
+   "who": "Ludmila",
+   "text": "My husband lies under the third stone. Every evening I tell him what the clock did, and every evening he says nothing. This week I swear I heard the bones laugh. Not cruel. Just... delighted. Like they'd finally heard a good joke."
+  }
+ ],
+ "pra_ludmila_again": [
+  {
+   "who": "Ludmila",
+   "text": "I told him you were coming. He seemed pleased."
+  }
+ ],
+ "pra_agnes": [
+  {
+   "who": "Sister Agnes",
+   "text": "Pilgrim of the Orloj. I walked from Kutna Hora to see the apostles turn. They didn't. I stayed anyway. Sometimes a stopped clock is the most honest face of time, you know. It shows you exactly where you stand."
+  }
+ ],
+ "pra_agnes_again": [
+  {
+   "who": "Sister Agnes",
+   "text": "Bless you, travellers. May the hour be kind to you."
+  }
+ ],
+ "pra_in_tavern": [
+  {
+   "who": "Drover Jaroslav",
+   "text": "I came to Prague for the beer and stayed for the ghosts. They're very polite. They never touch the tab."
+  }
+ ],
+ "pra_in_lodge": [
+  {
+   "who": "Clockwright Anton",
+   "text": "I've been oiling these gears for twenty years. Last week one turned the wrong way, and the whole lodge exhaled. As if it had been holding its breath."
+  }
+ ],
+ "pra_in_alchemist": [
+  {
+   "who": "Student Kasimir",
+   "text": "My master says I'm not allowed to touch the red flask. I've been very good. I've only touched it with a spoon."
+  }
+ ],
+ "pra_in_cartographer": [
+  {
+   "who": "Surveyor Beata",
+   "text": "Every map of Prague I draw is slightly bigger than the last. I'm not complaining. I'm just running out of paper."
+  }
+ ],
+ "pra_in_bakery": [
+  {
+   "who": "Customer Hana",
+   "text": "The bread here rises even when it's cold. Even when it's stale. I took a loaf home last Tuesday and it's still rising. Please advise."
+  }
+ ],
+ "pra_in_retort": [
+  {
+   "who": "Apprentice Tobias",
+   "text": "The tincture smells like pennies and old rain. My master says that's how you know it's working. I think that's how you know it's wrong."
+  }
+ ],
+ "pra_in_guild": [
+  {
+   "who": "Squire Ctibor",
+   "text": "The guildmaster told me to stand up straight. I did. Then he told me to stand up straighter. I'm not sure there's any more straight left."
+  }
+ ],
+ "pra_in_steel": [
+  {
+   "who": "Journeyman Radek",
+   "text": "Iron remembers every hammer-blow. Master says that's why it's strong. I say that's why it's cranky."
+  }
+ ],
+ "pra_in_rose": [
+  {
+   "who": "Guest Lenka",
+   "text": "The Rose and the Hourglass has a clock in every room, and not one agrees with another. I'm sleeping better than I have in years. No idea what time it is."
+  }
  ]
 }

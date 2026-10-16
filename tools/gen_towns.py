@@ -518,6 +518,10 @@ if __name__ == "__main__":
     build_prague()
     enrich_edinburgh()
     enrich_prague()
+    import gen_more
+    gen_more.main()
+    import gen_vaults
+    gen_vaults.check(gen_vaults.build())
     with open(os.path.join(ROOT, "data", "dialogue_towns.json"), "w") as f:
         json.dump(DIALOGUE, f, indent=1, ensure_ascii=False)
         f.write("\n")

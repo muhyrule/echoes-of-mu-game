@@ -54,6 +54,7 @@ const ITEMS := {
 	"wre_w_f": {"name": "Key-Shaped Blades", "hero": "wren", "slot": "weapon", "tier": 9, "atk": 2, "def": 0, "hp": 0, "price": 0, "desc": "They open more than locks."},
 	"cor_a_f": {"name": "Winder's Mantle", "hero": "corvin", "slot": "armor", "tier": 9, "atk": 0, "def": 1, "hp": 2, "price": 0, "desc": "Thirty years of clockwork oil in the weave."},
 	"cor_w_f": {"name": "Heartspring Staff", "hero": "corvin", "slot": "weapon", "tier": 9, "atk": 2, "def": 0, "hp": 1, "price": 0, "desc": "Wound tight, it never quite runs down."},
+	"wre_a_f": {"name": "Ringer's Shadecloak", "hero": "wren", "slot": "armor", "tier": 9, "atk": 0, "def": 2, "hp": 1, "price": 0, "desc": "Left in a cistern chest. It remembers being worn quietly."},
 }
 
 const SUPPLIES := {
