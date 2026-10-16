@@ -273,3 +273,74 @@ ITEMS = {
     "t_barrel": "Ossuary Rosary",
     "m_chart1": "Seven-Bell Spiral",
 }
+
+d("edin_bessie",
+  ("Bessie", "Oatcakes! Warm ones, from the oven by the Cowgate. Nobody wants the cold ones any more, folk want something warm in their hands."))
+d("edin_bessie_again",
+  ("Bessie", "I leave a cake on the sill every night. By morning it's gone. Cats, I tell myself."))
+d("edin_bessie_after",
+  ("Bessie", "Sill cake was still there this morning. Nobody took it. I'm not sure whether to be glad."))
+d("edin_gideon",
+  ("Gideon", "Cobbler. Fifty years of boots. Lately every pair that comes in has the same wear on the left heel, as if the whole town walks listening for something."))
+d("edin_gideon_again",
+  ("Gideon", "Your boots are good. Leather and patience, boy, that's the secret."))
+d("edin_nell",
+  ("Nell", "I'm not allowed near the South Bridge. Da says the ground sings. I put my ear to it once. It sang my name."),
+  ("Mu", "What did it sing?"),
+  ("Nell", "Mostly the bit where I'm in trouble."))
+d("edin_nell_again",
+  ("Nell", "If you see a lost bell down there, can I have it? Just to hold?"))
+d("edin_gilchrist",
+  ("Mrs Gilchrist", "My tea goes missing and nobody owns up. I keep it in the Candle's barrels, I'll have you know. Wee Rab, I'd wager."))
+d("edin_gilchrist_again",
+  ("Mrs Gilchrist", "Forty years I've kept that tea. It was my mother's recipe. It goes with everything."))
+d("edin_lachlan",
+  ("Lachlan", "Night watch. I walk the Close and the Square and I count the lit windows. Eighty-one, if you're curious. Eighty-two since Tuesday."))
+d("edin_lachlan_again",
+  ("Lachlan", "Keep to the lamps, bell-boy. The dark between them is longer than it looks."))
+d("edin_lachlan_after",
+  ("Lachlan", "Eighty-six windows lit tonight. The town's coming back, one candle at a time."))
+d("edin_tam",
+  ("Tam", "Carter. I haul stone from the quarry for Duncan. Last cart wouldn't turn at the South Bridge. Horse refused. Never known her to refuse."))
+d("edin_tam_again",
+  ("Tam", "Horses know. People pretend they don't."))
+d("edin_peggy_shop",
+  ("Peggy", "Browse as you like. Everything here is hand-dipped, and everything here leans toward the vaults. I've stopped fighting it."),
+  ("Peggy", "Take a rest by the shelves. The wax is warm."))
+d("pra_vit",
+  ("Vit", "Fresh bread, black rye and white. The clock stops between chimes, and the dough rises anyway. Don't ask me how."))
+d("pra_vit_again",
+  ("Vit", "Wren steals my bread every morning. I leave the crust loose so it's easier."))
+d("pra_tereza",
+  ("Tereza", "Do you know why the clock has a skeleton on it? It rings the bell. Mama says he's the Clock-Keeper's friend."),
+  ("Mu", "Is he?"),
+  ("Tereza", "He doesn't say."))
+d("pra_tereza_again",
+  ("Tereza", "I counted the chimes. There were thirteen. Mama said that's not right."))
+d("pra_ondra",
+  ("Ondra", "Hic. I saw the Clock-Keeper go down. He had a candle and a hammer. The candle came back up on its own."))
+d("pra_ondra_again",
+  ("Ondra", "Don't tell Anezka I told you. She cut me off at the third pint."))
+d("pra_anna",
+  ("Anna", "Seamstress. I've mended forty coats this month. Every one with the pockets turned out and empty. Like folk are hiding nothing from the dark."))
+d("pra_anna_again",
+  ("Anna", "A red scarf came in, a child's. Missing a hem. I'd return it, but nobody comes for it."))
+d("pra_hynek",
+  ("Hynek", "Town guard. We walk in pairs now, after the four went down. Captain Jan says the Keeper's pass is the only way. I say stay up here and drink."))
+d("pra_hynek_again",
+  ("Hynek", "I'll be honest: I'm glad it's you going down and not me."))
+d("pra_hynek_after",
+  ("Hynek", "The bells over the square chime true. First morning in a month I felt warm."))
+d("pra_student",
+  ("Student", "Magister Zdenek says the Clock stores time like a lake stores rain. I think it stores people, but he gets cross when I say so."))
+d("pra_student_again",
+  ("Student", "I'm writing it all down. In case nobody's left to read it."))
+d("pra_vit_shop",
+  ("Vit", "Sit by the oven. Take a loaf if you like. Nobody's buying today."))
+SECRETS.update({
+    "ch_crate": "Spare wicks and a lead weight. Folded inside the weight: a note in Peggy's hand, 'They bow to the south. All of them. Why?'",
+    "ch_barrel": "Warm tallow, strong-smelling. Under it, a half-eaten honey cake. Wee Rab's, no doubt.",
+    "bk_crate": "A sack of rye flour and a scrap of red cloth snagged on the lid. Wren was here.",
+    "bk_barrel": "A cask of barley water, cool and sweet. You feel refreshed.",
+})
+ITEMS.update({"ch_crate": "Peggy's Note", "ch_barrel": "Rab's Honey Cake", "bk_crate": "Scrap of Red Cloth", "bk_barrel": "Barley Water"})

@@ -36,7 +36,7 @@ class Map:
     def alloc(self):
         return self.pool.pop(0)
 
-    def npc(self, x, y, id, pal, variants=None, face=(0, 1), hide_if=None):
+    def npc(self, x, y, id, pal, variants=None, face=(0, 1), hide_if=None, wander=0):
         ch = self.alloc()
         d = {"id": id, "pal": pal, "face": list(face)}
         vs = list(variants or [])
@@ -46,6 +46,8 @@ class Map:
             d["variants"] = vs
         if hide_if:
             d["hide_if"] = hide_if
+        if wander:
+            d["wander"] = wander
         self.meta["npcs"][ch] = d
         self.put(x, y, ch)
 
@@ -104,18 +106,32 @@ def pal(coat, accent, hair, skin="#c4a083", style="short", **kw):
 
 
 def town(name, theme, title, sub, music, after_flag, back_spawn):
-    m = Map(name, 56, 34, theme, title, sub, music)
+    m = Map(name, 112, 44, theme, title, sub, music)
     m.after_flag = after_flag
-    m.rect(1, 3, 54, 30)
-    m.rect(26, 33, 4, 1, "#")
+    m.rect(1, 3, 110, 40)
     m.meta["spawns"].update({"from_chapel": "$"})
     m.meta["exit"] = {"map": "chapel", "spawn": back_spawn}
-    m.rect(25, 32, 6, 1, "E")
-    m.put(27, 30, "$")
-    m.put(28, 30, "@")
-    for x in range(24, 31):
-        m.put(x, 27, "1")
+    m.rect(53, 43, 6, 1, "E")
+    m.put(56, 40, "$")
+    m.put(57, 40, "@")
+    for x in range(52, 61):
+        m.put(x, 36, "1")
     return m
+
+
+def street_lamps(m):
+    for x in range(8, 106, 12):
+        m.put(x, 10, "l")
+        m.put(x, 34, "l")
+    for y in range(6, 40, 6):
+        m.put(51, y, "l")
+        m.put(61, y, "l")
+
+
+def market(m, x0, y0, n):
+    for i in range(n):
+        m.decorate(x0 + i * 3, y0, "crate" if i % 2 else "barrel")
+        m.decorate(x0 + i * 3 + 1, y0, "barrel" if i % 2 else "crate")
 
 
 def lamps(m, pts):
@@ -155,33 +171,45 @@ def build_edinburgh():
     t = town("edinburgh", "town_e", "Edinburgh — The Old Town",
              "Nine storeys of houses leaning together against the dark", "edin", af, "from_vaults")
     t.meta["triggers"]["1"] = "edin_arrive"
-    t.building(4, 4, 7, "marsh_cottage", "Enter Marsh Cottage")
-    t.building(16, 4, 8, "mason_yard", "Enter the Mason's Yard")
-    t.building(30, 4, 9, "drowned_candle", "Enter the Drowned Candle")
-    t.building(44, 4, 8, "archive", "Enter the Archive")
-    t.building(4, 15, 6)
-    t.building(14, 18, 7)
-    t.building(32, 12, 5)
-    t.door(27, 2, "vaults", "Descend into the Vaults", style="gate", requires="edin_writ", locked="edin_gate_locked")
-    lamps(t, [(8, 9), (20, 9), (34, 9), (48, 9), (27, 4), (27, 14), (27, 24), (52, 4), (12, 24), (45, 18)])
-    # Kirkyard
-    fence(t, 38, 20, 53, 31, (38, 25))
-    t.obj(42, 23, "grave", "e_grave1")
-    t.obj(46, 23, "grave", "e_grave2")
-    t.obj(50, 23, "grave", "e_grave3")
-    t.obj(46, 27, "statue", "e_statue")
-    t.obj(51, 29, "urn", "e_urn")
-    t.obj(41, 29, "grave")
-    t.obj(53, 3, "chest", "e_chest", "maxhp")
-    t.obj(33, 8, "barrel", "e_barrel", "heal")
-    t.obj(25, 8, "crate", "e_crate")
-    for x, y in [(2, 10), (3, 10), (14, 9), (36, 9)]:
-        t.decorate(x, y, "barrel" if x < 10 else "crate")
-    t.npc(30, 3, "edin_hamish", pal("#3a2a30", "#8a7436", "#6a5a4a", style="beard", item="none"),
+    t.building(6, 4, 8, "marsh_cottage", "Enter Marsh Cottage")
+    t.building(22, 4, 9, "mason_yard", "Enter the Mason's Yard")
+    t.building(70, 4, 9, "drowned_candle", "Enter the Drowned Candle")
+    t.building(88, 4, 9, "archive", "Enter the Archive")
+    t.building(36, 4, 8)
+    t.building(100, 4, 9)
+    t.building(6, 15, 8, "chandlery", "Enter Peggy's Chandlery")
+    t.building(20, 15, 7)
+    t.building(34, 15, 8)
+    t.building(70, 15, 8)
+    t.building(84, 15, 7)
+    t.building(6, 28, 9)
+    t.building(20, 28, 7)
+    t.door(56, 2, "vaults", "Descend into the Vaults", style="gate", requires="edin_writ", locked="edin_gate_locked")
+    street_lamps(t)
+    market(t, 40, 26, 4)
+    t.obj(56, 22, "statue")
+    t.obj(20, 11, "barrel", "e_barrel", "heal")
+    t.obj(46, 12, "crate", "e_crate")
+    t.obj(108, 11, "chest", "e_chest", "maxhp")
+    fence(t, 80, 24, 109, 41, (80, 33))
+    t.obj(86, 28, "grave", "e_grave1")
+    t.obj(92, 28, "grave", "e_grave2")
+    t.obj(98, 28, "grave", "e_grave3")
+    t.obj(92, 34, "statue", "e_statue")
+    t.obj(104, 38, "urn", "e_urn")
+    for gx in (84, 88, 96, 102, 106):
+        t.obj(gx, 38, "grave")
+    t.npc(55, 4, "edin_hamish", pal("#3a2a30", "#8a7436", "#6a5a4a", style="beard", item="none", mail=True),
           [{"if": af, "id": "edin_hamish_after"}, {"if": "edin_writ", "id": "edin_hamish_writ"}])
-    t.npc(20, 10, "edin_peggy", pal("#6a4a3a", "#c0a070", "#7a3a24", style="braid"))
-    t.npc(10, 12, "edin_rab", pal("#4a4a56", "#7a2a2e", "#4a3a2a"))
-    t.npc(37, 25, "edin_alasdair", pal("#22212c", "#6a6a74", "#b8b8c0", style="beard"))
+    t.npc(24, 12, "edin_peggy", pal("#6a4a3a", "#c0a070", "#7a3a24", style="braid"), wander=3)
+    t.npc(14, 20, "edin_rab", pal("#4a4a56", "#7a2a2e", "#4a3a2a"), wander=6)
+    t.npc(82, 30, "edin_alasdair", pal("#22212c", "#6a6a74", "#b8b8c0", style="beard"), wander=2)
+    t.npc(44, 22, "edin_bessie", pal("#6a4a4a", "#e0d0b0", "#a05a2a", style="braid", item="none"), wander=4)
+    t.npc(66, 22, "edin_gideon", pal("#4a3a2a", "#8a8d98", "#2a2a2e", style="beard", item="none"), wander=3)
+    t.npc(30, 34, "edin_nell", pal("#5a5a6a", "#c06a6a", "#c08a4a", style="braid"), wander=6)
+    t.npc(72, 34, "edin_gilchrist", pal("#3a3a4a", "#9a9aa0", "#c8c8d0", style="braid", item="none"), wander=3)
+    t.npc(56, 30, "edin_lachlan", pal("#2c3a5a", "#b0b0b8", "#5a4a3a", item="none", mail=True), wander=5)
+    t.npc(12, 36, "edin_tam", pal("#4a5a5a", "#8a7436", "#7a5a3a", style="beard", item="none"), wander=4)
     t.save()
 
     c = interior("marsh_cottage", "Marsh Cottage", "A lamp is lit in the window", af, "edinburgh", music="inn")
@@ -225,6 +253,15 @@ def build_edinburgh():
     lamps(d, [(6, 15), (30, 15)])
     d.save()
 
+    p = interior("chandlery", "Peggy's Chandlery", "Wax, wicks and candles that lean south", af, "edinburgh", music="inn")
+    shelves(p, 2, 8)
+    p.put(26, 3, "U")
+    p.obj(12, 4, "crate", "ch_crate")
+    p.obj(24, 12, "barrel", "ch_barrel", "heal")
+    p.npc(14, 8, "edin_peggy_shop", pal("#6a4a3a", "#c0a070", "#7a3a24", style="braid"))
+    lamps(p, [(10, 13), (21, 4)])
+    p.save()
+
     a = interior("archive", "The Burgh Archive", "Every name the town ever owned", af, "edinburgh")
     shelves(a, 2, 9)
     shelves(a, 18, 27)
@@ -244,30 +281,54 @@ def build_prague():
     t = town("prague_town", "town_p", "Prague — Old Town Square",
              "An astronomical clock counts the hours of the dead", "praha", af, "from_prague")
     t.meta["triggers"]["1"] = "pra_arrive"
-    t.building(4, 4, 8, "raven_tavern", "Enter the Sleeping Raven")
-    t.building(17, 4, 7, "orloj_lodge", "Enter the Clock-Keeper's Lodge")
-    t.building(30, 4, 8, "alchemist", "Enter the Alchemist's")
-    t.building(44, 4, 8, "cartographer", "Enter the Cartographer's")
-    t.building(4, 15, 7)
-    t.building(14, 18, 6)
-    t.building(32, 12, 6)
-    t.door(27, 2, "prague", "Descend to the Ossuary", style="gate", requires="pra_pass", locked="pra_gate_locked")
-    lamps(t, [(8, 9), (20, 9), (34, 9), (48, 9), (27, 4), (27, 14), (27, 24), (52, 4), (12, 24), (45, 18)])
-    fence(t, 38, 20, 53, 31, (38, 25))
-    t.obj(42, 23, "statue", "p_statue1")
-    t.obj(50, 23, "statue", "p_statue2")
-    t.obj(10, 14, "urn", "p_urn1")
-    t.obj(46, 10, "urn", "p_urn2")
-    t.obj(25, 8, "barrel", "p_barrel")
-    t.obj(6, 24, "crate", "p_crate")
-    t.obj(53, 3, "chest", "p_chest", "maxhp")
-    for x, y in [(2, 10), (3, 10), (14, 9), (36, 9)]:
-        t.decorate(x, y, "barrel" if x < 10 else "crate")
-    t.npc(30, 3, "pra_jan", pal("#2c3a5a", "#b0b0b8", "#5a4a3a", style="beard", item="none", mail=True),
+    t.building(6, 4, 9, "raven_tavern", "Enter the Sleeping Raven")
+    t.building(22, 4, 8, "orloj_lodge", "Enter the Clock-Keeper's Lodge")
+    t.building(70, 4, 9, "alchemist", "Enter the Alchemist's")
+    t.building(88, 4, 9, "cartographer", "Enter the Cartographer's")
+    t.building(36, 4, 8)
+    t.building(100, 4, 9)
+    t.building(6, 15, 8, "bakery", "Enter the Bakery")
+    t.building(20, 15, 7)
+    t.building(34, 15, 8)
+    t.building(70, 15, 8)
+    t.building(84, 15, 7)
+    t.building(6, 28, 9)
+    t.building(20, 28, 7)
+    t.door(56, 2, "prague", "Descend to the Ossuary", style="gate", requires="pra_pass", locked="pra_gate_locked")
+    street_lamps(t)
+    market(t, 40, 26, 4)
+    t.obj(56, 22, "statue")
+    t.obj(46, 12, "barrel", "p_barrel")
+    t.obj(14, 12, "urn", "p_urn1")
+    t.obj(100, 12, "urn", "p_urn2")
+    t.obj(26, 34, "crate", "p_crate")
+    t.obj(108, 11, "chest", "p_chest", "maxhp")
+    fence(t, 80, 24, 109, 41, (80, 33))
+    t.obj(88, 28, "statue", "p_statue1")
+    t.obj(100, 28, "statue", "p_statue2")
+    for gx, gy in ((86, 36), (92, 36), (98, 36), (104, 36), (94, 31)):
+        t.obj(gx, gy, "grave")
+    t.npc(55, 4, "pra_jan", pal("#2c3a5a", "#b0b0b8", "#5a4a3a", style="beard", item="none", mail=True),
           [{"if": af, "id": "pra_jan_after"}, {"if": "pra_pass", "id": "pra_jan_pass"}])
-    t.npc(15, 10, "pra_eliska", pal("#6a3a50", "#c0a070", "#2a2a2e", style="braid"))
-    t.npc(45, 25, "pra_marketa", pal("#2a2a32", "#c8c0b0", "#b8b8c0", style="braid", item="none", hood=True))
+    t.npc(24, 12, "pra_eliska", pal("#6a3a50", "#c0a070", "#2a2a2e", style="braid"), wander=4)
+    t.npc(90, 30, "pra_marketa", pal("#2a2a32", "#c8c0b0", "#b8b8c0", style="braid", item="none", hood=True), wander=2)
+    t.npc(44, 22, "pra_vit", pal("#6a5a3a", "#e0d0b0", "#4a3a2a", style="beard", item="none"), wander=4)
+    t.npc(66, 22, "pra_tereza", pal("#6a4a6a", "#c0a070", "#c08a4a", style="braid"), wander=6)
+    t.npc(30, 34, "pra_ondra", pal("#4a4a3a", "#8a7436", "#2a2a2e", item="none"), wander=5)
+    t.npc(72, 34, "pra_anna", pal("#3a5a5a", "#c0a070", "#9a7a5a", style="braid", item="none"), wander=3)
+    t.npc(56, 30, "pra_hynek", pal("#2c3a5a", "#b0b0b8", "#5a4a3a", item="none", mail=True), wander=5)
+    t.npc(12, 36, "pra_student", pal("#2a2a3a", "#c0a070", "#6a3a24", item="none"), wander=4)
     t.save()
+
+    b = interior("bakery", "Vit's Bakery", "Bread that never stales between the chimes", af, "prague_town", music="inn")
+    shelves(b, 2, 6)
+    b.put(26, 3, "U")
+    b.put(25, 3, "U")
+    b.obj(10, 4, "crate", "bk_crate")
+    b.obj(24, 12, "barrel", "bk_barrel", "heal")
+    b.npc(14, 8, "pra_vit_shop", pal("#6a5a3a", "#e0d0b0", "#4a3a2a", style="beard", item="none"))
+    lamps(b, [(10, 13), (21, 4)])
+    b.save()
 
     r = interior("raven_tavern", "The Sleeping Raven", "Beer, bread and bad dreams", af, "prague_town", w=36, h=20)
     r.put(17, 3, "U")

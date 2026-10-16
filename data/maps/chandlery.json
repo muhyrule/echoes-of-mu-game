@@ -1,0 +1,71 @@
+{
+ "theme": "interior",
+ "title": "Peggy's Chandlery",
+ "subtitle": "Wax, wicks and candles that lean south",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "e": {
+   "id": "edin_peggy_shop",
+   "pal": {
+    "coat": "#6a4a3a",
+    "accent": "#c0a070",
+    "hair": "#7a3a24",
+    "skin": "#c4a083",
+    "style": "braid"
+   },
+   "face": [
+    0,
+    1
+   ]
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "edinburgh",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "a": {
+   "kind": "crate",
+   "id": "ch_crate",
+   "text": "Spare wicks and a lead weight. Folded inside the weight: a note in Peggy's hand, 'They bow to the south. All of them. Why?'",
+   "item": "Peggy's Note",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "barrel",
+   "id": "ch_barrel",
+   "text": "Warm tallow, strong-smelling. Under it, a half-eaten honey cake. Wee Rab's, no doubt.",
+   "item": "Rab's Honey Cake",
+   "reward": "heal",
+   "empty": "You've already searched here."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#.ZZZZZZZ....................#",
+  "#.........................U..#",
+  "#...........a........l.......#",
+  "#............................#",
+  "#............................#",
+  "#............................#",
+  "#.............e..............#",
+  "#............................#",
+  "#............................#",
+  "#............................#",
+  "#.......................d....#",
+  "#.........l..................#",
+  "#............................#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

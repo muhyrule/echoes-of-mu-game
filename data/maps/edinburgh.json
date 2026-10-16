@@ -9,7 +9,7 @@
   "from_chapel": "$"
  },
  "npcs": {
-  "n": {
+  "u": {
    "id": "edin_hamish",
    "pal": {
     "coat": "#3a2a30",
@@ -17,7 +17,8 @@
     "hair": "#6a5a4a",
     "skin": "#c4a083",
     "style": "beard",
-    "item": "none"
+    "item": "none",
+    "mail": true
    },
    "face": [
     0,
@@ -34,7 +35,7 @@
     }
    ]
   },
-  "p": {
+  "v": {
    "id": "edin_peggy",
    "pal": {
     "coat": "#6a4a3a",
@@ -52,9 +53,10 @@
      "if": "edinburgh_done",
      "id": "edin_peggy_after"
     }
-   ]
+   ],
+   "wander": 3
   },
-  "q": {
+  "w": {
    "id": "edin_rab",
    "pal": {
     "coat": "#4a4a56",
@@ -72,9 +74,10 @@
      "if": "edinburgh_done",
      "id": "edin_rab_after"
     }
-   ]
+   ],
+   "wander": 6
   },
-  "s": {
+  "y": {
    "id": "edin_alasdair",
    "pal": {
     "coat": "#22212c",
@@ -92,7 +95,116 @@
      "if": "edinburgh_done",
      "id": "edin_alasdair_after"
     }
-   ]
+   ],
+   "wander": 2
+  },
+  "z": {
+   "id": "edin_bessie",
+   "pal": {
+    "coat": "#6a4a4a",
+    "accent": "#e0d0b0",
+    "hair": "#a05a2a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "edinburgh_done",
+     "id": "edin_bessie_after"
+    }
+   ],
+   "wander": 4
+  },
+  "C": {
+   "id": "edin_gideon",
+   "pal": {
+    "coat": "#4a3a2a",
+    "accent": "#8a8d98",
+    "hair": "#2a2a2e",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 3
+  },
+  "F": {
+   "id": "edin_nell",
+   "pal": {
+    "coat": "#5a5a6a",
+    "accent": "#c06a6a",
+    "hair": "#c08a4a",
+    "skin": "#c4a083",
+    "style": "braid"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 6
+  },
+  "J": {
+   "id": "edin_gilchrist",
+   "pal": {
+    "coat": "#3a3a4a",
+    "accent": "#9a9aa0",
+    "hair": "#c8c8d0",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 3
+  },
+  "O": {
+   "id": "edin_lachlan",
+   "pal": {
+    "coat": "#2c3a5a",
+    "accent": "#b0b0b8",
+    "hair": "#5a4a3a",
+    "skin": "#c4a083",
+    "style": "short",
+    "item": "none",
+    "mail": true
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "edinburgh_done",
+     "id": "edin_lachlan_after"
+    }
+   ],
+   "wander": 5
+  },
+  "R": {
+   "id": "edin_tam",
+   "pal": {
+    "coat": "#4a5a5a",
+    "accent": "#8a7436",
+    "hair": "#7a5a3a",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "wander": 4
   }
  },
  "doors": {
@@ -102,9 +214,11 @@
    "style": "door"
   },
   "6": {
-   "map": "mason_yard",
-   "label": "Enter the Mason's Yard",
-   "style": "door"
+   "map": "vaults",
+   "label": "Descend into the Vaults",
+   "style": "gate",
+   "requires": "edin_writ",
+   "locked": "edin_gate_locked"
   },
   "7": {
    "map": "drowned_candle",
@@ -117,78 +231,12 @@
    "style": "door"
   },
   "9": {
-   "map": "vaults",
-   "label": "Descend into the Vaults",
-   "style": "gate",
-   "requires": "edin_writ",
-   "locked": "edin_gate_locked"
+   "map": "chandlery",
+   "label": "Enter Peggy's Chandlery",
+   "style": "door"
   }
  },
  "objects": {
-  "a": {
-   "kind": "grave",
-   "id": "e_grave1",
-   "text": "Here lies Agnes Thorn, bell-founder's widow. 'She rang once and the town remembered.' Moss has crept over the last word.",
-   "reward": "lore",
-   "empty": "You've already searched here."
-  },
-  "d": {
-   "kind": "grave",
-   "id": "e_grave2",
-   "text": "Hugh Lennox, 1590-1644. 'He mended what others only measured.' A tiny bell is carved at the foot of the stone.",
-   "reward": "lore",
-   "empty": "You've already searched here."
-  },
-  "e": {
-   "kind": "grave",
-   "id": "e_grave3",
-   "text": "The stone is smooth. No name, no date. A fresh posy lies at its foot, though nobody remembers whose it is.",
-   "reward": "lore",
-   "empty": "You've already searched here."
-  },
-  "f": {
-   "kind": "statue",
-   "id": "e_statue",
-   "text": "A bronze founder, a bell cradled in her arms. 'MARGARET THE CASTER: She taught the town to speak with one voice.' The bell's lip is worn bright by a thousand hands.",
-   "reward": "lore",
-   "empty": "You've already searched here."
-  },
-  "h": {
-   "kind": "urn",
-   "id": "e_urn",
-   "text": "Behind the urn, wrapped in oilcloth: a Silver Bell Pin. Rab was right.",
-   "item": "Silver Bell Pin",
-   "reward": "relic",
-   "empty": "You've already searched here."
-  },
-  "i": {
-   "kind": "grave",
-   "empty": "You've already searched here."
-  },
-  "j": {
-   "kind": "chest",
-   "id": "e_chest",
-   "text": "The chest is crammed into a crack of the Close. Inside, wrapped in a child's mitten: a small red stone that beats like a heart. Your vitality grows.",
-   "item": "Heart of the Old Town",
-   "reward": "maxhp",
-   "empty": "You've already searched here."
-  },
-  "k": {
-   "kind": "barrel",
-   "id": "e_barrel",
-   "text": "The second barrel really does hold tea. It also holds a very small boy's footprint.",
-   "item": "Rab's Tea Tin",
-   "reward": "heal",
-   "empty": "You've already searched here."
-  },
-  "m": {
-   "kind": "crate",
-   "id": "e_crate",
-   "text": "A wedge of Duncan's chalk, and a lead Mason's Level, lighter than it looks. The bubble inside has stopped, forever, dead centre.",
-   "item": "Mason's Level",
-   "reward": "relic",
-   "empty": "You've already searched here."
-  },
   "%": {
    "kind": "barrel",
    "empty": "Nothing but old stores and dust."
@@ -196,6 +244,90 @@
   "+": {
    "kind": "crate",
    "empty": "Nothing but old stores and dust."
+  },
+  "a": {
+   "kind": "statue",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "barrel",
+   "id": "e_barrel",
+   "text": "The second barrel really does hold tea. It also holds a very small boy's footprint.",
+   "item": "Rab's Tea Tin",
+   "reward": "heal",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "crate",
+   "id": "e_crate",
+   "text": "A wedge of Duncan's chalk, and a lead Mason's Level, lighter than it looks. The bubble inside has stopped, forever, dead centre.",
+   "item": "Mason's Level",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "f": {
+   "kind": "chest",
+   "id": "e_chest",
+   "text": "The chest is crammed into a crack of the Close. Inside, wrapped in a child's mitten: a small red stone that beats like a heart. Your vitality grows.",
+   "item": "Heart of the Old Town",
+   "reward": "maxhp",
+   "empty": "You've already searched here."
+  },
+  "h": {
+   "kind": "grave",
+   "id": "e_grave1",
+   "text": "Here lies Agnes Thorn, bell-founder's widow. 'She rang once and the town remembered.' Moss has crept over the last word.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "i": {
+   "kind": "grave",
+   "id": "e_grave2",
+   "text": "Hugh Lennox, 1590-1644. 'He mended what others only measured.' A tiny bell is carved at the foot of the stone.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "j": {
+   "kind": "grave",
+   "id": "e_grave3",
+   "text": "The stone is smooth. No name, no date. A fresh posy lies at its foot, though nobody remembers whose it is.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "k": {
+   "kind": "statue",
+   "id": "e_statue",
+   "text": "A bronze founder, a bell cradled in her arms. 'MARGARET THE CASTER: She taught the town to speak with one voice.' The bell's lip is worn bright by a thousand hands.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "m": {
+   "kind": "urn",
+   "id": "e_urn",
+   "text": "Behind the urn, wrapped in oilcloth: a Silver Bell Pin. Rab was right.",
+   "item": "Silver Bell Pin",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "n": {
+   "kind": "grave",
+   "empty": "You've already searched here."
+  },
+  "p": {
+   "kind": "grave",
+   "empty": "You've already searched here."
+  },
+  "q": {
+   "kind": "grave",
+   "empty": "You've already searched here."
+  },
+  "s": {
+   "kind": "grave",
+   "empty": "You've already searched here."
+  },
+  "t": {
+   "kind": "grave",
+   "empty": "You've already searched here."
   }
  },
  "triggers": {
@@ -206,39 +338,49 @@
   "spawn": "from_vaults"
  },
  "ascii": [
-  "########################################################",
-  "########################################################",
-  "###########################9############################",
-  "#.............................n......................j.#",
-  "#...HHHHHHH.....HHHHHHHH...l..HHHHHHHHH.....HHHHHHHHl..#",
-  "#...HHHHHHH.....HHHHHHHH......HHHHHHHHH.....HHHHHHHH...#",
-  "#...HHHHHHH.....HHHHHHHH......HHHHHHHHH.....HHHHHHHH...#",
-  "#...HHH5HHH.....HHHH6HHH......HHHH7HHHH.....HHHH8HHH...#",
-  "#........................m.......k.....................#",
-  "#.......l.....+.....l.............l.+...........l......#",
-  "#.%%................p..................................#",
-  "#......................................................#",
-  "#.........q.....................HHHHH..................#",
-  "#...............................HHHHH..................#",
-  "#..........................l....HHHHH..................#",
-  "#...HHHHHH......................HHHHH..................#",
-  "#...HHHHHH.............................................#",
-  "#...HHHHHH.............................................#",
-  "#...HHHHHH....HHHHHHH........................l.........#",
-  "#.............HHHHHHH..................................#",
-  "#.............HHHHHHH.................================.#",
-  "#.............HHHHHHH.................=..............=.#",
-  "#.....................................=..............=.#",
-  "#.....................................=...a...d...e..=.#",
-  "#...........l..............l..........=..............=.#",
-  "#....................................s...............=.#",
-  "#.....................................=..............=.#",
-  "#.......................1111111.......=.......f......=.#",
-  "#.....................................=..............=.#",
-  "#.....................................=..i.........h.=.#",
-  "#..........................$@.........=..............=.#",
-  "#.....................................================.#",
-  "#........................EEEEEE........................#",
-  "########################################################"
+  "################################################################################################################",
+  "################################################################################################################",
+  "########################################################6#######################################################",
+  "#..............................................................................................................#",
+  "#.....HHHHHHHH........HHHHHHHHH.....HHHHHHHH...........u..............HHHHHHHHH.........HHHHHHHHH...HHHHHHHHH..#",
+  "#.....HHHHHHHH........HHHHHHHHH.....HHHHHHHH..........................HHHHHHHHH.........HHHHHHHHH...HHHHHHHHH..#",
+  "#.....HHHHHHHH........HHHHHHHHH.....HHHHHHHH.......l.........l........HHHHHHHHH.........HHHHHHHHH...HHHHHHHHH..#",
+  "#.....HHHH5HHH........HHHH6HHHH.....HHHHHHHH..........................HHHH7HHHH.........HHHH8HHHH...HHHHHHHHH..#",
+  "#..............................................................................................................#",
+  "#..............................................................................................................#",
+  "#.......l...........l...........l...........l...........l...........l...........l...........l...........l......#",
+  "#...................d.......................................................................................f..#",
+  "#.......................v.....................e....l.........l.................................................#",
+  "#..............................................................................................................#",
+  "#..............................................................................................................#",
+  "#.....HHHHHHHH......HHHHHHH.......HHHHHHHH............................HHHHHHHH......HHHHHHH....................#",
+  "#.....HHHHHHHH......HHHHHHH.......HHHHHHHH............................HHHHHHHH......HHHHHHH....................#",
+  "#.....HHHHHHHH......HHHHHHH.......HHHHHHHH............................HHHHHHHH......HHHHHHH....................#",
+  "#.....HHHH9HHH......HHHHHHH.......HHHHHHHH.........l.........l........HHHHHHHH......HHHHHHH....................#",
+  "#..............................................................................................................#",
+  "#.............w................................................................................................#",
+  "#..............................................................................................................#",
+  "#...........................................z...........a.........C............................................#",
+  "#..............................................................................................................#",
+  "#..................................................l.........l..................==============================.#",
+  "#...............................................................................=............................=.#",
+  "#.......................................%+.+%.%+.+%.............................=............................=.#",
+  "#...............................................................................=............................=.#",
+  "#.....HHHHHHHHH.....HHHHHHH.....................................................=.....h.....i.....j..........=.#",
+  "#.....HHHHHHHHH.....HHHHHHH.....................................................=............................=.#",
+  "#.....HHHHHHHHH.....HHHHHHH........................l....O....l..................=.y..........................=.#",
+  "#.....HHHHHHHHH.....HHHHHHH.....................................................=............................=.#",
+  "#...............................................................................=............................=.#",
+  "#............................................................................................................=.#",
+  "#.......l...........l.........F.l...........l...........l...........l...J.......=...........k...........l....=.#",
+  "#...............................................................................=............................=.#",
+  "#...........R......................................l111111111l..................=............................=.#",
+  "#...............................................................................=............................=.#",
+  "#...............................................................................=...n...p.......q.....s.m.t..=.#",
+  "#...............................................................................=............................=.#",
+  "#.......................................................$@......................=............................=.#",
+  "#...............................................................................==============================.#",
+  "#..............................................................................................................#",
+  "#####################################################EEEEEE#####################################################"
  ]
 }

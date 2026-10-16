@@ -576,5 +576,199 @@
    "who": "Mu",
    "text": "He knew."
   }
+ ],
+ "edin_bessie": [
+  {
+   "who": "Bessie",
+   "text": "Oatcakes! Warm ones, from the oven by the Cowgate. Nobody wants the cold ones any more, folk want something warm in their hands."
+  }
+ ],
+ "edin_bessie_again": [
+  {
+   "who": "Bessie",
+   "text": "I leave a cake on the sill every night. By morning it's gone. Cats, I tell myself."
+  }
+ ],
+ "edin_bessie_after": [
+  {
+   "who": "Bessie",
+   "text": "Sill cake was still there this morning. Nobody took it. I'm not sure whether to be glad."
+  }
+ ],
+ "edin_gideon": [
+  {
+   "who": "Gideon",
+   "text": "Cobbler. Fifty years of boots. Lately every pair that comes in has the same wear on the left heel, as if the whole town walks listening for something."
+  }
+ ],
+ "edin_gideon_again": [
+  {
+   "who": "Gideon",
+   "text": "Your boots are good. Leather and patience, boy, that's the secret."
+  }
+ ],
+ "edin_nell": [
+  {
+   "who": "Nell",
+   "text": "I'm not allowed near the South Bridge. Da says the ground sings. I put my ear to it once. It sang my name."
+  },
+  {
+   "who": "Mu",
+   "text": "What did it sing?"
+  },
+  {
+   "who": "Nell",
+   "text": "Mostly the bit where I'm in trouble."
+  }
+ ],
+ "edin_nell_again": [
+  {
+   "who": "Nell",
+   "text": "If you see a lost bell down there, can I have it? Just to hold?"
+  }
+ ],
+ "edin_gilchrist": [
+  {
+   "who": "Mrs Gilchrist",
+   "text": "My tea goes missing and nobody owns up. I keep it in the Candle's barrels, I'll have you know. Wee Rab, I'd wager."
+  }
+ ],
+ "edin_gilchrist_again": [
+  {
+   "who": "Mrs Gilchrist",
+   "text": "Forty years I've kept that tea. It was my mother's recipe. It goes with everything."
+  }
+ ],
+ "edin_lachlan": [
+  {
+   "who": "Lachlan",
+   "text": "Night watch. I walk the Close and the Square and I count the lit windows. Eighty-one, if you're curious. Eighty-two since Tuesday."
+  }
+ ],
+ "edin_lachlan_again": [
+  {
+   "who": "Lachlan",
+   "text": "Keep to the lamps, bell-boy. The dark between them is longer than it looks."
+  }
+ ],
+ "edin_lachlan_after": [
+  {
+   "who": "Lachlan",
+   "text": "Eighty-six windows lit tonight. The town's coming back, one candle at a time."
+  }
+ ],
+ "edin_tam": [
+  {
+   "who": "Tam",
+   "text": "Carter. I haul stone from the quarry for Duncan. Last cart wouldn't turn at the South Bridge. Horse refused. Never known her to refuse."
+  }
+ ],
+ "edin_tam_again": [
+  {
+   "who": "Tam",
+   "text": "Horses know. People pretend they don't."
+  }
+ ],
+ "edin_peggy_shop": [
+  {
+   "who": "Peggy",
+   "text": "Browse as you like. Everything here is hand-dipped, and everything here leans toward the vaults. I've stopped fighting it."
+  },
+  {
+   "who": "Peggy",
+   "text": "Take a rest by the shelves. The wax is warm."
+  }
+ ],
+ "pra_vit": [
+  {
+   "who": "Vit",
+   "text": "Fresh bread, black rye and white. The clock stops between chimes, and the dough rises anyway. Don't ask me how."
+  }
+ ],
+ "pra_vit_again": [
+  {
+   "who": "Vit",
+   "text": "Wren steals my bread every morning. I leave the crust loose so it's easier."
+  }
+ ],
+ "pra_tereza": [
+  {
+   "who": "Tereza",
+   "text": "Do you know why the clock has a skeleton on it? It rings the bell. Mama says he's the Clock-Keeper's friend."
+  },
+  {
+   "who": "Mu",
+   "text": "Is he?"
+  },
+  {
+   "who": "Tereza",
+   "text": "He doesn't say."
+  }
+ ],
+ "pra_tereza_again": [
+  {
+   "who": "Tereza",
+   "text": "I counted the chimes. There were thirteen. Mama said that's not right."
+  }
+ ],
+ "pra_ondra": [
+  {
+   "who": "Ondra",
+   "text": "Hic. I saw the Clock-Keeper go down. He had a candle and a hammer. The candle came back up on its own."
+  }
+ ],
+ "pra_ondra_again": [
+  {
+   "who": "Ondra",
+   "text": "Don't tell Anezka I told you. She cut me off at the third pint."
+  }
+ ],
+ "pra_anna": [
+  {
+   "who": "Anna",
+   "text": "Seamstress. I've mended forty coats this month. Every one with the pockets turned out and empty. Like folk are hiding nothing from the dark."
+  }
+ ],
+ "pra_anna_again": [
+  {
+   "who": "Anna",
+   "text": "A red scarf came in, a child's. Missing a hem. I'd return it, but nobody comes for it."
+  }
+ ],
+ "pra_hynek": [
+  {
+   "who": "Hynek",
+   "text": "Town guard. We walk in pairs now, after the four went down. Captain Jan says the Keeper's pass is the only way. I say stay up here and drink."
+  }
+ ],
+ "pra_hynek_again": [
+  {
+   "who": "Hynek",
+   "text": "I'll be honest: I'm glad it's you going down and not me."
+  }
+ ],
+ "pra_hynek_after": [
+  {
+   "who": "Hynek",
+   "text": "The bells over the square chime true. First morning in a month I felt warm."
+  }
+ ],
+ "pra_student": [
+  {
+   "who": "Student",
+   "text": "Magister Zdenek says the Clock stores time like a lake stores rain. I think it stores people, but he gets cross when I say so."
+  }
+ ],
+ "pra_student_again": [
+  {
+   "who": "Student",
+   "text": "I'm writing it all down. In case nobody's left to read it."
+  }
+ ],
+ "pra_vit_shop": [
+  {
+   "who": "Vit",
+   "text": "Sit by the oven. Take a loaf if you like. Nobody's buying today."
+  }
  ]
 }

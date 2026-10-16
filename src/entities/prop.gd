@@ -13,6 +13,7 @@ var moving := false
 var open := false
 var t := randf() * 10.0
 var home_cell := Vector2i.ZERO
+var wait := 2.0
 var light: PointLight2D
 var base_energy := 1.0
 var pal: Dictionary = {}
@@ -108,8 +109,35 @@ func unlock() -> void:
 	tw.tween_callback(queue_free)
 
 
+func _wander(delta: float) -> void:
+	if level._busy or level.frozen_for_dialogue():
+		return
+	wait -= delta
+	if wait > 0.0 or moving:
+		return
+	wait = randf_range(1.5, 4.5)
+	var dirs := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
+	var d: Vector2i = dirs[randi() % 4]
+	var tc := cell + d
+	var r: int = def.get("wander", 3)
+	if absi(tc.x - home_cell.x) > r or absi(tc.y - home_cell.y) > r or not level.cell_free(tc):
+		return
+	if level.player.position.distance_to(level._cell_center(tc)) < 14.0:
+		return
+	level.occupied.erase(cell)
+	cell = tc
+	level.occupied[cell] = self
+	moving = true
+	def["face"] = [d.x, d.y]
+	var tw := create_tween()
+	tw.tween_property(self, "position", level._cell_center(tc), 0.55)
+	tw.tween_callback(func(): moving = false)
+
+
 func _process(delta: float) -> void:
 	t += delta
+	if kind == "npc" and def.has("wander"):
+		_wander(delta)
 	if light:
 		match kind:
 			"candle", "torch", "lamp":

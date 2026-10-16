@@ -152,7 +152,7 @@ func run() -> void:
 	GS.set_flag("intro_done")
 	GS.set_flag("isolde_joined")
 	lv = await load_level("edinburgh", "from_chapel")
-	check(lv.entries.size() == 5, "edinburgh has 4 buildings and a dungeon gate")
+	check(lv.entries.size() == 6, "edinburgh has 5 buildings and a dungeon gate")
 	var gate: Node2D
 	for e in lv.entries:
 		if e.def.map == "vaults":
@@ -183,7 +183,7 @@ func run() -> void:
 	for e in lv.entries:
 		if e.def.map == "archive":
 			arch = e
-	check(lv.player.position.distance_to(arch.position) < 40.0, "leaving an interior returns to its door")
+	check(lv.w >= 100 and lv.player.position.distance_to(arch.position) < 40.0, "leaving an interior returns to its door")
 
 	print("SMOKE TEST DONE, failures: %d" % fails)
 	quit(fails)

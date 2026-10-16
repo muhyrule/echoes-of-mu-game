@@ -126,6 +126,10 @@ func in_bars(pos: Vector2) -> bool:
 	return false
 
 
+func frozen_for_dialogue() -> bool:
+	return Dialogue.active
+
+
 func _cell_center(c: Vector2i) -> Vector2:
 	return Vector2(c) * TILE + Vector2(TILE / 2.0, TILE / 2.0)
 
@@ -299,6 +303,9 @@ func _setup_camera() -> void:
 	cam.limit_bottom = h * TILE
 	var z := maxf(2.6, maxf(1920.0 / (w * TILE), 1080.0 / (h * TILE)))
 	cam.zoom = Vector2(z, z)
+	if theme in TOWN_THEMES:
+		cam.position_smoothing_enabled = true
+		cam.position_smoothing_speed = 7.0
 	player.add_child(cam)
 	cam.make_current()
 
@@ -364,6 +371,27 @@ func spark(pos: Vector2, col := Color(1, 0.9, 0.6), n := 8) -> void:
 	get_tree().create_timer(0.6).timeout.connect(p.queue_free)
 
 
+func _chimney_smoke() -> void:
+	for y in range(1, h - 1):
+		for x in w:
+			if grid[y][x] == "H" and grid[y - 1][x] != "H" and grid[y + 1][x] == "H" and x > 0 and grid[y][x - 1] == "H" and (x - _house_base(x, y)) == 1:
+				var sm := CPUParticles2D.new()
+				sm.position = Vector2(x * TILE + 7, y * TILE - 2)
+				sm.amount = 14
+				sm.lifetime = 3.5
+				sm.preprocess = 3.5
+				sm.direction = Vector2(0.4, -1)
+				sm.spread = 12.0
+				sm.gravity = Vector2(6, -2)
+				sm.initial_velocity_min = 5.0
+				sm.initial_velocity_max = 10.0
+				sm.scale_amount_min = 1.2
+				sm.scale_amount_max = 2.6
+				sm.color = Color(0.7, 0.7, 0.78, 0.28)
+				sm.z_index = 12
+				add_child(sm)
+
+
 func _setup_fx() -> void:
 	var dust := CPUParticles2D.new()
 	dust.amount = 70
@@ -392,6 +420,8 @@ func _setup_fx() -> void:
 		f.set_meta("spd", randf_range(2.0, 6.0))
 		add_child(f)
 		fog.append(f)
+	if theme in TOWN_THEMES:
+		_chimney_smoke()
 	overlay = Node2D.new()
 	overlay.z_index = 16
 	var mat := CanvasItemMaterial.new()
