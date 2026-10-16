@@ -172,6 +172,7 @@ func _draw() -> void:
 
 
 func _draw_wings() -> void:
+	draw_set_transform(Vector2(0, 5), 0.0, Vector2.ONE)
 	var flap := sin(t * (9.0 if moving else 2.5)) * (2.5 if moving else 1.0)
 	for sgn in [-1.0, 1.0]:
 		var wing := PackedVector2Array([
@@ -187,6 +188,7 @@ func _draw_wings() -> void:
 
 
 func _draw_horns() -> void:
+	draw_set_transform(Vector2(0, -1.5), 0.0, Vector2.ONE)
 	for sgn in [-1.0, 1.0]:
 		draw_colored_polygon(PackedVector2Array([Vector2(sgn * 3.2, -17.5), Vector2(sgn * 5.5, -23.5), Vector2(sgn * 1.5, -19.5)]), Color(Art.OUT))
 		draw_colored_polygon(PackedVector2Array([Vector2(sgn * 3.0, -18), Vector2(sgn * 4.8, -22.2), Vector2(sgn * 2.0, -19)]), Color("a9b2c2"))
