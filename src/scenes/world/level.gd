@@ -80,6 +80,7 @@ func _ready() -> void:
 	player.set_script(PlayerScript)
 	player.level = self
 	_build_world()
+	_build_hero_puzzle()
 	_place_player()
 	entities.add_child(player)
 	player.died.connect(_on_player_died)
@@ -578,14 +579,24 @@ func _draw_overlay() -> void:
 			overlay.draw_circle(e.position + Vector2(0, -6), br * 0.2, Color(bc, 0.16 * fl))
 
 
-const FOLLOW_PAL := {"isolde": Art.PAL_ISOLDE, "wren": Art.PAL_WREN, "corvin": Art.PAL_CORVIN}
+const FOLLOW_PAL := {"mu": Art.PAL_MU, "isolde": Art.PAL_ISOLDE, "wren": Art.PAL_WREN, "corvin": Art.PAL_CORVIN}
+const SEAL_FOR := {"bell": "seal_bell", "dagger": "seal_dagger", "bolt": "seal_bolt"}
+var seals: Array = []
+var seal_gates: Array = []
+
+
+func _chain_ids() -> Array:
+	var ids: Array = ["mu"]
+	ids.append_array(GameState.party)
+	ids.erase(GameState.lead)
+	return ids
 
 
 func _spawn_follower(id: String) -> void:
 	if followers.has(id) and is_instance_valid(followers[id]):
 		return
 	var lead: Node2D = player
-	for fid in GameState.party:
+	for fid in _chain_ids():
 		if fid == id:
 			break
 		if followers.has(fid) and is_instance_valid(followers[fid]):
@@ -601,16 +612,98 @@ func _spawn_follower(id: String) -> void:
 
 func _relink_followers() -> void:
 	var lead: Node2D = player
-	for fid in GameState.party:
+	for fid in _chain_ids():
 		if followers.has(fid) and is_instance_valid(followers[fid]):
 			followers[fid].target = lead
 			lead = followers[fid]
 
 
 func _spawn_followers() -> void:
-	for id in GameState.party:
+	if GameState.lead != "mu" and not GameState.lead in GameState.party:
+		GameState.lead = "mu"
+	player.set_lead(GameState.lead)
+	if GameState.party.is_empty():
+		return
+	for id in _chain_ids():
 		if FOLLOW_PAL.has(id):
 			_spawn_follower(id)
+
+
+func switch_hero(id: String) -> void:
+	var old: String = GameState.lead
+	if id == old or player.dead or frozen or _busy or Dialogue.blocking():
+		return
+	if not followers.has(id) or not is_instance_valid(followers[id]):
+		return
+	var f: Node2D = followers[id]
+	var b: Node2D = player.brain
+	var fa: float = f.atk_cd
+	var fs: float = f.skill_cd
+	f.atk_cd = b.atk_cd
+	f.skill_cd = b.skill_cd
+	b.atk_cd = fa
+	b.skill_cd = fs
+	f.hero = old
+	f.pal = FOLLOW_PAL[old]
+	followers.erase(id)
+	followers[old] = f
+	player.set_lead(id)
+	player.invuln = maxf(player.invuln, 0.5)
+	Audio.sfx("form")
+	spark(player.global_position, Color(0.8, 0.7, 1.0), 12)
+	spark(f.global_position, Color(0.8, 0.7, 1.0), 8)
+	hud.show_notice("Now controlling %s" % id.capitalize())
+
+
+func cycle_lead() -> void:
+	var ids: Array = ["mu"]
+	ids.append_array(GameState.party)
+	if ids.size() < 2:
+		return
+	switch_hero(ids[(ids.find(GameState.lead) + 1) % ids.size()])
+
+
+func _build_hero_puzzle() -> void:
+	var hp: Dictionary = meta.get("hero_puzzle", {})
+	if hp.is_empty():
+		return
+	var all_lit := true
+	for k in SEAL_FOR.values():
+		all_lit = all_lit and GameState.flag(prefix + "_" + k)
+	for k in ["bell", "dagger", "bolt"]:
+		var cc: Array = hp[k]
+		var sp := _make_prop(SEAL_FOR[k], Vector2i(int(cc[0]), int(cc[1])))
+		sp.lit = GameState.flag(prefix + "_" + SEAL_FOR[k])
+		seals.append(sp)
+	if not all_lit:
+		for g in hp.gates:
+			seal_gates.append(_make_prop("gate", Vector2i(int(g[0]), int(g[1]))))
+
+
+func hero_hit(src: String, pos: Vector2, rad: float) -> bool:
+	var hit := false
+	for sp in seals:
+		if not is_instance_valid(sp) or sp.lit or sp.kind != SEAL_FOR.get(src, ""):
+			continue
+		if sp.position.distance_to(pos) <= rad + 9.0:
+			sp.lit = true
+			hit = true
+			GameState.set_flag(prefix + "_" + sp.kind)
+			Audio.sfx("switch")
+			shake(2.0)
+			spark(sp.position, Color(1.0, 0.9, 0.6), 14)
+			var left := 0
+			for o in seals:
+				if is_instance_valid(o) and not o.lit:
+					left += 1
+			if left == 0:
+				for g in seal_gates:
+					if is_instance_valid(g):
+						g.unlock()
+				hud.show_notice("All three seals answer. A gate grinds open...")
+			else:
+				hud.show_notice("A seal answers. %d to go." % left)
+	return hit
 
 
 func _has_window(c: Vector2i) -> bool:
@@ -1120,11 +1213,13 @@ func _process(_delta: float) -> void:
 				text = "[E] Step through"
 			"entry":
 				text = "[E] " + str(_nearest.def.get("label", "Enter"))
-			"grave", "statue":
+			"grave", "statue", "seal_bell", "seal_dagger", "seal_bolt":
 				text = "[E] Examine"
 			"barrel", "chest", "crate", "urn", "tomes":
 				text = "[E] Search"
 	hud.hint = text
+	if Input.is_action_just_pressed("swap") and not frozen and not hud.paused:
+		cycle_lead()
 	if Input.is_action_just_pressed("status") and not frozen and not _busy and not Dialogue.blocking() and not hud.paused and not player.dead:
 		open_status()
 	if Input.is_action_just_pressed("reset_puzzle") and not frozen:
@@ -1197,6 +1292,12 @@ func _interact(p: Node2D) -> void:
 			return
 		"barrel", "chest", "crate", "urn", "tomes", "grave", "statue":
 			await _search(p)
+		"seal_bell", "seal_dagger", "seal_bolt":
+			var hints := {"seal_bell": "A bell of blue glass set in the floor, cracked across the lip. It hums when anything loud is near. A struck bell would answer it, rung by someone who learned to ring.",
+				"seal_dagger": "A painted roundel of the old Ringers' guild, scored with tiny knife-nicks. It wants a thrown blade, and someone who throws well.",
+				"seal_bolt": "A brass socket with a stopped wheel inside. It wants a spark of clockwork, loosed from some distance by someone who builds such things."}
+			var lit_txt: String = "The seal glows softly. It has been answered." if p.lit else hints[p.kind]
+			await Dialogue.play_lines([{"who": "", "text": lit_txt}])
 		"shrine":
 			await _shrine()
 		"table":
@@ -1417,6 +1518,8 @@ func _boss_defeated(pos: Vector2) -> void:
 	var bi: Dictionary = meta.get("boss", {})
 	await Dialogue.play(bi.get("defeated", "kelpie_defeated"))
 	if bi.has("leave") and bi.leave in GameState.party:
+		if GameState.lead == bi.leave:
+			switch_hero("mu")
 		GameState.party.erase(bi.leave)
 		GameState.set_flag(bi.leave + "_left")
 		if followers.has(bi.leave) and is_instance_valid(followers[bi.leave]):

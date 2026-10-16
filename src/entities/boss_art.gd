@@ -322,6 +322,26 @@ static func golem(c: CanvasItem, t: float, ph: int, flash: float, winding: bool,
 	# cobwebbed corner cracks and chipped edges on the crown
 	for k in 3:
 		c.draw_line(Vector2(-20 + k * 3, hy - 16), Vector2(-14 + k * 4, hy - 8 + k * 2), Color(OUT, 0.6), 1.0)
+	# engraved glyph columns and quatrefoils on the legs
+	for s2 in [-1.0, 1.0]:
+		for k in 3:
+			var gy := -34.0 + k * 9.0
+			c.draw_rect(Rect2(s2 * 24 - 1.5, gy, 3, 1), Color(glow, 0.65))
+			c.draw_rect(Rect2(s2 * 24 - 0.5, gy - 3, 1, 3), Color(glow, 0.65))
+		for q in 4:
+			var qa := q * TAU / 4.0 + PI / 4.0
+			c.draw_circle(Vector2(s2 * 22, -26) + Vector2.from_angle(qa) * 3.0, 1.6, Color("2c2634"))
+			c.draw_circle(Vector2(s2 * 22, -26) + Vector2.from_angle(qa) * 3.0, 0.9, Color("9a90a8"))
+	# mossy patches and swaying shoulder chains
+	for k in 8:
+		var mp := Vector2(-40 + fmod(k * 29.0, 80.0), -60 - fmod(k * 17.0, 40.0))
+		c.draw_rect(Rect2(mp, Vector2(2.5, 1.5)), Color(0.3, 0.45, 0.25, 0.55))
+		c.draw_rect(Rect2(mp + Vector2(1, 1.5), Vector2(1.5, 1)), Color(0.4, 0.55, 0.3, 0.45))
+	for s2 in [-1.0, 1.0]:
+		for j in 6:
+			var cp := Vector2(s2 * 40 + sin(t * 1.6 + j * 0.6 + s2) * 1.5, -112 + j * 6.0)
+			c.draw_circle(cp, 2.0, OUT)
+			c.draw_circle(cp, 1.2, Color("8a8094") if j % 2 == 0 else Color("5a5260"))
 	# loose dust motes
 	for k in 6:
 		var u := fmod(t * 0.4 + k * 0.17, 1.0)
@@ -401,7 +421,8 @@ static func kelpie(c: CanvasItem, t: float, ph: int, flash: float, winding: bool
 		var u := 0.25 + k * 0.22
 		var a := Vector2(10 + u * 36, -88 - u * 56 - rear * u)
 		c.draw_line(a, a + Vector2(26, 6 - k), OUT, 5.0)
-		c.draw_line(a, a + Vector2(26, 6 - k), gold, 3.0)
+		c.draw_line(a, a + Vector2(26, 6 - k), Color("24485a"), 3.0)
+		c.draw_line(a + Vector2(0, -1), a + Vector2(26, 5 - k), Color("4f9aa8"), 1.0)
 		c.draw_circle(a + Vector2(13, 3), 1.8, Color(0.7, 1.0, 0.95))
 	# flowing weed mane
 	for k in 16:
@@ -436,13 +457,17 @@ static func kelpie(c: CanvasItem, t: float, ph: int, flash: float, winding: bool
 	for k in 3:
 		var u := fmod(t * 0.9 + k * 0.33, 1.0)
 		c.draw_circle(Vector2(hx + 46 + u * 20, hy + 14 - u * 8), 2.0 + u * 3.0, Color(0.8, 1.0, 1.0, 0.35 * (1.0 - u)))
-	# ornate bridle with a lantern
-	c.draw_line(Vector2(hx - 12, hy + 14), Vector2(hx + 38, hy + 14), OUT, 3.4)
-	c.draw_line(Vector2(hx - 12, hy + 14), Vector2(hx + 38, hy + 14), gold, 1.8)
-	c.draw_line(Vector2(hx + 2, hy - 8), Vector2(hx + 22, hy + 22), gold, 1.4)
-	c.draw_circle(Vector2(hx + 20, hy + 14), 3.0, gold)
+	# face detail: brow ridge, cheek scales, nostril flare, glowing freckles
+	c.draw_polyline(_sm([Vector2(hx - 6, hy - 2), Vector2(hx + 6, hy - 6), Vector2(hx + 18, hy - 2)], false, 3), OUT, 2.4)
+	c.draw_polyline(_sm([Vector2(hx - 6, hy - 3), Vector2(hx + 6, hy - 7), Vector2(hx + 18, hy - 3)], false, 3), body_l, 1.0)
+	_scales(c, Vector2(hx - 14, hy + 8), 3, 2, 5.0, Color(body_l, 0.5))
+	_poly(c, [Vector2(hx + 36, hy + 10), Vector2(hx + 44, hy + 12), Vector2(hx + 38, hy + 17)], Color(OUT, 0.8), f, 0.6)
+	for k in 7:
+		var fp := Vector2(hx + 12 + k * 4.0, hy + 11 + sin(k * 1.7) * 3.0)
+		c.draw_circle(fp, 0.9, Color(0.6, 1.0, 0.95, 0.55 + 0.3 * sin(t * 3.0 + k)))
+	_poly(c, [Vector2(hx + 20, hy + 20), Vector2(hx + 30, hy + 22), Vector2(hx + 24, hy + 27)], Color(body_l, 0.7), f, 0.6)
 	var lp := Vector2(hx + 34 + sin(t * 2.0) * 3.0, hy + 52 + sin(t * 2.6) * 2.0)
-	c.draw_line(Vector2(hx + 36, hy + 26), lp + Vector2(0, -8), gold, 1.2)
+	c.draw_line(Vector2(hx + 36, hy + 28), lp + Vector2(0, -8), Color("4a3828"), 1.2)
 	_poly(c, [lp + Vector2(-5, -6), lp + Vector2(5, -6), lp + Vector2(6, 6), lp + Vector2(-6, 6)], Color("3a2a1a"), f, 1.0)
 	c.draw_circle(lp, 9.0, Color(1.0, 0.8, 0.3, 0.2))
 	_arch(c, lp.x, lp.y + 5, 3.4, 10.0, Color(1.0, 0.85, 0.4), Color("3a2a1a"))
@@ -473,7 +498,6 @@ static func kelpie(c: CanvasItem, t: float, ph: int, flash: float, winding: bool
 		for j in 5:
 			pts.append(Vector2(hx + 42 + j * 5, hy + 20 + k * 4 + sin(t * 3.0 + j + k) * 3 + j * 2))
 		c.draw_polyline(_sm(pts, false, 3), Color(0.8, 1.0, 1.0, 0.6), 1.0)
-	_rivets(c, Vector2(hx - 8, hy + 14), Vector2(hx + 30, hy + 14), 6, gold)
 	# glowing pearls strung through the mane
 	for k in 6:
 		var u := float(k) / 5.0
@@ -487,6 +511,31 @@ static func kelpie(c: CanvasItem, t: float, ph: int, flash: float, winding: bool
 		for j in 4:
 			c.draw_line(hf + Vector2(-5 + j * 3, 0), hf + Vector2(-6 + j * 3.4, -9), Color("9ad8d8"), 1.0)
 		_scales(c, kn + Vector2(-5, 2), 2, 3, 6.0, Color(0.75, 1.0, 1.0, 0.5))
+	# coral antler crown rising from the brow
+	for k in 3:
+		var base := Vector2(hx - 6 + k * 9, hy - 14 - k * 1.5)
+		var tip := base + Vector2(-6 + k * 5, -26 + k * 4)
+		var coral := Color("d06a7a") if k != 1 else Color("e48a96")
+		c.draw_line(base, tip, OUT, 4.2)
+		c.draw_line(base, tip, coral, 2.4)
+		for j in 2:
+			var br2 := base.lerp(tip, 0.45 + j * 0.3)
+			var bt := br2 + Vector2(7 - j * 12, -9)
+			c.draw_line(br2, bt, OUT, 3.2)
+			c.draw_line(br2, bt, coral, 1.6)
+			c.draw_circle(bt, 1.3, Color("ffd0d8"))
+		c.draw_circle(tip, 1.6, Color("ffd0d8"))
+	# translucent fin membranes between the neck spines and a dappled back
+	for k in 5:
+		var u := 0.12 + k * 0.17
+		var a2 := Vector2(4 + u * 44, -92 - u * 62 - rear * u)
+		var b2 := a2 + Vector2(-10, -14 - k)
+		var c2 := a2 + Vector2(-18, 0)
+		c.draw_colored_polygon(PackedVector2Array([a2, b2, c2]), Color(0.45, 0.85, 0.9, 0.3))
+		c.draw_line(a2, b2, Color(0.8, 1.0, 1.0, 0.7), 1.0)
+	for k in 14:
+		var sp := Vector2(-40 + fmod(k * 37.0, 64.0), -40 - fmod(k * 23.0, 44.0))
+		c.draw_rect(Rect2(sp, Vector2(1.5, 1.5)), Color(0.85, 1.0, 1.0, 0.45 + 0.35 * sin(t * 2.0 + k)))
 	# cascading water and drips
 	for k in 12:
 		var x := -30.0 + k * 8.0

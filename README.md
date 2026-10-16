@@ -77,4 +77,7 @@ Isolde, Wren and Corvin now fight beside Mu with automatic attacks (Isolde's mau
 - `5` Wren: Shadow Fan (five thrown daggers)
 - `6` Corvin: Gearstorm (radial bolts, heals 1 HP)
 
+### Switching heroes
+Press `C` to cycle the hero you control (Mu, Isolde, Wren, Corvin). The hero you leave goes automatic (auto-attack plus skills) and the new one takes over with their own attack and skill key. Only Mu can shift forms (Q). Each hero's craft solves puzzles: in the Vaults' cistern gallery, three seals answer only to Isolde's Bell Toll, Wren's thrown daggers and Corvin's clockwork bolts, and together open a hidden reliquary. Mu gains `7` Moon Cleave when auto-controlled.
+
 Bosses gained 16-bit style checker-dither shading, scale/brick/filigree detail, and heroes have refined signature gear.

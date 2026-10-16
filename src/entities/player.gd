@@ -5,6 +5,9 @@ const Art = preload("res://src/core/art.gd")
 
 signal died
 
+const FollowerScript = preload("res://src/entities/follower.gd")
+const MOVE := {"mu": 88.0, "isolde": 80.0, "wren": 104.0, "corvin": 78.0}
+
 const WORLD := 1
 const BARS := 2
 
@@ -21,6 +24,7 @@ var slow := 0.0
 var t := 0.0
 var moving := false
 var _hit_set: Array = []
+var brain: Node2D
 
 
 func _ready() -> void:
@@ -31,17 +35,36 @@ func _ready() -> void:
 	shape.shape = r
 	shape.position = Vector2(0, 2)
 	add_child(shape)
+	brain = Node2D.new()
+	brain.set_script(FollowerScript)
+	brain.set("puppet", true)
+	brain.set("level", level)
+	brain.set("target", self)
+	add_child(brain)
 	apply_form()
 	add_to_group("player")
 
 
+func is_mu() -> bool:
+	return GameState.lead == "mu"
+
+
+func set_lead(id: String) -> void:
+	GameState.lead = id
+	brain.set("hero", "" if id == "mu" else id)
+	brain.set("pal", FollowerScript.PALS.get(id, Art.PAL_MU))
+	apply_form()
+
+
 func apply_form() -> void:
 	# Wraith Mu slips through iron bars; Mu does not.
-	collision_mask = WORLD if GameState.form == "wraith" else (WORLD | BARS)
+	collision_mask = WORLD if (is_mu() and GameState.form == "wraith") else (WORLD | BARS)
 
 
 func _physics_process(delta: float) -> void:
 	t += delta
+	if brain.get("level") == null:
+		brain.set("level", level)
 	invuln = maxf(0.0, invuln - delta)
 	ward = maxf(0.0, ward - delta)
 	attack_cd = maxf(0.0, attack_cd - delta)
@@ -59,7 +82,9 @@ func _physics_process(delta: float) -> void:
 	moving = dir != Vector2.ZERO
 	if moving and attacking <= 0.0:
 		facing = dir.normalized()
-	var spd := 118.0 if GameState.form == "wraith" else (70.0 if GameState.form == "gargoyle" else 88.0)
+	var spd: float = float(MOVE.get(GameState.lead, 88.0))
+	if is_mu():
+		spd = 118.0 if GameState.form == "wraith" else (70.0 if GameState.form == "gargoyle" else 88.0)
 	if attacking > 0.0:
 		spd *= 0.3
 	if slow > 0.0:
@@ -70,12 +95,18 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_check_push(dir, delta)
 
-	if Input.is_action_just_pressed("attack") and attack_cd <= 0.0:
-		_start_attack()
-	if attacking > 0.0:
-		_sword_hits()
-	if Input.is_action_just_pressed("form"):
-		cycle_form()
+	if is_mu():
+		if Input.is_action_just_pressed("attack") and attack_cd <= 0.0:
+			_start_attack()
+		if attacking > 0.0:
+			_sword_hits()
+		if Input.is_action_just_pressed("form"):
+			cycle_form()
+	else:
+		if Input.is_action_pressed("attack"):
+			brain.manual_attack()
+		if Input.is_action_just_pressed("form") and level:
+			level.hud.show_notice("Only Mu can shift forms")
 	if Input.is_action_just_pressed("interact"):
 		level.interact()
 	queue_redraw()
@@ -158,7 +189,7 @@ func cycle_form() -> void:
 func hurt(dmg: int, from_dir: Vector2) -> void:
 	if invuln > 0.0 or ward > 0.0 or dead:
 		return
-	if GameState.form == "gargoyle":
+	if GameState.form == "gargoyle" and is_mu():
 		dmg = maxi(1, dmg - 1)
 	var armor := Gear.def_total()
 	dmg = maxi(1, dmg - armor / 3)
@@ -175,6 +206,12 @@ func hurt(dmg: int, from_dir: Vector2) -> void:
 
 
 func _draw() -> void:
+	if not is_mu():
+		if ward > 0.0:
+			var wa2 := 0.35 + 0.15 * sin(t * 8.0) if ward > 1.5 else 0.35 * (ward / 1.5)
+			draw_circle(Vector2(0, -6), 15.0, Color(1.0, 0.8, 0.4, wa2 * 0.5))
+			draw_arc(Vector2(0, -6), 15.0, 0, TAU, 28, Color(1.0, 0.9, 0.6, wa2 + 0.2), 1.2)
+		return
 	if invuln > 0.0 and int(t * 20.0) % 2 == 0:
 		return
 	var wraith := GameState.form == "wraith"

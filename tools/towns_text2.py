@@ -137,10 +137,11 @@ SECRETS.update({
     "v_chest2": "Under a heap of mouldering cloaks, a folded cloak that is not mouldering at all. It slips over your arm like a shadow with good manners.",
     "v_statue": "A stone ringer with her arms raised to a bell that has long since gone. At her feet, an inscription: 'Whoever strikes it last, strikes it for all of us.'",
     "v_crate2": "A crate of Burgh surveyors' chalk, and a rolled Cistern Chart that marks a room you have not found yet. The room is labelled 'Where he is.'",
+    "v_chest3": "A reliquary kept for three ringers who never came back together. Inside lies a plain brass bell-pull, and a note: 'Seal the seals in the right hands.' The hands were right. It rings once, in thanks.",
     "v_urn3": "A drowned Ringer's Glove, stiff with lime. The thumb is stitched with blue thread. The stitches are very neat.",
 })
 ITEMS.update({
     "v_urn1": "Ringer's Token", "v_crate": "Brass Plumb-Bob", "v_tomes": "Ringers' Ledger",
     "v_chest1": "Heart of the Cistern", "v_urn2": "Sexton's Whistle", "v_chest2": "Ringer's Shadecloak",
-    "v_crate2": "Cistern Chart", "v_urn3": "Drowned Ringer's Glove", "v_barrel": "Old Small Beer",
+    "v_crate2": "Cistern Chart", "v_urn3": "Drowned Ringer's Glove", "v_chest3": "Ringers' Reliquary Bell-Pull", "v_barrel": "Old Small Beer",
 })

@@ -6,10 +6,12 @@ const ShotScript = preload("res://src/entities/party_shot.gd")
 
 # Isolde: heavy maul arc and Bell Toll. Wren: twin stabs and Shadow Fan. Corvin: clockwork bolts and Gearstorm.
 const KIT := {
+	"mu": {"reach": 28.0, "speed": 108.0, "atk_cd": 0.5, "dmg": 2, "skill_cd": 10.0, "key": KEY_7, "skill": "Moon Cleave"},
 	"isolde": {"reach": 24.0, "speed": 96.0, "atk_cd": 0.85, "dmg": 2, "skill_cd": 9.0, "key": KEY_4, "skill": "Bell Toll"},
 	"wren": {"reach": 16.0, "speed": 130.0, "atk_cd": 0.42, "dmg": 1, "skill_cd": 7.0, "key": KEY_5, "skill": "Shadow Fan"},
 	"corvin": {"reach": 84.0, "speed": 90.0, "atk_cd": 1.1, "dmg": 1, "skill_cd": 14.0, "key": KEY_6, "skill": "Gearstorm"},
 }
+const PALS := {"mu": Art.PAL_MU, "isolde": Art.PAL_ISOLDE, "wren": Art.PAL_WREN, "corvin": Art.PAL_CORVIN}
 const DELAY := 16
 const ENGAGE := 90.0
 
@@ -27,6 +29,7 @@ var skill_cd := 4.0
 var atk_anim := 0.0
 var fx_t := 0.0
 var fx_kind := ""
+var puppet := false
 
 
 func start(p: Node2D, palette: Dictionary = Art.PAL_ISOLDE) -> void:
@@ -46,6 +49,18 @@ func _unhandled_input(ev: InputEvent) -> void:
 	if ev is InputEventKey and ev.pressed and not ev.echo and KIT.has(hero) and ev.keycode == KIT[hero].key:
 		if skill_cd <= 0.0 and not _locked():
 			_skill()
+
+
+func manual_attack() -> void:
+	if atk_cd > 0.0 or _locked() or not KIT.has(hero):
+		return
+	atk_cd = float(KIT[hero].atk_cd) * Gear.cooldown_mult()
+	_swing()
+
+
+func try_skill() -> void:
+	if skill_cd <= 0.0 and not _locked() and KIT.has(hero):
+		_skill()
 
 
 func _locked() -> bool:
@@ -78,6 +93,14 @@ func _process(delta: float) -> void:
 	atk_anim = maxf(0.0, atk_anim - delta)
 	fx_t = maxf(0.0, fx_t - delta)
 	if target == null:
+		return
+	if puppet:
+		facing = target.get("facing")
+		moving = target.get("moving")
+		var tg := target.get("invuln") as float
+		modulate.a = 0.4 if tg > 0.0 and int(t * 20.0) % 2 == 0 else 1.0
+		visible = hero != ""
+		queue_redraw()
 		return
 	if trail.is_empty() or trail.back().distance_to(target.global_position) > 3.0:
 		trail.append(target.global_position)
@@ -133,24 +156,32 @@ func _dmg(base: int) -> int:
 	return base + int(Gear.item(Gear.equipped(hero, "weapon")).atk) / 3
 
 
-func _auto_attack(foe: Node2D) -> void:
+func _auto_attack(_foe: Node2D) -> void:
+	atk_cd = float(KIT[hero].atk_cd)
+	_swing()
+
+
+func _melee(reach: float, dmg: int, arc: float) -> void:
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(e) or str(e.get("state")) in ["dormant", "intro", "dying"]:
+			continue
+		var d: Vector2 = e.global_position - global_position
+		if d.length() - float(e.get("hit_radius")) <= reach and (d.length() < float(e.get("hit_radius")) + 6.0 or d.normalized().dot(facing) > arc):
+			e.hurt(dmg, d.normalized() if d.length() > 0.1 else facing)
+
+
+func _swing() -> void:
 	var kit: Dictionary = KIT[hero]
-	atk_cd = float(kit.atk_cd)
 	atk_anim = 0.22
 	Audio.sfx("slash")
 	match hero:
-		"isolde":
-			for e in get_tree().get_nodes_in_group("enemies"):
-				if not is_instance_valid(e) or str(e.get("state")) in ["dormant", "intro", "dying"]:
-					continue
-				var d: Vector2 = e.global_position - global_position
-				if d.length() - float(e.get("hit_radius")) <= float(kit.reach) and d.normalized().dot(facing) > 0.0:
-					e.hurt(_dmg(2), d.normalized())
+		"mu", "isolde":
+			_melee(float(kit.reach), _dmg(int(kit.dmg)), 0.0)
 		"wren":
-			foe.hurt(_dmg(1), facing)
+			_melee(float(kit.reach), _dmg(1), 0.2)
 			get_tree().create_timer(0.1).timeout.connect(func() -> void:
-				if is_instance_valid(foe) and is_instance_valid(self):
-					foe.hurt(_dmg(1), facing))
+				if is_instance_valid(self):
+					_melee(float(kit.reach), _dmg(1), 0.2))
 		"corvin":
 			_shoot(facing, "bolt", _dmg(1), 190.0)
 
@@ -172,13 +203,23 @@ func _skill() -> void:
 	fx_kind = hero
 	atk_anim = 0.3
 	match hero:
+		"mu":
+			Audio.sfx("slash")
+			if level:
+				level.shake(2.0)
+				level.spark(global_position, Color(0.85, 0.92, 1.0), 10)
+			_melee(46.0, _dmg(3), -2.0)
 		"isolde":
 			Audio.sfx("bell")
+			if level:
+				level.hero_hit("bell", global_position, 52.0)
 			if level:
 				level.shake(3.0)
 				level.spark(global_position, Color(1.0, 0.85, 0.4), 14)
 			if target != null:
 				target.set("ward", 1.0)
+			if level and puppet:
+				level.spark(global_position, Color(1.0, 0.85, 0.4), 6)
 			for e in get_tree().get_nodes_in_group("enemies"):
 				if not is_instance_valid(e) or str(e.get("state")) in ["dormant", "intro", "dying"]:
 					continue
@@ -202,9 +243,11 @@ func _skill() -> void:
 
 
 func _draw() -> void:
-	var st: Dictionary = Gear.styled(hero, pal) if hero != "" else pal
+	if hero == "":
+		return
+	var st: Dictionary = Gear.styled(hero, pal)
 	Art.person(self, facing, t, st, moving, 1.0, atk_anim, 0.0)
-	if atk_anim > 0.0 and hero == "isolde":
+	if atk_anim > 0.0 and hero in ["isolde", "mu"]:
 		var a := facing.angle()
 		var k := 1.0 - atk_anim / 0.22
 		draw_arc(Vector2(0, -5), 22.0, a - 1.0 + k * 1.2, a - 0.2 + k * 1.2, 8, Color(1.0, 0.95, 0.8, 0.7), 3.0)
@@ -217,6 +260,8 @@ func _draw() -> void:
 	if fx_t > 0.0:
 		var u := 1.0 - fx_t / 0.5
 		match fx_kind:
+			"mu":
+				draw_arc(Vector2(0, -4), 6.0 + u * 38.0, 0, TAU, 28, Color(0.85, 0.92, 1.0, 0.85 * (1.0 - u)), 3.0)
 			"isolde":
 				draw_arc(Vector2(0, -4), 8.0 + u * 44.0, 0, TAU, 28, Color(1.0, 0.85, 0.4, 0.8 * (1.0 - u)), 3.0)
 				draw_arc(Vector2(0, -4), 4.0 + u * 30.0, 0, TAU, 24, Color(1.0, 1.0, 0.8, 0.5 * (1.0 - u)), 1.5)

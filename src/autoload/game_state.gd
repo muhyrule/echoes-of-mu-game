@@ -16,6 +16,7 @@ var hp := 6
 var keys := 0
 var forms: Array = ["mu"]
 var form := "mu"
+var lead := "mu"
 var party: Array = []
 var items: Array = []
 var current_map := "chapel"
@@ -35,6 +36,7 @@ func _setup_input() -> void:
 		"attack": [KEY_SPACE, KEY_J],
 		"interact": [KEY_E, KEY_ENTER],
 		"form": [KEY_Q, KEY_K],
+		"swap": [KEY_C, KEY_L],
 		"reset_puzzle": [KEY_R],
 		"pause": [KEY_ESCAPE],
 		"status": [KEY_TAB, KEY_I],
@@ -72,6 +74,7 @@ func new_game() -> void:
 	forms = ["mu"]
 	form = "mu"
 	party = []
+	lead = "mu"
 	items = []
 	current_map = "chapel"
 	spawn = "start"

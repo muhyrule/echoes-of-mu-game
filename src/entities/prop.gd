@@ -18,7 +18,9 @@ var light: PointLight2D
 var base_energy := 1.0
 var pal: Dictionary = {}
 var def: Dictionary = {}
+var lit := false
 
+const SEALS := ["seal_bell", "seal_dagger", "seal_bolt"]
 const OBJECT_KINDS := ["barrel", "chest", "crate", "urn", "tomes", "grave", "statue"]
 
 
@@ -29,7 +31,7 @@ func setup(k: String, c: Vector2i, lvl: Node2D, npc_id := "") -> void:
 	level = lvl
 	id = npc_id
 	position = Vector2(c) * 16.0 + Vector2(8, 8)
-	solid = kind in ["door", "gate", "bars", "block", "npc", "shrine", "table", "cracked"] or kind in OBJECT_KINDS
+	solid = kind in ["door", "gate", "bars", "block", "npc", "shrine", "table", "cracked"] or kind in OBJECT_KINDS or kind in SEALS
 	if solid:
 		body = StaticBody2D.new()
 		body.collision_layer = 2 if kind == "bars" else 1
@@ -74,7 +76,7 @@ func _add_light() -> void:
 func is_interactable() -> bool:
 	if kind == "door":
 		return not open
-	return kind in ["npc", "shrine", "table", "portal", "entry"] or kind in OBJECT_KINDS
+	return kind in ["npc", "shrine", "table", "portal", "entry"] or kind in OBJECT_KINDS or kind in SEALS
 
 
 func is_pickup() -> bool:
@@ -295,10 +297,45 @@ func _draw() -> void:
 			draw_rect(Rect2(-3.5, -13, 7, 1.6), Color("2a2630"))
 		"entry":
 			_draw_entry()
+		"seal_bell", "seal_dagger", "seal_bolt":
+			_draw_seal()
 		"barrel":
 			_draw_object()
 		"chest", "crate", "urn", "tomes", "grave", "statue":
 			_draw_object()
+
+
+func _draw_seal() -> void:
+	var O := Color(Art.OUT)
+	var glow := Color(1.0, 0.85, 0.4) if kind == "seal_bell" else (Color(0.7, 0.55, 1.0) if kind == "seal_dagger" else Color(0.5, 0.95, 1.0))
+	var pulse := 0.5 + 0.5 * sin(t * 3.0)
+	draw_rect(Rect2(-7, 3, 14, 4), O)
+	draw_rect(Rect2(-6, 4, 12, 2.5), Color("5a586a"))
+	if lit:
+		draw_circle(Vector2(0, -3), 11.0, Color(glow, 0.12 + 0.08 * pulse))
+	match kind:
+		"seal_bell":
+			draw_colored_polygon(PackedVector2Array([Vector2(-5, 3), Vector2(-4, -4), Vector2(-2, -8), Vector2(2, -8), Vector2(4, -4), Vector2(5, 3)]), O)
+			draw_colored_polygon(PackedVector2Array([Vector2(-4, 2.4), Vector2(-3, -3.6), Vector2(-1.6, -7), Vector2(1.6, -7), Vector2(3, -3.6), Vector2(4, 2.4)]), glow if lit else Color("6a8a9a"))
+			draw_rect(Rect2(-3, -6, 1.4, 7), Color(1, 1, 1, 0.45))
+			if not lit:
+				draw_line(Vector2(-1, -6), Vector2(1, -1), O, 0.8)
+				draw_line(Vector2(1, -1), Vector2(-1, 2), O, 0.8)
+		"seal_dagger":
+			draw_circle(Vector2(0, -3), 7.0, O)
+			for i in 3:
+				draw_circle(Vector2(0, -3), 6.0 - i * 2.0, glow if (lit and i % 2 == 0) else (Color("7a3a4a") if i % 2 == 0 else Color("d8d0c0")))
+		"seal_bolt":
+			draw_rect(Rect2(-6, -8, 12, 12), O)
+			draw_rect(Rect2(-5, -7, 10, 10), Color("3a3a48"))
+			draw_circle(Vector2(0, -2), 3.6, O)
+			for i in 6:
+				var a := (t * (3.0 if lit else 0.0)) + i * TAU / 6.0
+				draw_circle(Vector2(0, -2) + Vector2.from_angle(a) * 3.2, 0.9, glow if lit else Color("8a7a50"))
+			draw_circle(Vector2(0, -2), 1.6, glow if lit else Color("5a5040"))
+	if _nearest_self() and not lit:
+		var bob := sin(t * 5.0) * 1.0
+		draw_colored_polygon(PackedVector2Array([Vector2(-2.5, -15 + bob), Vector2(2.5, -15 + bob), Vector2(0, -12 + bob)]), Color("ffd166"))
 
 
 func _searched() -> bool:

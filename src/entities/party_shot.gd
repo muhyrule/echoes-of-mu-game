@@ -24,6 +24,9 @@ func _process(delta: float) -> void:
 	if life <= 0.0 or (level and level._is_solid_char(cell)):
 		queue_free()
 		return
+	if level and level.hero_hit(kind, position, 5.0):
+		queue_free()
+		return
 	for e in get_tree().get_nodes_in_group("enemies"):
 		if not is_instance_valid(e):
 			continue

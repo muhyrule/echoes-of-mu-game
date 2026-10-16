@@ -106,6 +106,14 @@ def build():
     many("o", [(66, 48), (66, 64), (72, 52), (72, 60), (84, 52), (84, 60), (90, 48), (90, 64), (78, 50), (78, 66)])
     candles([(61, 43), (95, 43), (61, 69), (95, 69), (73, 44), (78, 44)])
 
+    # reliquary of the three seals (optional): each seal answers only to one hero's craft
+    R(92, 10, 1, 2)
+    R(93, 8, 5, 6)
+    p(92, 10, ".")
+    m.meta["hero_puzzle"] = {"bell": [44, 11], "dagger": [60, 13], "bolt": [76, 11], "gates": [[92, 10], [92, 11]]}
+    candles([(94, 8), (97, 8), (94, 13), (97, 13)])
+    m.obj(96, 11, "chest", "v_chest3", "relic")
+
     # secrets
     m.obj(25, 60, "urn", "v_urn1")
     m.obj(52, 56, "crate", "v_crate")
