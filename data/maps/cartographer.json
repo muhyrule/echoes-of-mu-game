@@ -1,0 +1,78 @@
+{
+ "theme": "interior",
+ "title": "Milo\u0161 the Cartographer",
+ "subtitle": "Maps of places that do not want to be mapped",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "f": {
+   "id": "pra_milos",
+   "pal": {
+    "coat": "#5a3a2a",
+    "accent": "#c0a070",
+    "hair": "#4a4a4e",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ]
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "prague_town",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "a": {
+   "kind": "tomes",
+   "id": "m_chart1",
+   "text": "A copy of the seven-bell spiral, annotated in different inks. The seventh circle is blank except for a single word: 'Listening.'",
+   "item": "Seven-Bell Spiral",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "tomes",
+   "id": "m_chart2",
+   "text": "Rolled maps of the Clock Tower. The undercroft is marked with the same bell sigil you've seen in Edinburgh.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "urn",
+   "id": "m_urn",
+   "text": "Cartographer's ink, dried to a black crust. Someone has sketched a tiny bell in the crust.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#.ZZZZ......Z................#",
+  "#......a........d............#",
+  "#....................l.......#",
+  "#............................#",
+  "#............................#",
+  "#............................#",
+  "#.............f..............#",
+  "#............................#",
+  "#............................#",
+  "#............................#",
+  "#.........................e..#",
+  "#.....................l......#",
+  "#............................#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

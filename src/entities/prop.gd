@@ -15,6 +15,10 @@ var t := randf() * 10.0
 var home_cell := Vector2i.ZERO
 var light: PointLight2D
 var base_energy := 1.0
+var pal: Dictionary = {}
+var def: Dictionary = {}
+
+const OBJECT_KINDS := ["barrel", "chest", "crate", "urn", "tomes", "grave", "statue"]
 
 
 func setup(k: String, c: Vector2i, lvl: Node2D, npc_id := "") -> void:
@@ -24,7 +28,7 @@ func setup(k: String, c: Vector2i, lvl: Node2D, npc_id := "") -> void:
 	level = lvl
 	id = npc_id
 	position = Vector2(c) * 16.0 + Vector2(8, 8)
-	solid = kind in ["door", "gate", "bars", "block", "npc", "shrine", "table", "cracked"]
+	solid = kind in ["door", "gate", "bars", "block", "npc", "shrine", "table", "cracked"] or kind in OBJECT_KINDS
 	if solid:
 		body = StaticBody2D.new()
 		body.collision_layer = 2 if kind == "bars" else 1
@@ -56,6 +60,9 @@ func _add_light() -> void:
 			light = Art.make_light(Color("66e0ff"), 0.45, 0.0)
 		"gear":
 			light = null
+		"lamp":
+			light = Art.make_light(Color("ffb35a"), 1.3, 1.0)
+			light.position = Vector2(0, -8)
 		"table":
 			light = Art.make_light(Color("ffcf80"), 0.5, 0.5)
 	if light:
@@ -66,7 +73,7 @@ func _add_light() -> void:
 func is_interactable() -> bool:
 	if kind == "door":
 		return not open
-	return kind in ["npc", "shrine", "table", "portal"]
+	return kind in ["npc", "shrine", "table", "portal", "entry"] or kind in OBJECT_KINDS
 
 
 func is_pickup() -> bool:
@@ -105,7 +112,7 @@ func _process(delta: float) -> void:
 	t += delta
 	if light:
 		match kind:
-			"candle", "torch":
+			"candle", "torch", "lamp":
 				light.energy = base_energy * (0.85 + 0.15 * sin(t * 13.0 + position.x) + 0.05 * sin(t * 31.0))
 			"plate":
 				light.energy = 0.8 if level.flags_plate else 0.0
@@ -246,8 +253,143 @@ func _draw() -> void:
 		"torch":
 			Art.torch(self, t, position.x)
 		"npc":
-			var pal: Dictionary = {"aldous": Art.PAL_ALDOUS, "wren": Art.PAL_WREN, "corvin": Art.PAL_CORVIN}.get(id, Art.PAL_ISOLDE)
-			Art.person(self, Vector2.DOWN, t, pal, false)
+			var npal: Dictionary = pal if not pal.is_empty() else {"aldous": Art.PAL_ALDOUS, "wren": Art.PAL_WREN, "corvin": Art.PAL_CORVIN}.get(id, Art.PAL_ISOLDE)
+			Art.person(self, Vector2(def.get("face", [0, 1])[0], def.get("face", [0, 1])[1]), t, npal, false)
 			if is_interactable() and level.get("_nearest") == self:
 				var bob := sin(t * 5.0) * 1.0
 				draw_colored_polygon(PackedVector2Array([Vector2(-2.5, -22 + bob), Vector2(2.5, -22 + bob), Vector2(0, -19 + bob)]), Color("ffd166"))
+		"lamp":
+			draw_rect(Rect2(-1.5, 5.5, 3, 2), Color(Art.OUT))
+			draw_rect(Rect2(-0.9, -6, 1.8, 12), Color(Art.OUT))
+			draw_rect(Rect2(-0.5, -6, 1, 12), Color("3a3644"))
+			draw_rect(Rect2(-3.5, -12, 7, 7), Color(Art.OUT))
+			draw_rect(Rect2(-2.5, -11, 5, 5), Color("ffd98a") if int(t * 3.0 + position.x) % 9 != 0 else Color("e8b860"))
+			draw_rect(Rect2(-3.5, -13, 7, 1.6), Color("2a2630"))
+		"entry":
+			_draw_entry()
+		"barrel":
+			_draw_object()
+		"chest", "crate", "urn", "tomes", "grave", "statue":
+			_draw_object()
+
+
+func _searched() -> bool:
+	return GameState.flag("found_" + str(def.get("id", "")))
+
+
+func _draw_entry() -> void:
+	var style: String = def.get("style", "door")
+	var req: String = def.get("requires", "")
+	var ready := req == "" or GameState.flag(req)
+	if style == "gate":
+		draw_rect(Rect2(-8, -8, 16, 16), Color(Art.OUT))
+		draw_rect(Rect2(-7, -8, 14, 16), Color("231f2e"))
+		draw_arc(Vector2(0, -1), 6.5, PI, TAU, 14, Color("6a6678"), 2.0)
+		draw_rect(Rect2(-6, -1, 12, 9), Color("07050c"))
+		var gc := Color("b894ff") if ready else Color("a03a3a")
+		draw_rect(Rect2(-5, -1, 10, 9), Color(gc, 0.10 + 0.05 * sin(t * 2.0)))
+		for x in [-3.5, 0.0, 3.5]:
+			draw_rect(Rect2(x - 0.5, -1, 1, 9), Color("5f6370") if not ready else Color(0.35, 0.3, 0.45, 0.5))
+		if not ready:
+			draw_line(Vector2(-6, 1), Vector2(6, 5), Color("8a8f9c"), 1.2)
+			draw_line(Vector2(-6, 5), Vector2(6, 1), Color("8a8f9c"), 1.2)
+			draw_circle(Vector2(0, 3), 1.3, Color("d6b25a"))
+	elif style == "inner":
+		draw_rect(Rect2(-8, -8, 16, 16), Color("2a1c12"))
+		draw_rect(Rect2(-6, -7, 12, 15), Color(Art.OUT))
+		draw_rect(Rect2(-5, -6, 10, 14), Color("5a3a24"))
+		draw_rect(Rect2(-5, -6, 10, 1.5), Color("7a5236"))
+		draw_rect(Rect2(-0.4, -6, 0.8, 14), Color("3a2415"))
+		draw_circle(Vector2(3, 1), 0.9, Color("d6b25a"))
+		draw_rect(Rect2(-7, 8, 14, 1), Color(1.0, 0.8, 0.45, 0.25))
+	else:
+		draw_rect(Rect2(-8, -8, 16, 16), Color("352f3d"))
+		draw_rect(Rect2(-6.5, -8, 13, 16), Color(Art.OUT))
+		draw_rect(Rect2(-5.5, -7, 11, 15), Color("5a3a24"))
+		draw_colored_polygon(PackedVector2Array([Vector2(-5.5, -4), Vector2(-3, -7), Vector2(3, -7), Vector2(5.5, -4)]), Color("5a3a24"))
+		for x in [-3.0, 0.0, 3.0]:
+			draw_line(Vector2(x, -7), Vector2(x, 8), Color("3a2415"), 0.5)
+		draw_rect(Rect2(-5.5, -1, 11, 1.8), Color("4a4d58"))
+		draw_circle(Vector2(3, 3), 0.9, Color("d6b25a"))
+		draw_rect(Rect2(-7, -9, 14, 2), Color("1c1824"))
+		draw_rect(Rect2(-6, 8, 12, 1.2), Color("6a6678"))
+	if _nearest_self():
+		var bob := sin(t * 5.0) * 1.0
+		draw_colored_polygon(PackedVector2Array([Vector2(-2.5, -14 + bob), Vector2(2.5, -14 + bob), Vector2(0, -11 + bob)]), Color("ffd166"))
+
+
+func _nearest_self() -> bool:
+	return level.get("_nearest") == self
+
+
+func _draw_object() -> void:
+	var done := _searched()
+	var O := Color(Art.OUT)
+	draw_rect(Rect2(-6.5, 3.5, 13, 3), Color(0, 0, 0, 0.28))
+	match kind:
+		"barrel":
+			draw_rect(Rect2(-6, -8, 12, 15), O)
+			draw_rect(Rect2(-5, -7, 10, 13), Color("6a4a2e"))
+			draw_rect(Rect2(-5, -7, 3, 13), Color("84603c"))
+			draw_rect(Rect2(3, -7, 2, 13), Color("4a3220"))
+			for y in [-4.0, 2.5]:
+				draw_rect(Rect2(-5, y, 10, 1.5), Color("3a3a46"))
+				draw_rect(Rect2(-5, y, 10, 0.5), Color("6a6a7a"))
+			draw_rect(Rect2(-5, -7, 10, 2), Color("8a6a40") if not done else Color("2a1c12"))
+		"chest":
+			draw_rect(Rect2(-7.5, -5, 15, 12), O)
+			draw_rect(Rect2(-6.5, -1, 13, 7), Color("6a3e22"))
+			draw_rect(Rect2(-6.5, -1, 13, 1.5), Color("8a5a30"))
+			if done:
+				draw_rect(Rect2(-6.5, -6, 13, 5), Color("1a0f08"))
+				draw_rect(Rect2(-6.5, -9, 13, 3), Color("8a5a30"))
+			else:
+				draw_rect(Rect2(-6.5, -4.5, 13, 4), Color("8a5a30"))
+				draw_rect(Rect2(-6.5, -4.5, 13, 1), Color("a87a48"))
+				draw_rect(Rect2(-1.2, -2.5, 2.4, 3.5), Color("d6b25a"))
+			for x in [-5.0, 4.0]:
+				draw_rect(Rect2(x, -4.5, 1.5, 10.5), Color("4a4d58"))
+		"crate":
+			draw_rect(Rect2(-7, -7, 14, 14), O)
+			draw_rect(Rect2(-6, -6, 12, 12), Color("8a6a3c") if not done else Color("6a5230"))
+			draw_rect(Rect2(-6, -6, 12, 1.5), Color("a88a58"))
+			draw_line(Vector2(-6, -6), Vector2(6, 6), Color("5a4226"), 1.2)
+			draw_line(Vector2(6, -6), Vector2(-6, 6), Color("5a4226"), 1.2)
+			draw_rect(Rect2(-6, -0.5, 12, 1), Color("5a4226"))
+		"urn":
+			draw_colored_polygon(PackedVector2Array([Vector2(-3, -8), Vector2(3, -8), Vector2(6, -2), Vector2(4, 6), Vector2(-4, 6), Vector2(-6, -2)]), O)
+			draw_colored_polygon(PackedVector2Array([Vector2(-2, -7), Vector2(2, -7), Vector2(5, -2), Vector2(3, 5), Vector2(-3, 5), Vector2(-5, -2)]), Color("6a5a7a"))
+			draw_rect(Rect2(-4, -2, 8, 1.2), Color("c8a050"))
+			draw_rect(Rect2(-4, -6, 1.5, 9), Color("8a7a9a"))
+			draw_rect(Rect2(-3, -9, 6, 2), Color("8a7a9a"))
+			if done:
+				draw_line(Vector2(0, -7), Vector2(1, 3), O, 0.8)
+		"tomes":
+			var cols := [Color("6a1e30"), Color("2c4a7a"), Color("4a5a2e"), Color("6a5420")]
+			for i in 4:
+				var y := 3.0 - i * 3.4
+				draw_rect(Rect2(-6.5 + (i % 2) * 1.0, y - 1.7, 13, 3.6), O)
+				draw_rect(Rect2(-5.7 + (i % 2) * 1.0, y - 1.0, 11.4, 2.4), cols[i])
+				draw_rect(Rect2(-5.7 + (i % 2) * 1.0, y - 1.0, 11.4, 0.6), cols[i].lightened(0.25))
+				draw_rect(Rect2(3.5 + (i % 2) * 1.0, y - 1.0, 1.2, 2.4), Color("c8a050"))
+			if done:
+				draw_rect(Rect2(-1, -11, 1.2, 4), Color("d0405a"))
+		"grave":
+			draw_rect(Rect2(-6, 4, 12, 3), Color("2a3a2a"))
+			draw_colored_polygon(PackedVector2Array([Vector2(-5, 5), Vector2(-5, -3), Vector2(-3, -7), Vector2(3, -7), Vector2(5, -3), Vector2(5, 5)]), O)
+			draw_colored_polygon(PackedVector2Array([Vector2(-4, 4.5), Vector2(-4, -3), Vector2(-2.4, -6), Vector2(2.4, -6), Vector2(4, -3), Vector2(4, 4.5)]), Color("7a7888"))
+			draw_rect(Rect2(-4, -3, 1.5, 7.5), Color("9a98a8"))
+			draw_rect(Rect2(-0.5, -5, 1, 6), Color("4a4858"))
+			draw_rect(Rect2(-2, -3.2, 4, 1), Color("4a4858"))
+			draw_rect(Rect2(-4, 2, 3, 2), Color(0.25, 0.5, 0.3, 0.7))
+		"statue":
+			draw_rect(Rect2(-6, 1, 12, 6), O)
+			draw_rect(Rect2(-5, 2, 10, 4.5), Color("6a6878"))
+			draw_rect(Rect2(-5, 2, 10, 1.2), Color("8a889a"))
+			draw_colored_polygon(PackedVector2Array([Vector2(-4, 2), Vector2(-5, -4), Vector2(-3, -6), Vector2(-4, -9), Vector2(-1.5, -7), Vector2(1.5, -7), Vector2(4, -9), Vector2(3, -6), Vector2(5, -4), Vector2(4, 2)]), O)
+			draw_colored_polygon(PackedVector2Array([Vector2(-3, 1.5), Vector2(-4, -4), Vector2(-2.2, -5.5), Vector2(-3, -7.5), Vector2(-1, -6.2), Vector2(1, -6.2), Vector2(3, -7.5), Vector2(2.2, -5.5), Vector2(4, -4), Vector2(3, 1.5)]), Color("86869a"))
+			draw_rect(Rect2(-2, -4.5, 1, 1), Color("ff7a3a") if int(t) % 2 == 0 else Color("a04a20"))
+			draw_rect(Rect2(1, -4.5, 1, 1), Color("ff7a3a") if int(t) % 2 == 0 else Color("a04a20"))
+	if _nearest_self() and not done:
+		var bob := sin(t * 5.0) * 1.0
+		draw_colored_polygon(PackedVector2Array([Vector2(-2.5, -15 + bob), Vector2(2.5, -15 + bob), Vector2(0, -12 + bob)]), Color("ffd166"))

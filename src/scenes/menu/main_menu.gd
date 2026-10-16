@@ -162,12 +162,6 @@ func _draw() -> void:
 		_tower(tx, 280, 18, 110, mid, true)
 	draw_colored_polygon(PackedVector2Array([Vector2(250, 150), Vector2(390, 150), Vector2(320, 100)]), mid)
 	var glow_a := 0.7 + 0.2 * sin(t * 1.4)
-	draw_circle(Vector2(320, 134), 15.0, Color(0.05, 0.03, 0.08))
-	for i in 8:
-		var an := TAU * float(i) / 8.0 + t * 0.05
-		var cols := [Color("d0405a"), Color("4a7be0"), Color("e0b040"), Color("40b08a")]
-		draw_colored_polygon(PackedVector2Array([Vector2(320, 134), Vector2(320, 134) + Vector2(cos(an), sin(an)) * 13.0, Vector2(320, 134) + Vector2(cos(an + 0.7), sin(an + 0.7)) * 13.0]), Color(cols[i % 4], glow_a))
-	draw_circle(Vector2(320, 134), 20.0, Color(1.0, 0.8, 0.5, 0.05 * glow_a))
 	for wx in [262.0, 288.0, 346.0, 372.0]:
 		draw_rect(Rect2(wx - 3, 252, 6, 18), Color("ffd166") if int(t * 0.7 + wx) % 6 != 0 else Color("3a2a14"))
 	draw_colored_polygon(PackedVector2Array([Vector2(314, 280), Vector2(314, 268), Vector2(320, 262), Vector2(326, 268), Vector2(326, 280)]), Color(1.0, 0.7, 0.35, 0.5 * glow_a))

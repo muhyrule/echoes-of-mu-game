@@ -1,5 +1,5 @@
 {
- "title": "Prague — The Ossuary Clock",
+ "title": "Prague \u2014 The Ossuary Clock",
  "subtitle": "Where every hour is counted in bone",
  "music": "clock",
  "theme": "prague",
@@ -76,13 +76,17 @@
   "leave": "isolde"
  },
  "exit": {
-  "map": "chapel",
-  "spawn": "from_prague"
+  "map": "prague_town",
+  "spawn": "door:prague"
  },
  "shrine": {
   "form": "gargoyle",
   "dialogue": "shrine_gargoyle",
   "after": "shrine_gargoyle_after",
-  "notice": "Gargoyle Form unlocked — press Q"
+  "notice": "Gargoyle Form unlocked \u2014 press Q"
+ },
+ "final_exit": {
+  "map": "chapel",
+  "spawn": "from_prague"
  }
 }

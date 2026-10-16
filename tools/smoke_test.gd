@@ -147,5 +147,43 @@ func run() -> void:
 	GS.new_game()
 	check(GS.load_game() and GS.flags == before, "save/load round trip")
 
+	# Towns: gated dungeon, interiors, secrets
+	GS.new_game()
+	GS.set_flag("intro_done")
+	GS.set_flag("isolde_joined")
+	lv = await load_level("edinburgh", "from_chapel")
+	check(lv.entries.size() == 5, "edinburgh has 4 buildings and a dungeon gate")
+	var gate: Node2D
+	for e in lv.entries:
+		if e.def.map == "vaults":
+			gate = e
+	check(gate != null and gate.def.has("requires"), "dungeon gate requires a writ")
+	lv.player.global_position = gate.position + Vector2(0, 16)
+	await frames(3)
+	lv._enter(gate)
+	await frames(120)
+	check(current_scene.map_name == "edinburgh", "locked gate keeps heroes in town")
+	GS.set_flag("edin_writ")
+	lv._enter(gate)
+	await frames(60)
+	check(current_scene.map_name == "vaults", "writ opens the vault gate")
+	lv = await load_level("archive", "start")
+	check(lv.theme == "interior" and lv.interactables.size() > 3, "interior loads with searchable objects")
+	var secret: Node2D
+	for p in lv.interactables:
+		if p.def.get("id", "") == "a_tomes1":
+			secret = p
+	check(secret != null, "secret object present")
+	lv.player.global_position = secret.position + Vector2(0, 16)
+	lv._search(secret)
+	await frames(600)
+	check(GS.flag("found_a_tomes1") and "Register Leaf of 1631" in GS.items, "searching a secret grants its item")
+	lv = await load_level("edinburgh", "door:archive")
+	var arch: Node2D
+	for e in lv.entries:
+		if e.def.map == "archive":
+			arch = e
+	check(lv.player.position.distance_to(arch.position) < 40.0, "leaving an interior returns to its door")
+
 	print("SMOKE TEST DONE, failures: %d" % fails)
 	quit(fails)

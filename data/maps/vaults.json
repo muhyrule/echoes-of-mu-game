@@ -1,5 +1,5 @@
 {
- "title": "Edinburgh — The South Bridge Vaults",
+ "title": "Edinburgh \u2014 The South Bridge Vaults",
  "subtitle": "Beneath the Old Town, something is ringing",
  "music": "crypt",
  "spawns": {
@@ -57,13 +57,17 @@
   "defeated": "warden_defeated"
  },
  "exit": {
-  "map": "chapel",
-  "spawn": "from_vaults"
+  "map": "edinburgh",
+  "spawn": "door:vaults"
  },
  "shrine": {
   "form": "wraith",
   "dialogue": "shrine",
   "after": "shrine_after",
-  "notice": "Wraith Form unlocked — press Q"
+  "notice": "Wraith Form unlocked \u2014 press Q"
+ },
+ "final_exit": {
+  "map": "chapel",
+  "spawn": "from_vaults"
  }
 }

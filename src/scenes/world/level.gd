@@ -9,7 +9,8 @@ const FollowerScript = preload("res://src/entities/follower.gd")
 const HudScript = preload("res://src/scenes/world/hud.gd")
 
 const TILE := 16
-const SOLID_CHARS := ["#", "o", "="]
+const SOLID_CHARS := ["#", "o", "=", "H", "Z", "Y", "U"]
+const TOWN_THEMES := ["town_e", "town_p"]
 
 var map_name := ""
 var meta: Dictionary = {}
@@ -44,6 +45,8 @@ var theme := "chapel"
 var prefix := ""
 var followers: Dictionary = {}
 var cracked_props: Array = []
+var hearths: Array = []
+var entries: Array = []
 
 
 func _ready() -> void:
@@ -76,7 +79,7 @@ func _ready() -> void:
 	_spawn_followers()
 
 	Audio.play_music(meta.get("music", "crypt"))
-	if map_name == "chapel":
+	if map_name == "chapel" or meta.get("safe", false):
 		GameState.hp = GameState.max_hp
 	hud.show_banner(meta.title, meta.subtitle)
 	hud.fade = 1.0
@@ -139,6 +142,29 @@ func _make_prop(kind: String, c: Vector2i, npc_id := "") -> Node2D:
 	return p
 
 
+func _make_town_npc(c: Vector2i, d: Dictionary) -> void:
+	if d.has("hide_if") and GameState.flag(d.hide_if):
+		return
+	var p := _make_prop("npc", c, d.id)
+	p.def = d
+	var pal := {"coat": Color("4a4a56"), "accent": Color("8a7436"), "skin": Color("c4a083"), "hair": Color("5a4a3a"), "boots": Color("1c1620"), "style": "short", "item": "none", "look": "villager"}
+	for k in d.get("pal", {}):
+		var v = d.pal[k]
+		pal[k] = Color(v) if k in ["coat", "accent", "skin", "hair", "boots"] else v
+	p.pal = pal
+
+
+func _make_entry(c: Vector2i, d: Dictionary) -> void:
+	var p := _make_prop("entry", c)
+	p.def = d
+	entries.append(p)
+
+
+func _make_object(c: Vector2i, d: Dictionary) -> void:
+	var p := _make_prop(d.kind, c)
+	p.def = d
+
+
 func spawn_enemy(kind: String, pos: Vector2) -> void:
 	var e := CharacterBody2D.new()
 	e.set_script(EnemyScript)
@@ -159,6 +185,11 @@ func _build_world() -> void:
 		for x in w:
 			var c := Vector2i(x, y)
 			var ch: String = grid[y][x]
+			if ch == "U":
+				hearths.append(c)
+				var hl := Art.make_light(Color("ff8a3a"), 1.6, 1.1)
+				hl.position = _cell_center(c)
+				add_child(hl)
 			if ch in SOLID_CHARS:
 				var near_open := false
 				for dy in range(-1, 2):
@@ -171,8 +202,19 @@ func _build_world() -> void:
 					cs.position = _cell_center(c)
 					walls.add_child(cs)
 				continue
+			if meta.get("npcs", {}).has(ch):
+				_make_town_npc(c, meta.npcs[ch])
+				continue
+			if meta.get("doors", {}).has(ch):
+				_make_entry(c, meta.doors[ch])
+				continue
+			if meta.get("objects", {}).has(ch):
+				_make_object(c, meta.objects[ch])
+				continue
 			match ch:
-				"@", "$":
+				"l":
+					_make_prop("lamp", c)
+				"@", "$", "&":
 					marks[ch] = c
 				"r":
 					spawn_enemy("rat", _cell_center(c))
@@ -237,6 +279,15 @@ func _build_world() -> void:
 func _place_player() -> void:
 	var key: String = meta.spawns.get(GameState.spawn, "@")
 	var c: Vector2i = marks.get(key, marks.get("@", Vector2i(2, 2)))
+	if GameState.spawn.begins_with("door:"):
+		var origin := GameState.spawn.substr(5)
+		for e in entries:
+			if e.def.get("map", "") == origin:
+				for off in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
+					if not _is_solid_char(e.cell + off):
+						c = e.cell + off
+						break
+				break
 	player.position = _cell_center(c)
 
 
@@ -246,7 +297,8 @@ func _setup_camera() -> void:
 	cam.limit_top = 0
 	cam.limit_right = w * TILE
 	cam.limit_bottom = h * TILE
-	cam.zoom = Vector2(2.6, 2.6)
+	var z := maxf(2.6, maxf(1920.0 / (w * TILE), 1080.0 / (h * TILE)))
+	cam.zoom = Vector2(z, z)
 	player.add_child(cam)
 	cam.make_current()
 
@@ -263,7 +315,7 @@ func _setup_hud() -> void:
 
 func _setup_atmosphere() -> void:
 	var tint := CanvasModulate.new()
-	tint.color = {"vault": Color(0.38, 0.4, 0.56), "prague": Color(0.46, 0.46, 0.52), "chapel": Color(0.55, 0.5, 0.62)}[theme]
+	tint.color = {"vault": Color(0.38, 0.4, 0.56), "prague": Color(0.46, 0.46, 0.52), "chapel": Color(0.55, 0.5, 0.62), "town_e": Color(0.5, 0.52, 0.68), "town_p": Color(0.62, 0.56, 0.58), "interior": Color(0.78, 0.68, 0.62)}[theme]
 	add_child(tint)
 	var lamp := Art.make_light(Color("ffd9a0"), 2.0, 1.0)
 	player.add_child(lamp)
@@ -335,7 +387,7 @@ func _setup_fx() -> void:
 		f.texture = tex
 		f.scale = Vector2(randf_range(1.4, 2.6), randf_range(0.5, 0.9))
 		f.position = Vector2(randf() * w * TILE, randf() * h * TILE)
-		f.modulate = {"vault": Color(0.55, 0.6, 0.85, 0.16), "prague": Color(0.85, 0.7, 0.45, 0.1), "chapel": Color(0.75, 0.6, 0.8, 0.12)}[theme]
+		f.modulate = {"vault": Color(0.55, 0.6, 0.85, 0.16), "prague": Color(0.85, 0.7, 0.45, 0.1), "chapel": Color(0.75, 0.6, 0.8, 0.12), "town_e": Color(0.7, 0.75, 0.95, 0.16), "town_p": Color(0.9, 0.78, 0.6, 0.1), "interior": Color(1.0, 0.8, 0.5, 0.05)}[theme]
 		f.z_index = 14
 		f.set_meta("spd", randf_range(2.0, 6.0))
 		add_child(f)
@@ -347,9 +399,9 @@ func _setup_fx() -> void:
 	overlay.material = mat
 	overlay.draw.connect(_draw_overlay)
 	add_child(overlay)
-	var cols := [Color("d0405a"), Color("4a7be0"), Color("e0b040"), Color("40b08a")]
+	var cols: Array = [Color("d0405a"), Color("4a7be0"), Color("e0b040"), Color("40b08a")]
 	var n := 0
-	for x in range(3, w - 2, 5):
+	for x in (range(3, w - 2, 5) if theme not in TOWN_THEMES else []):
 		for y in range(0, h - 1):
 			if grid[y][x] == "#" and not _is_solid_char(Vector2i(x, y + 1)):
 				if theme == "chapel" or n % 2 == 1:
@@ -379,6 +431,15 @@ func _draw_overlay() -> void:
 		overlay.draw_circle(Vector2.ZERO, 26.0, Color(col, 0.05 * pulse))
 		overlay.draw_circle(Vector2.ZERO, 15.0, Color(col, 0.07 * pulse))
 		overlay.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	for hc in hearths:
+		var hp := _cell_center(hc)
+		var hf := 0.8 + 0.2 * sin(gt * 11.0 + hc.x) + 0.08 * sin(gt * 23.0)
+		overlay.draw_circle(hp, 30.0, Color(1.0, 0.5, 0.2, 0.05 * hf))
+		overlay.draw_circle(hp, 16.0, Color(1.0, 0.6, 0.25, 0.08 * hf))
+		for k in 3:
+			var fx := (k - 1) * 3.2
+			var fh := 5.0 + 2.0 * sin(gt * 13.0 + k * 2.0)
+			overlay.draw_colored_polygon(PackedVector2Array([hp + Vector2(fx - 2, 5), hp + Vector2(fx + 2, 5), hp + Vector2(fx, 5 - fh)]), Color(1.0, 0.55, 0.15, 0.55))
 	for e in entities.get_children():
 		if not ("kind" in e):
 			continue
@@ -391,6 +452,9 @@ func _draw_overlay() -> void:
 			"candle":
 				bc = Color(1.0, 0.8, 0.45)
 				br = 11.0
+			"lamp":
+				bc = Color(1.0, 0.72, 0.38)
+				br = 26.0
 		if br > 0.0:
 			var fl := 0.8 + 0.2 * sin(gt * 9.0 + e.position.x)
 			overlay.draw_circle(e.position + Vector2(0, -6), br, Color(bc, 0.05 * fl))
@@ -451,9 +515,16 @@ func _banner(p: Vector2, vault: bool, prague: bool) -> void:
 
 func _draw() -> void:
 	var vault := theme == "vault"
-	var prague := theme == "prague"
+	var prague := theme == "prague" or theme == "town_p"
+	var interior := theme == "interior"
 	var floor_a := Color("2c2a33") if vault else (Color("34363f") if prague else Color("38323f"))
 	var floor_b := Color("26242d") if vault else (Color("2a2c35") if prague else Color("322c38"))
+	if theme == "town_e":
+		floor_a = Color("3c3f4a")
+		floor_b = Color("343742")
+	elif theme == "town_p":
+		floor_a = Color("4a4238")
+		floor_b = Color("40382f")
 	var wall_top := Color("15131b")
 	var wall_face := Color("4a4558") if vault else (Color("565a66") if prague else Color("5a4f66"))
 	var mortar := Color("2a2633")
@@ -462,6 +533,13 @@ func _draw() -> void:
 			var c := Vector2i(x, y)
 			var r := Rect2(x * TILE, y * TILE, TILE, TILE)
 			var ch: String = grid[y][x]
+			if ch == "H":
+				_draw_house(r, x, y)
+				continue
+			if ch == "Z" or ch == "Y" or ch == "U":
+				_draw_floor_plank(r, x, y)
+				_draw_furniture(r, ch, x, y)
+				continue
 			if ch == "#":
 				if _is_solid_char(c + Vector2i(0, 1)):
 					draw_rect(r, wall_top)
@@ -499,27 +577,30 @@ func _draw() -> void:
 					if prague and (x + y) % 3 == 0:
 						draw_rect(Rect2(r.position.x + 3, r.position.y + 5, 2, 2), Color("b58f4a"))
 						draw_rect(Rect2(r.position.x + 3, r.position.y + 5, 2, 1), Color("e0c27a"))
-					if (x * 31 + y * 17) % 9 == 0 and not prague:
+					if (x * 31 + y * 17) % 9 == 0 and not prague and not interior:
 						draw_rect(Rect2(r.position.x + 2, r.position.y + 9, 5, 4), Color(0.2, 0.4, 0.25, 0.55))
 						draw_rect(Rect2(r.position.x + 3, r.position.y + 11, 2, 3), Color(0.25, 0.5, 0.3, 0.5))
 				continue
 			var hv := (x * 73856093 ^ y * 19349663) % 7
-			draw_rect(r, floor_a if (x + y) % 2 == 0 else floor_b)
-			draw_rect(Rect2(r.position.x, r.position.y, TILE, 1), Color(0, 0, 0, 0.22))
-			draw_rect(Rect2(r.position.x, r.position.y, 1, TILE), Color(0, 0, 0, 0.22))
-			draw_rect(Rect2(r.position.x + 1, r.position.y + 1, TILE - 1, 1), Color(1, 1, 1, 0.04))
-			draw_rect(Rect2(r.position.x + 8, r.position.y + 8, 1, 8), Color(0, 0, 0, 0.12))
-			draw_rect(Rect2(r.position.x, r.position.y + 8, 16, 1), Color(0, 0, 0, 0.1))
-			for i in 6:
-				var dp := (x * 7 + y * 13 + i * 5) % 16
-				draw_rect(Rect2(r.position.x + dp, r.position.y + (dp * 3 + i * 5) % 16, 1, 1), Color(1, 1, 1, 0.05) if i % 2 == 0 else Color(0, 0, 0, 0.14))
-			if y > 0 and grid[y - 1][x] == "#":
+			if interior:
+				_draw_floor_plank(r, x, y)
+			else:
+				draw_rect(r, floor_a if (x + y) % 2 == 0 else floor_b)
+				draw_rect(Rect2(r.position.x, r.position.y, TILE, 1), Color(0, 0, 0, 0.22))
+				draw_rect(Rect2(r.position.x, r.position.y, 1, TILE), Color(0, 0, 0, 0.22))
+				draw_rect(Rect2(r.position.x + 1, r.position.y + 1, TILE - 1, 1), Color(1, 1, 1, 0.04))
+				draw_rect(Rect2(r.position.x + 8, r.position.y + 8, 1, 8), Color(0, 0, 0, 0.12))
+				draw_rect(Rect2(r.position.x, r.position.y + 8, 16, 1), Color(0, 0, 0, 0.1))
+				for i in 6:
+					var dp := (x * 7 + y * 13 + i * 5) % 16
+					draw_rect(Rect2(r.position.x + dp, r.position.y + (dp * 3 + i * 5) % 16, 1, 1), Color(1, 1, 1, 0.05) if i % 2 == 0 else Color(0, 0, 0, 0.14))
+			if y > 0 and grid[y - 1][x] in ["#", "H"]:
 				draw_rect(Rect2(r.position.x, r.position.y, TILE, 5), Color(0, 0, 0, 0.35))
 				draw_rect(Rect2(r.position.x, r.position.y + 5, TILE, 3), Color(0, 0, 0, 0.15))
 			if hv == 3 and vault:
 				draw_rect(Rect2(r.position + Vector2(3, 8), Vector2(10, 5)), Color(0.15, 0.2, 0.35, 0.6))
 				draw_rect(Rect2(r.position + Vector2(5, 9), Vector2(4, 1)), Color(0.6, 0.75, 1.0, 0.25))
-			if hv == 4:
+			if hv == 4 and not interior:
 				draw_rect(Rect2(r.position + Vector2(11, 11), Vector2(3, 2)), Color(0.22, 0.4, 0.26, 0.6))
 			if hv == 0:
 				draw_line(r.position + Vector2(3, 5), r.position + Vector2(9, 9), Color(0, 0, 0, 0.25), 1.0)
@@ -527,7 +608,7 @@ func _draw() -> void:
 				draw_rect(Rect2(r.position + Vector2(10, 3), Vector2(2, 2)), Color(1, 1, 1, 0.05))
 			if prague and (x + y) % 2 == 0:
 				draw_rect(r, Color(0.7, 0.55, 0.3, 0.07))
-			if prague and x % 6 == 0:
+			if theme == "prague" and x % 6 == 0:
 				draw_rect(Rect2(r.position.x, r.position.y, 1, TILE), Color(0.72, 0.56, 0.28, 0.5))
 			if ch == ",":
 				draw_rect(r, Color("5a2030"))
@@ -541,6 +622,120 @@ func _draw() -> void:
 				draw_rect(Rect2(r.position + Vector2(0, 3), Vector2(16, 11)), Color("4d3624"))
 				draw_rect(Rect2(r.position + Vector2(0, 3), Vector2(16, 3)), Color("6a4a30"))
 				draw_rect(Rect2(r.position + Vector2(0, 13), Vector2(16, 1)), Color("2a1c12"))
+
+
+func _house_base(x: int, y: int) -> int:
+	var bx := x
+	while bx > 0 and grid[y][bx - 1] == "H":
+		bx -= 1
+	return bx
+
+
+func _draw_house(r: Rect2, x: int, y: int) -> void:
+	var bx := _house_base(x, y)
+	var idx := (bx * 7 + 3) % 4
+	var warm := theme == "town_p"
+	var roofs: Array = [Color("7a3a2e"), Color("8a4a30"), Color("5a4a3a"), Color("6a3038")] if warm else [Color("3a3644"), Color("4a2f36"), Color("2f3a44"), Color("40362c")]
+	var walls: Array = [Color("b09a72"), Color("a88a8a"), Color("8fa08a"), Color("c0a070")] if warm else [Color("6b6672"), Color("5f5a68"), Color("736a64"), Color("5a606c")]
+	var below_h: bool = y + 1 < h and grid[y + 1][x] == "H"
+	var above_h: bool = y > 0 and grid[y - 1][x] == "H"
+	var left_h: bool = x > 0 and grid[y][x - 1] == "H"
+	var right_h: bool = x + 1 < w and grid[y][x + 1] == "H"
+	var o := r.position
+	if below_h:
+		var rc: Color = roofs[idx]
+		draw_rect(r, rc)
+		for ry in 4:
+			var off := 0 if (ry + y) % 2 == 0 else 4
+			draw_rect(Rect2(o.x, o.y + ry * 4 + 3, TILE, 1), rc.darkened(0.35))
+			for k in 2:
+				draw_rect(Rect2(o.x + off + k * 8, o.y + ry * 4, 1, 3), rc.darkened(0.3))
+			draw_rect(Rect2(o.x, o.y + ry * 4, TILE, 1), rc.lightened(0.1))
+		if not above_h:
+			draw_rect(Rect2(o.x, o.y, TILE, 3), rc.lightened(0.22))
+			draw_rect(Rect2(o.x, o.y, TILE, 1), rc.darkened(0.5))
+		if not left_h:
+			draw_rect(Rect2(o.x, o.y, 1, TILE), rc.darkened(0.55))
+		if not right_h:
+			draw_rect(Rect2(o.x + 15, o.y, 1, TILE), rc.darkened(0.55))
+		if not above_h and (x - bx) == 1:
+			draw_rect(Rect2(o.x + 3, o.y - 3, 8, 8), Color(Art.OUT))
+			draw_rect(Rect2(o.x + 4, o.y - 2, 6, 7), Color("5a5260"))
+			draw_rect(Rect2(o.x + 4, o.y - 2, 6, 1), Color("8a8296"))
+	else:
+		var wc: Color = walls[idx]
+		draw_rect(r, wc)
+		for ry in 3:
+			draw_rect(Rect2(o.x, o.y + 3 + ry * 4, TILE, 1), wc.darkened(0.16))
+		draw_rect(Rect2(o.x, o.y + 12, TILE, 4), wc.darkened(0.38))
+		draw_rect(Rect2(o.x, o.y + 12, TILE, 1), wc.darkened(0.55))
+		draw_rect(Rect2(o.x, o.y, TILE, 3), Color(0, 0, 0, 0.4))
+		if not left_h:
+			draw_rect(Rect2(o.x, o.y, 2, TILE), Color("2a2230"))
+		if not right_h:
+			draw_rect(Rect2(o.x + 14, o.y, 2, TILE), Color("2a2230"))
+		if (x - bx) % 2 == 1 and left_h and right_h:
+			var lit := (x * 7 + y) % 5 != 0
+			draw_rect(Rect2(o.x + 3, o.y + 3, 10, 9), Color(Art.OUT))
+			draw_rect(Rect2(o.x + 4, o.y + 4, 8, 7), Color("ffd98a") if lit else Color("2a2a3a"))
+			draw_rect(Rect2(o.x + 4, o.y + 4, 8, 2), Color("ffeab0") if lit else Color("3a3a4c"))
+			draw_rect(Rect2(o.x + 7.5, o.y + 4, 1, 7), Color(Art.OUT))
+			draw_rect(Rect2(o.x + 4, o.y + 7.5, 8, 1), Color(Art.OUT))
+			draw_rect(Rect2(o.x + 2, o.y + 12, 12, 2), Color("3a3040"))
+
+
+func _draw_floor_plank(r: Rect2, x: int, y: int) -> void:
+	var o := r.position
+	var base := Color("5a4228") if y % 2 == 0 else Color("523a24")
+	draw_rect(r, base)
+	draw_rect(Rect2(o.x, o.y, TILE, 1), Color(0, 0, 0, 0.32))
+	draw_rect(Rect2(o.x, o.y + 8, TILE, 1), Color(0, 0, 0, 0.32))
+	draw_rect(Rect2(o.x + (x * 5 + y * 3) % 12 + 2, o.y, 1, 8), Color(0, 0, 0, 0.26))
+	draw_rect(Rect2(o.x + (x * 7 + y * 11) % 12 + 2, o.y + 8, 1, 8), Color(0, 0, 0, 0.26))
+	draw_rect(Rect2(o.x + 1, o.y + 1, TILE - 2, 1), Color(1, 0.9, 0.7, 0.06))
+	draw_rect(Rect2(o.x + 3, o.y + 4, 6, 1), Color(0, 0, 0, 0.1))
+	draw_rect(Rect2(o.x + 8, o.y + 12, 6, 1), Color(0, 0, 0, 0.1))
+
+
+func _draw_furniture(r: Rect2, ch: String, x: int, y: int) -> void:
+	var o := r.position
+	var O := Color(Art.OUT)
+	if ch == "Z":
+		draw_rect(Rect2(o.x, o.y, TILE, TILE), O)
+		draw_rect(Rect2(o.x + 1, o.y + 1, 14, 14), Color("4a3220"))
+		var cols: Array = [Color("6a1e30"), Color("2c4a7a"), Color("4a5a2e"), Color("6a5420"), Color("5a3a6a"), Color("8a6a40")]
+		for row in 2:
+			var by := o.y + 2 + row * 7
+			draw_rect(Rect2(o.x + 1, by + 5, 14, 1), Color("2a1c12"))
+			var bxp := o.x + 2
+			var k := 0
+			while bxp < o.x + 14:
+				var bw := 2 + (x * 3 + y * 5 + k * 2 + row) % 2
+				var bh := 4 - (k + row) % 2
+				draw_rect(Rect2(bxp, by + 5 - bh, bw, bh), cols[(x + y + k * 2 + row) % 6])
+				draw_rect(Rect2(bxp, by + 5 - bh, bw, 1), Color(1, 1, 1, 0.18))
+				bxp += bw + 0.5
+				k += 1
+		draw_rect(Rect2(o.x + 1, o.y + 1, 14, 1), Color("6a4a30"))
+	elif ch == "Y":
+		var bc: Color = [Color("6a1e30"), Color("2c4a7a"), Color("4a5a2e"), Color("5a3a6a")][(x * 3 + y) % 4]
+		draw_rect(Rect2(o.x, o.y + 1, TILE, 15), O)
+		draw_rect(Rect2(o.x + 1, o.y + 2, 14, 13), Color("4a3220"))
+		draw_rect(Rect2(o.x + 2, o.y + 3, 12, 4), Color("d8d0c0"))
+		draw_rect(Rect2(o.x + 2, o.y + 3, 12, 1), Color("f0ead8"))
+		draw_rect(Rect2(o.x + 2, o.y + 7, 12, 8), bc)
+		draw_rect(Rect2(o.x + 2, o.y + 7, 12, 2), bc.lightened(0.2))
+		draw_rect(Rect2(o.x + 2, o.y + 13, 12, 2), bc.darkened(0.3))
+	else:
+		draw_rect(Rect2(o.x, o.y, TILE, TILE), O)
+		draw_rect(Rect2(o.x + 1, o.y + 1, 14, 14), Color("5a5668"))
+		for ry in 3:
+			draw_rect(Rect2(o.x + 1, o.y + 4 + ry * 4, 14, 1), Color("3a3646"))
+		draw_rect(Rect2(o.x + 1, o.y + 1, 14, 2), Color("8a869a"))
+		draw_rect(Rect2(o.x + 3, o.y + 5, 10, 10), O)
+		draw_rect(Rect2(o.x + 4, o.y + 7, 8, 8), Color("1a0c08"))
+		draw_rect(Rect2(o.x + 5, o.y + 11, 6, 3), Color("d05a1a"))
+		draw_rect(Rect2(o.x + 6, o.y + 12, 4, 2), Color("ffb040"))
 
 
 func _physics_process(_delta: float) -> void:
@@ -595,6 +790,12 @@ func _process(_delta: float) -> void:
 				text = "[E] Read the map"
 			"portal":
 				text = "[E] Step through"
+			"entry":
+				text = "[E] " + str(_nearest.def.get("label", "Enter"))
+			"grave", "statue":
+				text = "[E] Examine"
+			"barrel", "chest", "crate", "urn", "tomes":
+				text = "[E] Search"
 	hud.hint = text
 	if Input.is_action_just_pressed("reset_puzzle") and not frozen:
 		_reset_puzzle()
@@ -661,6 +862,11 @@ func _interact(p: Node2D) -> void:
 				await Dialogue.play(prefix + "_locked")
 		"npc":
 			await _talk(p)
+		"entry":
+			await _enter(p)
+			return
+		"barrel", "chest", "crate", "urn", "tomes", "grave", "statue":
+			await _search(p)
 		"shrine":
 			await _shrine()
 		"table":
@@ -672,16 +878,77 @@ func _interact(p: Node2D) -> void:
 				await Dialogue.play("portal_done2")
 			elif GameState.flag("edinburgh_done"):
 				_busy = false
-				_leave("prague", "start")
+				_leave("prague_town", "from_chapel")
 				return
 			else:
 				_busy = false
-				_leave("vaults", "start")
+				_leave("edinburgh", "from_chapel")
 				return
 	_busy = false
 
 
+func _pick_dialogue(d: Dictionary) -> String:
+	var id: String = d.id
+	for v in d.get("variants", []):
+		if (not v.has("if") or GameState.flag(v["if"])) and (not v.has("not") or not GameState.flag(v["not"])):
+			return v.id
+	if GameState.flag("talked_" + id) and Dialogue.data.has(id + "_again"):
+		return id + "_again"
+	return id
+
+
+func _enter(p: Node2D) -> void:
+	var d: Dictionary = p.def
+	if d.has("requires") and not GameState.flag(d.requires):
+		await Dialogue.play(d.get("locked", ""))
+		_busy = false
+		return
+	if d.has("once"):
+		if not GameState.flag(d.once):
+			GameState.set_flag(d.once)
+			await Dialogue.play(d.once)
+	_busy = false
+	Audio.sfx("door")
+	_leave(d.map, "door:" + map_name)
+
+
+func _search(p: Node2D) -> void:
+	var d: Dictionary = p.def
+	var fid := "found_" + str(d.get("id", ""))
+	if not d.has("id") or GameState.flag(fid):
+		await Dialogue.play_lines([{"who": "", "text": d.get("empty", "Nothing more of interest here.")}])
+		return
+	GameState.set_flag(fid)
+	var reward: String = d.get("reward", "")
+	if d.has("item"):
+		GameState.items.append(d.item)
+	match reward:
+		"maxhp":
+			GameState.max_hp += 1
+			GameState.hp = GameState.max_hp
+			Audio.sfx("form")
+		"heal":
+			GameState.hp = GameState.max_hp
+			Audio.sfx("switch")
+		"relic", "lore":
+			Audio.sfx("pickup")
+		_:
+			Audio.sfx("switch")
+	if d.has("item"):
+		hud.show_notice("Found: %s  (%d secrets)" % [d.item, GameState.items.size()])
+	elif reward == "maxhp" or reward == "heal":
+		hud.show_notice("Vitality restored" if reward == "heal" else "Your vitality grows")
+	GameState.save_game()
+	await Dialogue.play_lines([{"who": "", "text": d.get("text", "")}])
+	p.queue_redraw()
+
+
 func _talk(p: Node2D) -> void:
+	if not p.def.is_empty():
+		var did := _pick_dialogue(p.def)
+		await Dialogue.play(did)
+		GameState.set_flag("talked_" + p.def.id)
+		return
 	if p.id == "aldous":
 		if not GameState.flag("isolde_joined"):
 			await Dialogue.play("aldous_pre")
@@ -784,6 +1051,8 @@ func _boss_defeated(pos: Vector2) -> void:
 func _leave_via(p: Node2D) -> void:
 	if p.kind == "final" or p.kind == "exit":
 		var ex: Dictionary = meta.get("exit", {"map": "chapel", "spawn": "start"})
+		if p.kind == "final" and meta.has("final_exit"):
+			ex = meta.final_exit
 		_leave(ex.map, ex.spawn)
 
 

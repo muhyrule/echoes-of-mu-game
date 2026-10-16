@@ -11,6 +11,7 @@ var keys := 0
 var forms: Array = ["mu"]
 var form := "mu"
 var party: Array = []
+var items: Array = []
 var current_map := "chapel"
 var spawn := "start"
 
@@ -56,6 +57,7 @@ func new_game() -> void:
 	forms = ["mu"]
 	form = "mu"
 	party = []
+	items = []
 	current_map = "chapel"
 	spawn = "start"
 
@@ -67,7 +69,7 @@ func has_save() -> bool:
 func save_game() -> void:
 	var data := {
 		"flags": flags, "max_hp": max_hp, "hp": hp, "keys": keys,
-		"forms": forms, "form": form, "party": party,
+		"forms": forms, "form": form, "party": party, "items": items,
 		"map": current_map, "spawn": spawn,
 	}
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -89,6 +91,7 @@ func load_game() -> bool:
 	forms = data.get("forms", ["mu"])
 	form = data.get("form", "mu")
 	party = data.get("party", [])
+	items = data.get("items", [])
 	current_map = data.get("map", "chapel")
 	spawn = data.get("spawn", "start")
 	return true

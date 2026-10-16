@@ -1,0 +1,79 @@
+{
+ "theme": "interior",
+ "title": "Zdenek's Laboratory",
+ "subtitle": "The vapours smell faintly of silence",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "f": {
+   "id": "pra_zdenek",
+   "pal": {
+    "coat": "#3a4a3a",
+    "accent": "#c0a070",
+    "hair": "#9a9aa0",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ]
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "prague_town",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "a": {
+   "kind": "barrel",
+   "id": "z_barrel",
+   "text": "Distilled aqua vitae, marked 'DO NOT TASTE'. Someone has tasted it. A lot.",
+   "reward": "heal",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "urn",
+   "id": "z_urn",
+   "text": "A vial of Philosopher's Salt. It hums at the same pitch as your bell.",
+   "item": "Philosopher's Salt",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "tomes",
+   "id": "z_tomes",
+   "text": "'On the Distillation of Silence' by Z. Hrad. Every page after the second is blank. The author has noted: 'It works.'",
+   "item": "Book of Silence",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#.ZZZZZZZZ..........ZZZZZZZZ.#",
+  "#...........a...e............#",
+  "#..........l.................#",
+  "#............................#",
+  "#............................#",
+  "#............................#",
+  "#.............f..............#",
+  "#............................#",
+  "#............................#",
+  "#............................#",
+  "#.......................l.d..#",
+  "#............................#",
+  "#............................#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

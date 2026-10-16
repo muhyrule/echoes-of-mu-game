@@ -1,0 +1,109 @@
+{
+ "theme": "interior",
+ "title": "The Sleeping Raven",
+ "subtitle": "Beer, bread and bad dreams",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "f": {
+   "id": "pra_anezka",
+   "pal": {
+    "coat": "#6a3038",
+    "accent": "#c0a070",
+    "hair": "#2a1a1a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ]
+  },
+  "h": {
+   "id": "pra_jiri",
+   "pal": {
+    "coat": "#3a3a44",
+    "accent": "#8a8d98",
+    "hair": "#c8c8d0",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "prague_done",
+     "id": "pra_jiri_again"
+    }
+   ]
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "prague_town",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "+": {
+   "kind": "crate",
+   "empty": "Nothing but old stores and dust."
+  },
+  "a": {
+   "kind": "barrel",
+   "id": "t_barrel",
+   "text": "Small beer, mostly. At the bottom of the barrel a rosary of knucklebone beads: the Ossuary Rosary. Anezka says it came with the cellar.",
+   "item": "Ossuary Rosary",
+   "reward": "heal",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "crate",
+   "id": "t_crate",
+   "text": "A fistful of candle ends, each one burned to precisely the same height. Eerie.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "chest",
+   "id": "t_chest",
+   "text": "Anezka's savings, in a sock. You put it back.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "%": {
+   "kind": "barrel",
+   "empty": "Nothing but old stores and dust."
+  }
+ },
+ "ascii": [
+  "####################################",
+  "####################################",
+  "#..................................#",
+  "#................UU................#",
+  "#.%a.............................d.#",
+  "#..................................#",
+  "#.........f...........h............#",
+  "#..................................#",
+  "#.......++++++.....................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#................................e.#",
+  "#.....l.......................l....#",
+  "#..................................#",
+  "#.................@................#",
+  "##################5#################",
+  "####################################"
+ ]
+}

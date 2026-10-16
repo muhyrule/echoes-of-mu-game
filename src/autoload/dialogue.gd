@@ -19,11 +19,12 @@ var _chars := 0.0
 func _ready() -> void:
 	layer = 50
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	var f := FileAccess.open("res://data/dialogue.json", FileAccess.READ)
-	if f:
-		var parsed = JSON.parse_string(f.get_as_text())
-		if typeof(parsed) == TYPE_DICTIONARY:
-			data = parsed
+	for path in ["res://data/dialogue.json", "res://data/dialogue_towns.json"]:
+		var f := FileAccess.open(path, FileAccess.READ)
+		if f:
+			var parsed = JSON.parse_string(f.get_as_text())
+			if typeof(parsed) == TYPE_DICTIONARY:
+				data.merge(parsed, true)
 	_build_ui()
 	_panel.visible = false
 

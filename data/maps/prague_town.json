@@ -1,0 +1,217 @@
+{
+ "theme": "town_p",
+ "title": "Prague \u2014 Old Town Square",
+ "subtitle": "An astronomical clock counts the hours of the dead",
+ "music": "praha",
+ "safe": true,
+ "spawns": {
+  "start": "@",
+  "from_chapel": "$"
+ },
+ "npcs": {
+  "k": {
+   "id": "pra_jan",
+   "pal": {
+    "coat": "#2c3a5a",
+    "accent": "#b0b0b8",
+    "hair": "#5a4a3a",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none",
+    "mail": true
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "prague_done",
+     "id": "pra_jan_after"
+    },
+    {
+     "if": "pra_pass",
+     "id": "pra_jan_pass"
+    }
+   ]
+  },
+  "m": {
+   "id": "pra_eliska",
+   "pal": {
+    "coat": "#6a3a50",
+    "accent": "#c0a070",
+    "hair": "#2a2a2e",
+    "skin": "#c4a083",
+    "style": "braid"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "prague_done",
+     "id": "pra_eliska_after"
+    }
+   ]
+  },
+  "n": {
+   "id": "pra_marketa",
+   "pal": {
+    "coat": "#2a2a32",
+    "accent": "#c8c0b0",
+    "hair": "#b8b8c0",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none",
+    "hood": true
+   },
+   "face": [
+    0,
+    1
+   ],
+   "variants": [
+    {
+     "if": "prague_done",
+     "id": "pra_marketa_after"
+    }
+   ]
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "raven_tavern",
+   "label": "Enter the Sleeping Raven",
+   "style": "door"
+  },
+  "6": {
+   "map": "orloj_lodge",
+   "label": "Enter the Clock-Keeper's Lodge",
+   "style": "door"
+  },
+  "7": {
+   "map": "alchemist",
+   "label": "Enter the Alchemist's",
+   "style": "door"
+  },
+  "8": {
+   "map": "cartographer",
+   "label": "Enter the Cartographer's",
+   "style": "door"
+  },
+  "9": {
+   "map": "prague",
+   "label": "Descend to the Ossuary",
+   "style": "gate",
+   "requires": "pra_pass",
+   "locked": "pra_gate_locked"
+  }
+ },
+ "objects": {
+  "a": {
+   "kind": "statue",
+   "id": "p_statue1",
+   "text": "A weathered saint holding a gear and a lantern. 'Bring light to those who count in the dark.' The base is warm under your hand.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "d": {
+   "kind": "statue",
+   "id": "p_statue2",
+   "text": "A stone gargoyle, mid-yawn. Someone has tied a ribbon round its horn. Marketa, probably.",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "urn",
+   "id": "p_urn1",
+   "text": "Under a loose cobble: a Hussite Pilgrim's Badge, the iron worn smooth by prayer.",
+   "item": "Pilgrim's Badge",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "f": {
+   "kind": "urn",
+   "id": "p_urn2",
+   "text": "A single brass Orrery Cog, still warm. It ticks faintly in your palm.",
+   "item": "Orrery Cog",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "h": {
+   "kind": "barrel",
+   "id": "p_barrel",
+   "text": "Wren's cache: three small coins and a stolen heel of bread, hidden with great care. You decide to leave the coins. The bread is already mostly crumbs.",
+   "item": "Wren's Cache",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "i": {
+   "kind": "crate",
+   "id": "p_crate",
+   "text": "Packed in straw: a Star Chart Fragment showing the sky over Prague on the night the Clock first struck backward. A pencilled note says 'ENT. TOWER 3 A.M.'",
+   "item": "Star Chart Fragment",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "j": {
+   "kind": "chest",
+   "id": "p_chest",
+   "text": "In a crack behind the tavern: a heavy brass box. Inside, a small glass vial of glowing gold. You drink it. Your vitality grows.",
+   "item": "Heart of the Golden Lane",
+   "reward": "maxhp",
+   "empty": "You've already searched here."
+  },
+  "%": {
+   "kind": "barrel",
+   "empty": "Nothing but old stores and dust."
+  },
+  "+": {
+   "kind": "crate",
+   "empty": "Nothing but old stores and dust."
+  }
+ },
+ "triggers": {
+  "1": "pra_arrive"
+ },
+ "exit": {
+  "map": "chapel",
+  "spawn": "from_prague"
+ },
+ "ascii": [
+  "########################################################",
+  "########################################################",
+  "###########################9############################",
+  "#.............................k......................j.#",
+  "#...HHHHHHHH.....HHHHHHH...l..HHHHHHHH......HHHHHHHHl..#",
+  "#...HHHHHHHH.....HHHHHHH......HHHHHHHH......HHHHHHHH...#",
+  "#...HHHHHHHH.....HHHHHHH......HHHHHHHH......HHHHHHHH...#",
+  "#...HHHH5HHH.....HHH6HHH......HHHH7HHH......HHHH8HHH...#",
+  "#........................h.............................#",
+  "#.......l.....+.....l.............l.+...........l......#",
+  "#.%%...........m..............................f........#",
+  "#......................................................#",
+  "#...............................HHHHHH.................#",
+  "#...............................HHHHHH.................#",
+  "#.........e................l....HHHHHH.................#",
+  "#...HHHHHHH.....................HHHHHH.................#",
+  "#...HHHHHHH............................................#",
+  "#...HHHHHHH............................................#",
+  "#...HHHHHHH...HHHHHH.........................l.........#",
+  "#.............HHHHHH...................................#",
+  "#.............HHHHHH..................================.#",
+  "#.............HHHHHH..................=..............=.#",
+  "#.....................................=..............=.#",
+  "#.....................................=...a.......d..=.#",
+  "#.....i.....l..............l..........=..............=.#",
+  "#............................................n.......=.#",
+  "#.....................................=..............=.#",
+  "#.......................1111111.......=..............=.#",
+  "#.....................................=..............=.#",
+  "#.....................................=..............=.#",
+  "#..........................$@.........=..............=.#",
+  "#.....................................================.#",
+  "#........................EEEEEE........................#",
+  "########################################################"
+ ]
+}
