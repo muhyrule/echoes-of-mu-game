@@ -89,8 +89,6 @@ func _physics_process(delta: float) -> void:
 		state = "stun"
 		st = 0.0
 		Audio.sfx("hit")
-	level.spark(global_position + Vector2(0, -4), Color(1, 0.85, 0.5), 10)
-	level.shake(2.0 if is_boss else 1.0)
 	if dist < hit_radius + 8.0 and state != "stun" and state != "dormant":
 		player.hurt(contact_dmg, to.normalized() if dist > 0.1 else Vector2.DOWN)
 	queue_redraw()
@@ -138,6 +136,8 @@ func hurt(dmg: int, dir: Vector2) -> void:
 	flash = 0.12
 	knock = dir * (70.0 if is_boss else 190.0)
 	Audio.sfx("hit")
+	level.spark(global_position + Vector2(0, -4), Color(1, 0.85, 0.5), 8)
+	level.shake(2.0 if is_boss else 0.8)
 	if is_boss and not summoned and hp <= max_hp / 2:
 		summoned = true
 		level.spawn_enemy("bat", global_position + Vector2(-24, -10))

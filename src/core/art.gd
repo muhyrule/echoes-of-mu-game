@@ -180,6 +180,79 @@ static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving 
 	if not up and not side:
 		c.draw_rect(Rect2(-2.1, -10.4 + bob, 0.5, 0.5), Color(1, 1, 1, 0.9 * a))
 		c.draw_rect(Rect2(1.7, -10.4 + bob, 0.5, 0.5), Color(1, 1, 1, 0.9 * a))
+	_person_detail(c, pal, side, up, sx, bob, swing, a)
+
+
+static func _person_detail(c: CanvasItem, pal: Dictionary, side: bool, up: bool, sx: float, bob: float, swing: float, a: float) -> void:
+	var coat := Color(pal.coat, a)
+	var hl := Color(coat.lightened(0.45), 0.55 * a)
+	var sh := Color(coat.darkened(0.55), 0.6 * a)
+	var acc := Color(pal.accent, a)
+	var hair := Color(pal.hair, a)
+	var skin := Color(pal.skin, a)
+	var boots := Color(pal.boots, a)
+	var ink := Color(OUT, 0.8 * a)
+	var gold := Color("e6c870", a)
+	# boot highlights and soles
+	if side:
+		c.draw_rect(Rect2(-1.8 + swing * 0.8, 5.4, 3.2, 0.7), ink)
+		c.draw_rect(Rect2(sx * 0.6 + swing * 0.8 - 0.8, 3.0, 1.6, 0.5), Color(boots.lightened(0.5), 0.6 * a))
+	else:
+		c.draw_rect(Rect2(-3.6, 5.4, 3.0, 0.7), ink)
+		c.draw_rect(Rect2(0.6, 5.4, 3.0, 0.7), ink)
+		c.draw_rect(Rect2(-3.0, 3.0, 1.2, 0.5), Color(boots.lightened(0.5), 0.6 * a))
+		c.draw_rect(Rect2(1.2, 3.0, 1.2, 0.5), Color(boots.lightened(0.5), 0.6 * a))
+		c.draw_line(Vector2(-3.4, 4.2), Vector2(-0.8, 4.2), ink, 0.35)
+		c.draw_line(Vector2(0.8, 4.2), Vector2(3.4, 4.2), ink, 0.35)
+	# hem trim and coat folds
+	c.draw_line(Vector2(-4.8, 3.1), Vector2(4.8, 3.1), Color(acc, 0.9 * a), 0.7)
+	if not side:
+		c.draw_line(Vector2(-2.4, 1.8), Vector2(-2.8, 3.2), sh, 0.5)
+		c.draw_line(Vector2(2.6, 1.8), Vector2(3.0, 3.2), sh, 0.5)
+		c.draw_line(Vector2(-3.6, -5.0 + bob), Vector2(-4.2, 0.0), hl, 0.6)
+	else:
+		c.draw_line(Vector2(-sx * 2.0, -4.6 + bob), Vector2(-sx * 2.6, 3.0), sh, 0.5)
+		c.draw_line(Vector2(sx * 2.2, -4.6 + bob), Vector2(sx * 2.8, 0.0), hl, 0.6)
+	if not up and not side:
+		# buttons, collar points, stitching
+		for i in 3:
+			c.draw_rect(Rect2(-0.3, -4.6 + bob + i * 1.7, 0.7, 0.7), gold)
+		c.draw_colored_polygon(PackedVector2Array([Vector2(-1.4, -5.6 + bob), Vector2(0, -3.6 + bob), Vector2(-3.0, -4.6 + bob)]), Color(acc.lightened(0.2), a))
+		c.draw_colored_polygon(PackedVector2Array([Vector2(1.4, -5.6 + bob), Vector2(0, -3.6 + bob), Vector2(3.0, -4.6 + bob)]), Color(acc.lightened(0.2), a))
+		# eyebrows, nose, mouth, cheeks
+		c.draw_line(Vector2(-2.7, -11.0 + bob), Vector2(-1.0, -10.8 + bob), Color(hair.darkened(0.3), a), 0.5)
+		c.draw_line(Vector2(1.0, -10.8 + bob), Vector2(2.7, -11.0 + bob), Color(hair.darkened(0.3), a), 0.5)
+		c.draw_rect(Rect2(-0.25, -9.2 + bob, 0.5, 0.6), Color(skin.darkened(0.2), a))
+		c.draw_line(Vector2(-0.8, -7.9 + bob), Vector2(0.8, -7.9 + bob), Color(skin.darkened(0.45), a), 0.4)
+		c.draw_circle(Vector2(-2.8, -8.7 + bob), 0.8, Color(1, 0.5, 0.5, 0.25 * a))
+		c.draw_circle(Vector2(2.8, -8.7 + bob), 0.8, Color(1, 0.5, 0.5, 0.25 * a))
+		# hair strands and sheen
+		c.draw_line(Vector2(-1.5, -14.4 + bob), Vector2(-2.6, -11.8 + bob), Color(hair.lightened(0.4), 0.8 * a), 0.4)
+		c.draw_line(Vector2(0.6, -14.6 + bob), Vector2(0.9, -11.6 + bob), Color(hair.lightened(0.4), 0.8 * a), 0.4)
+		c.draw_line(Vector2(2.4, -13.8 + bob), Vector2(3.4, -11.6 + bob), Color(hair.darkened(0.3), 0.8 * a), 0.4)
+		# shoulder pauldrons with rivets, cuffs
+		c.draw_arc(Vector2(-5.4, -4.4 + bob), 2.0, PI, TAU, 8, Color(acc.lightened(0.15), a), 1.0)
+		c.draw_arc(Vector2(5.4, -4.4 + bob), 2.0, PI, TAU, 8, Color(acc.darkened(0.1), a), 1.0)
+		c.draw_rect(Rect2(-6.6, 1.0 + bob, 2.4, 0.7), Color(acc, a))
+		c.draw_rect(Rect2(4.2, 1.0 + bob, 2.4, 0.7), Color(acc, a))
+		# belt pouch and buckle highlight
+		c.draw_rect(Rect2(2.2, 0.6, 2.0, 2.2), Color("5a3f2a", a))
+		c.draw_rect(Rect2(2.2, 0.6, 2.0, 0.5), Color("8a6a4a", a))
+		c.draw_rect(Rect2(-0.4, 0.3, 0.8, 0.8), Color("fff2b0", a))
+	elif side:
+		c.draw_rect(Rect2(sx * 2.4 - 0.5, -9.2 + bob, 0.9, 0.5), Color(skin.darkened(0.25), a))
+		c.draw_line(Vector2(sx * 1.4, -8.0 + bob), Vector2(sx * 2.8, -8.0 + bob), Color(skin.darkened(0.45), a), 0.4)
+		c.draw_line(Vector2(sx * 0.8, -11.5 + bob), Vector2(sx * 2.8, -11.3 + bob), Color(hair.darkened(0.3), a), 0.4)
+		c.draw_line(Vector2(-sx * 2.0, -13.4 + bob), Vector2(-sx * 3.6, -9.4 + bob), Color(hair.lightened(0.4), 0.8 * a), 0.4)
+		c.draw_circle(Vector2(-sx * 0.6, -9.6 + bob), 0.7, Color(skin.darkened(0.2), a))
+		c.draw_rect(Rect2(-0.4, 0.3, 0.8, 0.8), Color("fff2b0", a))
+		c.draw_rect(Rect2(-sx * 1.0, 0.5, 2.0, 2.0), Color("5a3f2a", a))
+	else:
+		c.draw_line(Vector2(-2.0, -13.6 + bob), Vector2(-2.4, -8.6 + bob), Color(hair.lightened(0.35), 0.7 * a), 0.4)
+		c.draw_line(Vector2(0.4, -14.0 + bob), Vector2(0.6, -8.2 + bob), Color(hair.darkened(0.3), 0.7 * a), 0.4)
+		c.draw_line(Vector2(2.4, -13.4 + bob), Vector2(2.8, -8.8 + bob), Color(hair.lightened(0.35), 0.7 * a), 0.4)
+		c.draw_line(Vector2(-3.0, -4.6 + bob), Vector2(3.0, -4.6 + bob), Color(acc.lightened(0.2), a), 0.6)
+		c.draw_line(Vector2(0, -3.8 + bob), Vector2(0, 2.0), sh, 0.5)
 
 
 static func rat(c: CanvasItem, f: Vector2, t: float, flash: float) -> void:
@@ -206,6 +279,29 @@ static func rat(c: CanvasItem, f: Vector2, t: float, flash: float) -> void:
 	c.draw_circle(Vector2(9.0 * s, -1.0), 0.8, Color("2a1a1a"))
 	c.draw_line(Vector2(8 * s, -0.5), Vector2(11 * s, 0.5), Color(1, 1, 1, 0.6), 0.4)
 	c.draw_line(Vector2(8 * s, 0.2), Vector2(11 * s, 1.8), Color(1, 1, 1, 0.6), 0.4)
+	var ink := Color(OUT, 0.7)
+	# fur tufts, spine ridge, ribs, scar, mange patch
+	for i in 6:
+		var x := (-4.5 + i * 1.7) * s
+		c.draw_line(Vector2(x, -4.4 + sin(i * 2.1) * 0.5), Vector2(x - s * 0.9, -5.8 + run * 0.3), fur.lightened(0.25), 0.5)
+	for i in 3:
+		c.draw_line(Vector2((-2.0 + i * 1.8) * s, -2.0), Vector2((-2.4 + i * 1.8) * s, 0.4), Color(ink, 0.45), 0.35)
+	c.draw_line(Vector2(-1.0 * s, -3.4), Vector2(1.8 * s, -2.2), Color("c06060") if flash <= 0.0 else Color.WHITE, 0.5)
+	c.draw_circle(Vector2(-2.6 * s, -1.8), 1.0, Color(fur.darkened(0.25), 0.7))
+	# ear detail and inner ear
+	c.draw_circle(Vector2(3.0 * s, -5.2), 0.8, Color("f0b8b8") if flash <= 0.0 else Color.WHITE)
+	c.draw_line(Vector2(2.2 * s, -6.2), Vector2(2.8 * s, -5.6), ink, 0.4)
+	# brow, nostril, teeth, claws, tail rings
+	c.draw_line(Vector2(4.6 * s, -3.4), Vector2(6.6 * s, -2.8), ink, 0.5)
+	c.draw_rect(Rect2(8.2 * s - 0.4, 0.0, 0.7, 1.0), Color("f4ecd0"))
+	c.draw_rect(Rect2(7.2 * s - 0.4, 0.2, 0.6, 0.9), Color("f4ecd0"))
+	c.draw_circle(Vector2(5.9 * s, -2.0), 1.4, Color(1.0, 0.2, 0.2, 0.18))
+	for i in 3:
+		c.draw_line(Vector2((-3.3 + i * 5.2) * s, 3.9 + run), Vector2((-2.4 + i * 5.2) * s, 4.4 + run), Color("e9e0cc"), 0.35)
+	for i in 4:
+		var k2 := (i + 1.5) / 7.0
+		var tp := Vector2(-s * (5.0 + k2 * 6.0), -1.0 + sin(t * 8.0 + k2 * 3.0) * 1.5 * k2)
+		c.draw_line(tp + Vector2(0, -0.9), tp + Vector2(0, 0.9), Color(ink, 0.5), 0.35)
 
 
 static func bat(c: CanvasItem, t: float, flash: float) -> void:
@@ -226,6 +322,26 @@ static func bat(c: CanvasItem, t: float, flash: float) -> void:
 	c.draw_rect(Rect2(0.8, -4.4, 1.0, 1.0), Color("ffd166"))
 	c.draw_line(Vector2(-0.6, -1.5), Vector2(-0.6, -0.3), Color.WHITE, 0.5)
 	c.draw_line(Vector2(0.6, -1.5), Vector2(0.6, -0.3), Color.WHITE, 0.5)
+	var ink := Color(OUT, 0.75)
+	for sgn in [-1.0, 1.0]:
+		# wing bones and membrane scallops
+		var root := Vector2(sgn * 2.0, -2.2)
+		var tips := [Vector2(sgn * 6.0, -8.0 - fl * 4.0), Vector2(sgn * 11.0, -5.0 - fl * 5.0), Vector2(sgn * 9.0, -2.0 - fl * 3.0), Vector2(sgn * 7.0, 0.0 - fl * 2.0)]
+		for tp in tips:
+			c.draw_line(root, tp, Color(col.lightened(0.35), 0.9), 0.45)
+		c.draw_circle(tips[1], 0.6, Color("d9d2c0"))
+		c.draw_line(Vector2(sgn * 4.0, -4.0), Vector2(sgn * 8.5, -4.5 - fl * 3.0), Color(ink, 0.5), 0.35)
+		# ear inner and tuft
+		c.draw_line(Vector2(sgn * 1.5, -6.2), Vector2(sgn * 1.2, -7.6), Color("c88aa8"), 0.5)
+		c.draw_line(Vector2(sgn * 1.2, 0.8), Vector2(sgn * 1.7, 1.8), Color(col.lightened(0.3), 0.9), 0.4)
+	# fur chest tufts, fangs, nose, glow
+	for i in 3:
+		c.draw_line(Vector2(-1.2 + i * 1.2, -1.0), Vector2(-1.4 + i * 1.2, 1.2), Color(col.lightened(0.3), 0.8), 0.35)
+	c.draw_rect(Rect2(-1.0, -2.2, 0.8, 0.8), Color("fff8e0"))
+	c.draw_rect(Rect2(0.2, -2.2, 0.8, 0.8), Color("fff8e0"))
+	c.draw_rect(Rect2(-0.4, -2.9, 0.8, 0.5), Color("d88aa0"))
+	c.draw_circle(Vector2(-1.3, -3.9), 1.7, Color(1.0, 0.8, 0.3, 0.2))
+	c.draw_circle(Vector2(1.3, -3.9), 1.7, Color(1.0, 0.8, 0.3, 0.2))
 
 
 static func warden(c: CanvasItem, f: Vector2, t: float, flash: float, winding: bool, brass := false) -> void:
@@ -258,6 +374,53 @@ static func warden(c: CanvasItem, f: Vector2, t: float, flash: float, winding: b
 	c.draw_line(Vector2(0, -8), f * 21.0, Color("d3d7e3"), 2.8)
 	c.draw_line(Vector2(0, -8), f * 21.0, Color("8a93a8"), 0.8)
 	c.draw_circle(Vector2(-15, 4), 3.2, Color(0.2, 0.15, 0.1))
+	var ink := Color(OUT, 0.8)
+	var hi := steel.lightened(0.35)
+	var rune := Color(0.4, 0.9, 1.0, 0.5 + 0.4 * sin(t * 3.0)) if not brass else Color(1.0, 0.7, 0.3, 0.5 + 0.4 * sin(t * 3.0))
+	# plate seams, rivets and highlights on the cuirass
+	c.draw_line(Vector2(0, -14.5), Vector2(0, 5.5), ink, 0.7)
+	c.draw_line(Vector2(-10, -9), Vector2(10, -9), ink, 0.6)
+	c.draw_line(Vector2(-9.5, -4), Vector2(9.5, -4), ink, 0.6)
+	c.draw_line(Vector2(-9.8, -14), Vector2(-8.6, 5), Color(hi, 0.7), 0.8)
+	for i in 4:
+		c.draw_circle(Vector2(-8.0 + i * 5.3, -13.5), 0.6, hi)
+		c.draw_circle(Vector2(-8.0 + i * 5.3, -9.7), 0.5, hi)
+	# chest sigil
+	c.draw_arc(Vector2(0, -6.5), 2.6, 0.0, TAU, 14, rune, 0.7)
+	c.draw_line(Vector2(0, -9.5), Vector2(0, -3.5), rune, 0.6)
+	c.draw_line(Vector2(-2.4, -6.5), Vector2(2.4, -6.5), rune, 0.6)
+	# tassets, knee plates, greaves lines
+	for i in 5:
+		c.draw_line(Vector2(-8.0 + i * 3.6, 3.0), Vector2(-8.6 + i * 3.8, 7.5), ink, 0.5)
+	c.draw_circle(Vector2(-5.5, 8.5), 1.8, hi)
+	c.draw_circle(Vector2(5.5, 8.5), 1.8, hi)
+	c.draw_circle(Vector2(-5.5, 8.5), 0.7, ink)
+	c.draw_circle(Vector2(5.5, 8.5), 0.7, ink)
+	# pauldron spikes and trim
+	for sg in [-1.0, 1.0]:
+		c.draw_colored_polygon(PackedVector2Array([Vector2(sg * 12.0, -17.5), Vector2(sg * 16.0, -22.5), Vector2(sg * 16.5, -16.0)]), Color(OUT))
+		c.draw_colored_polygon(PackedVector2Array([Vector2(sg * 12.8, -17.0), Vector2(sg * 15.6, -21.0), Vector2(sg * 15.8, -16.6)]), hi)
+		c.draw_arc(Vector2(sg * 14.0, -14.0), 4.2, 0.0, TAU, 12, ink, 0.5)
+	# helm: brow ridge, cheek vents, crest ridge, glowing eye halos
+	c.draw_line(Vector2(-6.5, -22.3), Vector2(6.5, -22.3), hi, 0.8)
+	for i in 4:
+		c.draw_line(Vector2(-3.0 + i * 2.0, -21.0), Vector2(-3.0 + i * 2.0, -19.2), ink, 0.5)
+	c.draw_line(Vector2(0, -29.5), Vector2(0, -23.5), hi, 0.7)
+	c.draw_circle(Vector2(-3.0, -23.3), 2.6, Color(0.4, 0.9, 1.0, 0.12 * glow) if not brass else Color(1.0, 0.7, 0.3, 0.12 * glow))
+	c.draw_circle(Vector2(3.0, -23.3), 2.6, Color(0.4, 0.9, 1.0, 0.12 * glow) if not brass else Color(1.0, 0.7, 0.3, 0.12 * glow))
+	# sword details: fuller, crossguard and pommel
+	var perp := Vector2(-f.y, f.x)
+	var gp := Vector2(0, -8) + f * 4.0
+	c.draw_line(gp - perp * 3.4, gp + perp * 3.4, Color(OUT), 2.2)
+	c.draw_line(gp - perp * 3.0, gp + perp * 3.0, Color("d6b25a"), 1.0)
+	c.draw_line(Vector2(0, -8) + f * 6.0, Vector2(0, -8) + f * 19.0, Color(hi, 0.8), 0.4)
+	c.draw_circle(Vector2(0, -8) - f * 0.5, 1.5, Color("d6b25a"))
+	# hanging chains and tattered cape stitches
+	for i in 6:
+		c.draw_circle(Vector2(-11.0 + i * 0.4, -2.0 + i * 1.6), 0.55, Color("9aa0ae"))
+		c.draw_circle(Vector2(11.0 - i * 0.4, -2.0 + i * 1.6), 0.55, Color("9aa0ae"))
+	for i in 5:
+		c.draw_line(Vector2(-12.0 + i * 6.0, -15.0), Vector2(-12.5 + i * 6.2, 8.0), Color(0.5, 0.4, 0.65, 0.25), 0.5)
 	var lc := Color("ffcf70") if int(t * 6.0) % 2 == 0 else Color("e09a3a")
 	c.draw_circle(Vector2(-15, 5), 2.2, lc)
 
