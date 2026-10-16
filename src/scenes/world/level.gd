@@ -246,7 +246,7 @@ func _setup_camera() -> void:
 	cam.limit_top = 0
 	cam.limit_right = w * TILE
 	cam.limit_bottom = h * TILE
-	cam.zoom = Vector2(3, 3)
+	cam.zoom = Vector2(2.6, 2.6)
 	player.add_child(cam)
 	cam.make_current()
 
@@ -318,7 +318,7 @@ func _setup_fx() -> void:
 	dust.lifetime = 7.0
 	dust.preprocess = 7.0
 	dust.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
-	dust.emission_rect_extents = Vector2(230, 130)
+	dust.emission_rect_extents = Vector2(310, 180)
 	dust.direction = Vector2(1, -0.3)
 	dust.spread = 60.0
 	dust.initial_velocity_min = 2.0
