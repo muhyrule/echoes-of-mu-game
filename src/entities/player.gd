@@ -154,7 +154,7 @@ func _draw() -> void:
 	draw_set_transform(Vector2(0, yoff), 0.0, Vector2.ONE)
 	if garg:
 		_draw_wings()
-	Art.person(self, facing, t, pal, moving, 0.75 if wraith else 1.0)
+	Art.person(self, facing, t, pal, moving, 0.75 if wraith else 1.0, attacking, yoff)
 	if garg:
 		_draw_horns()
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
