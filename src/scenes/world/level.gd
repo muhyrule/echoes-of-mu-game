@@ -594,6 +594,7 @@ func _spawn_follower(id: String) -> void:
 	f.set_script(FollowerScript)
 	entities.add_child(f)
 	f.hero = id
+	f.level = self
 	f.start(lead, FOLLOW_PAL[id])
 	followers[id] = f
 

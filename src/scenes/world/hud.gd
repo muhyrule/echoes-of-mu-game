@@ -129,8 +129,17 @@ func _draw() -> void:
 	var hint_q := "  [Q]" if GameState.forms.size() > 1 else ""
 	_txt(Vector2(12, 62), "Form: %s%s" % [fname, hint_q], 12, {"wraith": Color("9fd0ff"), "gargoyle": Color("c2cad8")}.get(GameState.form, Color("d9c9ff")))
 	_txt(Vector2(12, 78), "Gold %d" % GameState.gold, 12, Color("f0d070"))
+	var sk_y := 110
+	for fid in ["isolde", "wren", "corvin"]:
+		if level.followers.has(fid) and is_instance_valid(level.followers[fid]):
+			var fo: Node2D = level.followers[fid]
+			var kk: int = fo.KIT[fid].key
+			var rdy: bool = fo.skill_cd <= 0.0
+			var lab := "[%s] %s %s" % [OS.get_keycode_string(kk), fo.skill_name(), "READY" if rdy else "%ds" % ceili(fo.skill_cd)]
+			_txt(Vector2(12, sk_y), lab, 9, Color("f0d070") if rdy else Color("7a748c"))
+			sk_y += 16
 	if level.weather != null:
-		_txt(Vector2(12, 110), "Weather: %s" % level.weather.label(), 9, Color("a8c0e0"))
+		_txt(Vector2(12, sk_y), "Weather: %s" % level.weather.label(), 9, Color("a8c0e0"))
 	_txt(Vector2(12, 94), "[1] Tonic %d  [2] Elixir %d  [3] Candle %d" % [int(GameState.supplies.get("tonic", 0)), int(GameState.supplies.get("elixir", 0)), int(GameState.supplies.get("candle", 0))], 9, Color("b8b0c8"))
 	if banner_t > 0.0:
 		var a := minf(1.0, banner_t)

@@ -70,3 +70,11 @@ Both bosses come from real regional folklore:
 
 - **Nor' Loch Kelpie** (Drowned Cistern, Edinburgh): the Scottish water-horse that lures travellers onto its back and drowns them. Tide rings with a gap to slip through, weedy mane lashes, water geysers, drowned-light summons, charging rush.
 - **Golem of Prague** (Attic of the Old-New Synagogue): Rabbi Loew's clay guardian, animated by the word *emet* on its brow (it loses the first letter in its final phase). Clay boulder volleys, sweeping arm blows, stomp shockwaves, mud pits that slow you, charging rush.
+
+## Party combat
+Isolde, Wren and Corvin now fight beside Mu with automatic attacks (Isolde's maul, Wren's twin daggers, Corvin's clockwork bolts) and skills that fire when ready or on demand:
+- `4` Isolde: Bell Toll (AoE + ward)
+- `5` Wren: Shadow Fan (five thrown daggers)
+- `6` Corvin: Gearstorm (radial bolts, heals 1 HP)
+
+Bosses gained 16-bit style checker-dither shading, scale/brick/filigree detail, and heroes have refined signature gear.

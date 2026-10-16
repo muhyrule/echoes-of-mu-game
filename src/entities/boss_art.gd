@@ -27,6 +27,7 @@ static func _fl(col: Color, f: float) -> Color:
 
 static func _shape(c: CanvasItem, pts: PackedVector2Array, col: Color, f: float, hi := Color(0, 0, 0, 0), lw := 1.4) -> void:
 	c.draw_colored_polygon(pts, _fl(col, f))
+	_dither(c, pts, f)
 	var cl := pts.duplicate()
 	cl.append(pts[0])
 	if hi.a > 0.0:
@@ -36,6 +37,64 @@ static func _shape(c: CanvasItem, pts: PackedVector2Array, col: Color, f: float,
 		if half.size() > 1:
 			c.draw_polyline(half, _fl(hi, f), 1.6)
 	c.draw_polyline(cl, OUT, lw)
+
+
+# 16-bit style checker dithering: shadow along the bottom of a shape, highlight along the top.
+static func _dither(c: CanvasItem, pts: PackedVector2Array, f: float) -> void:
+	if f > 0.0 or pts.size() < 3:
+		return
+	var r := Rect2(pts[0], Vector2.ZERO)
+	for p in pts:
+		r = r.expand(p)
+	if r.size.x < 14.0 or r.size.y < 14.0:
+		return
+	var step := 3.0
+	var yb := r.end.y - r.size.y * 0.32
+	var yt := r.position.y + r.size.y * 0.14
+	var y := r.position.y
+	var row := 0
+	while y < r.end.y:
+		var shadow := y >= yb
+		if shadow or y <= yt:
+			var x := r.position.x + (step if row % 2 == 0 else 0.0)
+			var col := Color(0.04, 0.02, 0.1, 0.3) if shadow else Color(1, 1, 1, 0.13)
+			while x < r.end.x:
+				if Geometry2D.is_point_in_polygon(Vector2(x + 1.0, y + 1.0), pts):
+					c.draw_rect(Rect2(x, y, 2.0, 2.0), col)
+				x += step * 2.0
+		y += step
+		row += 1
+
+
+static func _rivets(c: CanvasItem, a: Vector2, b: Vector2, n: int, col: Color) -> void:
+	for i in n:
+		var p := a.lerp(b, (i + 0.5) / n)
+		c.draw_rect(Rect2(p.x - 1.5, p.y - 1.5, 3.0, 3.0), OUT)
+		c.draw_rect(Rect2(p.x - 1.0, p.y - 1.0, 2.0, 2.0), col)
+		c.draw_rect(Rect2(p.x - 1.0, p.y - 1.0, 1.0, 1.0), col.lightened(0.5))
+
+
+static func _scroll(c: CanvasItem, p: Vector2, sg: float, col: Color) -> void:
+	var pts := PackedVector2Array()
+	for i in 12:
+		var a := i * 0.62
+		pts.append(p + Vector2(sg * cos(a) * (1.0 + i * 0.5), sin(a) * (1.0 + i * 0.5)))
+	c.draw_polyline(pts, col, 1.0)
+
+
+static func _scales(c: CanvasItem, o: Vector2, cols: int, rows: int, sz: float, col: Color) -> void:
+	for j in rows:
+		for i in cols:
+			var p := o + Vector2(i * sz + (sz * 0.5 if j % 2 == 1 else 0.0), j * sz * 0.7)
+			c.draw_arc(p, sz * 0.5, 0.1, PI - 0.1, 5, col, 1.0)
+
+
+static func _barnacles(c: CanvasItem, p: Vector2, n: int) -> void:
+	for i in n:
+		var q := p + Vector2((i * 5) % 11 - 5, (i * 7) % 9 - 4)
+		c.draw_circle(q, 2.4, OUT)
+		c.draw_circle(q, 1.7, Color("d8e4dc"))
+		c.draw_circle(q + Vector2(0.4, 0.4), 0.7, Color("6a7a78"))
 
 
 static func _poly(c: CanvasItem, pts: Array, col: Color, f: float, lw := 1.4) -> void:
@@ -194,6 +253,10 @@ static func golem(c: CanvasItem, t: float, ph: int, flash: float, winding: bool,
 			_poly(c, [Vector2(bx - 4, sh.y - 16 + k * 2), Vector2(bx + 4, sh.y - 16 + k * 2), Vector2(bx + s * 1.5, sh.y - 36 + k * 4)], Color("7a7288"), f, 1.2)
 		c.draw_circle(sh + Vector2(s * 6, -2), 4.0, gold)
 		c.draw_circle(sh + Vector2(s * 6, -2), 2.0, glow)
+		_rivets(c, sh + Vector2(-s * 10, 2), sh + Vector2(s * 20, 4), 5, gold)
+		_scroll(c, sh + Vector2(s * 14, -8), s, Color(gold, 0.9))
+		for k in 3:
+			c.draw_line(fist + Vector2(-6 + k * 6, -6), fist + Vector2(-6 + k * 6, 8), Color(OUT, 0.8), 1.2)
 	# head with spired crown
 	var hy := -128.0 + br
 	var hood := _sm([Vector2(-21, hy + 4), Vector2(-23, hy - 18), Vector2(-14, hy - 34), Vector2(0, hy - 42), Vector2(14, hy - 34), Vector2(23, hy - 18), Vector2(21, hy + 4)], true, 5)
@@ -225,6 +288,40 @@ static func golem(c: CanvasItem, t: float, ph: int, flash: float, winding: bool,
 	# mouth grille
 	for k in 5:
 		c.draw_line(Vector2(-6 + k * 3, hy - 2), Vector2(-6 + k * 3, hy + 2), Color(glow, 0.8), 1.0)
+	# fired-clay brick seams over the torso
+	for k in 6:
+		var y := -66.0 - k * 9.0
+		var half := 40.0 - maxf(0.0, k - 3) * 3.0
+		var off := 8.0 if k % 2 == 0 else 0.0
+		var x := -half + off
+		while x < half:
+			c.draw_line(Vector2(x, y), Vector2(x, y - 9.0), Color(clay_d, 0.45), 1.0)
+			x += 16.0
+		c.draw_line(Vector2(-half, y), Vector2(half, y), Color(clay_d, 0.4), 1.0)
+		c.draw_line(Vector2(-half, y - 1.0), Vector2(half, y - 1.0), Color(1, 0.85, 0.7, 0.07), 1.0)
+	# gilt filigree scrolls on the skirt and brow
+	for i in 6:
+		var sx := -30.0 + i * 12.0
+		_scroll(c, Vector2(sx, -46), 1.0 if i % 2 == 0 else -1.0, Color(gold, 0.85))
+	for sg in [-1.0, 1.0]:
+		_scroll(c, Vector2(sg * 14, hy - 4), sg, Color(gold, 0.8))
+		_rivets(c, Vector2(sg * 14, -38), Vector2(sg * 32, -38), 3, gold)
+		_rivets(c, Vector2(sg * 10, -56), Vector2(sg * 24, -56), 2, gold)
+		c.draw_line(Vector2(sg * 12, -24), Vector2(sg * 32, -24), gold, 1.0)
+		for k in 3:
+			c.draw_line(Vector2(sg * (50 + k * 4), 0), Vector2(sg * (50 + k * 4), 6), OUT, 3.0)
+			c.draw_line(Vector2(sg * (50 + k * 4), 0), Vector2(sg * (50 + k * 4), 5), stone, 1.6)
+	# hanging scroll tags (the shem) swaying from the belt
+	for k in 4:
+		var tp := Vector2(-27.0 + k * 18.0, -47.0)
+		var sw := sin(t * 2.0 + k) * 1.5
+		c.draw_line(tp, tp + Vector2(sw, 4), gold, 1.0)
+		_poly(c, [tp + Vector2(-3 + sw, 4), tp + Vector2(3 + sw, 4), tp + Vector2(3 + sw, 14), tp + Vector2(0 + sw, 12), tp + Vector2(-3 + sw, 14)], Color("e8d8b0"), f, 0.9)
+		c.draw_line(tp + Vector2(-1.5 + sw, 7), tp + Vector2(1.5 + sw, 7), Color("8a3a2a"), 1.0)
+		c.draw_line(tp + Vector2(-1.5 + sw, 10), tp + Vector2(1.5 + sw, 10), Color("8a3a2a"), 1.0)
+	# cobwebbed corner cracks and chipped edges on the crown
+	for k in 3:
+		c.draw_line(Vector2(-20 + k * 3, hy - 16), Vector2(-14 + k * 4, hy - 8 + k * 2), Color(OUT, 0.6), 1.0)
 	# loose dust motes
 	for k in 6:
 		var u := fmod(t * 0.4 + k * 0.17, 1.0)
@@ -350,6 +447,46 @@ static func kelpie(c: CanvasItem, t: float, ph: int, flash: float, winding: bool
 	c.draw_circle(lp, 9.0, Color(1.0, 0.8, 0.3, 0.2))
 	_arch(c, lp.x, lp.y + 5, 3.4, 10.0, Color(1.0, 0.85, 0.4), Color("3a2a1a"))
 	_poly(c, [lp + Vector2(-6, -6), lp + Vector2(6, -6), lp + Vector2(0, -13)], gold, f, 1.0)
+	# overlapping fish-scale mail across barrel and haunch
+	_scales(c, Vector2(-44, -50 - rear * 0.2), 5, 4, 8.0, Color(body_l, 0.55))
+	_scales(c, Vector2(-8, -64 - rear * 0.4), 4, 4, 8.0, Color(body_l, 0.5))
+	# barnacle clusters and studded harness straps
+	_barnacles(c, Vector2(20, -46), 6)
+	_barnacles(c, Vector2(-34, -30), 5)
+	_barnacles(c, Vector2(30, -96 - rear * 0.7), 4)
+	for k in 2:
+		var a := Vector2(-4 + k * 18, -80 - k * 4 - rear * 0.5)
+		c.draw_line(a, a + Vector2(8, 46), OUT, 5.0)
+		c.draw_line(a, a + Vector2(8, 46), Color("4a3828"), 3.0)
+		_rivets(c, a + Vector2(1, 6), a + Vector2(7, 42), 5, gold)
+	# gill slits, frilled fins and whisker tendrils on the head
+	for k in 3:
+		c.draw_line(Vector2(hx - 10 + k * 3, hy + 8), Vector2(hx - 13 + k * 3, hy + 17), Color(OUT, 0.8), 1.2)
+		c.draw_line(Vector2(hx - 10 + k * 3, hy + 8), Vector2(hx - 13 + k * 3, hy + 17), Color(0.5, 1.0, 0.9, 0.4), 0.5)
+	for k in 5:
+		var fa := Vector2(hx - 24, hy + 2 + k * 2)
+		var tip := fa + Vector2(-16 - k * 3, -8 + k * 6 + sin(t * 3.0 + k) * 3)
+		c.draw_line(fa, tip, OUT, 2.6)
+		c.draw_line(fa, tip, Color("6ac0c8"), 1.2)
+	for k in 2:
+		var pts: Array = []
+		for j in 5:
+			pts.append(Vector2(hx + 42 + j * 5, hy + 20 + k * 4 + sin(t * 3.0 + j + k) * 3 + j * 2))
+		c.draw_polyline(_sm(pts, false, 3), Color(0.8, 1.0, 1.0, 0.6), 1.0)
+	_rivets(c, Vector2(hx - 8, hy + 14), Vector2(hx + 30, hy + 14), 6, gold)
+	# glowing pearls strung through the mane
+	for k in 6:
+		var u := float(k) / 5.0
+		var pp := Vector2(8 + u * 40, -86 - u * 66 - rear * (0.5 + u * 0.5) + wob * u)
+		c.draw_circle(pp, 2.6, Color(0.7, 1.0, 0.95, 0.25))
+		c.draw_circle(pp, 1.5, Color("f0fff8"))
+	# feathered fetlocks and spray at the hooves
+	for s2 in [0, 1]:
+		var kn := Vector2(22 + s2 * 6, -66 - rear * 0.4) + Vector2(26 + s2 * 8, -6 - s2 * 12 + sin(t * 2.2 + s2) * 3)
+		var hf := kn + Vector2(14 - s2 * 4, 22 + s2 * 8 + sin(t * 2.6 + s2 * 2.0) * 4 - rear * 0.2)
+		for j in 4:
+			c.draw_line(hf + Vector2(-5 + j * 3, 0), hf + Vector2(-6 + j * 3.4, -9), Color("9ad8d8"), 1.0)
+		_scales(c, kn + Vector2(-5, 2), 2, 3, 6.0, Color(0.75, 1.0, 1.0, 0.5))
 	# cascading water and drips
 	for k in 12:
 		var x := -30.0 + k * 8.0

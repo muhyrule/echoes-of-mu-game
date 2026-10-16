@@ -215,6 +215,69 @@ static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving 
 			c.draw_rect(Rect2(sx * 1.5 - 1.0, -14.0 + bob, 2.5, 1.0), Color(hair.darkened(0.3), a))
 		c.draw_rect(Rect2(-1.0, -2.0, 2.0, 1.0), Color("b89c52", a))
 	_fine(c, pal, side, up, sx, bob, swing, a, coat, acc, skin, hair, boots)
+	_hero_detail(c, pal, side, up, sx, bob, t, a, coat, acc, skin, hair)
+
+
+# Signature gear per hero so each reads at a glance: tabard and bell charm, dagger hilts and scarf, clockwork pack and lens, crest and sword hilt.
+static func _hero_detail(c: CanvasItem, pal: Dictionary, side: bool, up: bool, sx: float, bob: float, t: float, a: float, coat: Color, acc: Color, skin: Color, hair: Color) -> void:
+	var gold := Color("e0c27a", a)
+	var ink := Color(OUT, a)
+	var sway := sin(t * 3.0) * 0.8
+	match pal.look:
+		"mu":
+			if up:
+				c.draw_rect(Rect2(-3.0, -2.0, 6.0, 1.0), Color(acc.lightened(0.2), 0.8 * a))
+				c.draw_rect(Rect2(-1.0, -10.0 + bob, 2.0, 7.0), Color(acc, 0.8 * a))
+			else:
+				c.draw_rect(Rect2(-6.5, -9.0 + bob, 2.5, 2.0), Color(acc.lightened(0.15), a))
+				c.draw_rect(Rect2(4.0, -9.0 + bob, 2.5, 2.0), Color(acc.lightened(0.15), a))
+				c.draw_rect(Rect2(-6.5, -9.0 + bob, 2.5, 0.5), Color(1, 1, 1, 0.35 * a))
+				c.draw_rect(Rect2(3.5, 1.0, 1.5, 4.5), ink)
+				c.draw_rect(Rect2(3.5, 0.0, 1.5, 1.5), gold)
+				c.draw_rect(Rect2(2.8, 1.0, 3.0, 0.8), gold)
+		"isolde":
+			if not up:
+				c.draw_rect(Rect2(-2.0, -7.0 + bob, 4.0, 7.0), Color(acc.lightened(0.2), 0.85 * a))
+				c.draw_rect(Rect2(-0.5, -6.0 + bob, 1.0, 5.0), gold)
+				c.draw_rect(Rect2(-1.5, -4.5 + bob, 3.0, 1.0), gold)
+				c.draw_circle(Vector2(-4.0, 1.5), 1.6, ink)
+				c.draw_circle(Vector2(-4.0, 1.5), 1.1, gold)
+				c.draw_rect(Rect2(-4.4, 2.6, 0.8, 1.2), gold)
+			else:
+				c.draw_rect(Rect2(-2.0, -7.0 + bob, 4.0, 8.0), Color(acc.lightened(0.2), 0.85 * a))
+			for i in 3:
+				c.draw_rect(Rect2(-3.0 + i * 3.0, -8.5 + bob, 1.0, 0.8), Color(1, 1, 1, 0.5 * a))
+		"wren":
+			var bx := -sx * 3.0 if side else 0.0
+			if not up:
+				c.draw_line(Vector2(-5.0, -8.0 + bob), Vector2(4.0, -1.0), ink, 2.2)
+				c.draw_line(Vector2(-5.0, -8.0 + bob), Vector2(4.0, -1.0), Color("6a4a2a", a), 1.2)
+				for i in 3:
+					c.draw_rect(Rect2(-3.0 + i * 2.5, -6.0 + i * 2.0 + bob, 1.2, 1.6), gold)
+				c.draw_rect(Rect2(-6.5 + bx, 0.0, 1.0, 4.0), ink)
+				c.draw_rect(Rect2(-7.0 + bx, -0.5, 2.0, 1.0), Color("b8bcc8", a))
+				c.draw_rect(Rect2(5.5 + bx, 0.0, 1.0, 4.0), ink)
+				c.draw_rect(Rect2(5.0 + bx, -0.5, 2.0, 1.0), Color("b8bcc8", a))
+			c.draw_line(Vector2(-3.0, -9.0 + bob), Vector2(-8.0 - sway * 2.0, -5.0 + sway), ink, 2.4)
+			c.draw_line(Vector2(-3.0, -9.0 + bob), Vector2(-8.0 - sway * 2.0, -5.0 + sway), acc, 1.2)
+		"corvin":
+			var px := -sx * 5.5 if side else 0.0
+			if up or side:
+				c.draw_rect(Rect2(-5.0 + px, -10.0 + bob, 10.0, 9.0), ink)
+				c.draw_rect(Rect2(-4.0 + px, -9.0 + bob, 8.0, 7.0), Color("6a4a2e", a))
+				c.draw_circle(Vector2(px, -5.5 + bob), 3.0, ink)
+				c.draw_circle(Vector2(px, -5.5 + bob), 2.2, Color("b89c52", a))
+				for i in 6:
+					var ang := t * 2.0 + i * TAU / 6.0
+					c.draw_rect(Rect2(px + cos(ang) * 2.6 - 0.5, -5.5 + bob + sin(ang) * 2.6 - 0.5, 1.0, 1.0), Color("b89c52", a))
+				c.draw_circle(Vector2(px, -5.5 + bob), 0.9, ink)
+			if not up:
+				c.draw_rect(Rect2(-4.5, -16.0 + bob, 9.0, 1.5), ink)
+				c.draw_rect(Rect2(-4.0, -16.0 + bob, 8.0, 1.0), Color("6a4a2e", a))
+				c.draw_circle(Vector2(sx * 2.0 if side else 2.5, -14.5 + bob), 1.7, ink)
+				c.draw_circle(Vector2(sx * 2.0 if side else 2.5, -14.5 + bob), 1.1, Color(0.6, 0.85, 0.95, 0.9 * a))
+				c.draw_line(Vector2(-2.0, -7.0 + bob), Vector2(-3.5, 0.0), Color(gold, 0.8), 0.6)
+				c.draw_circle(Vector2(-3.5, 0.5), 1.2, gold)
 
 
 # Half-unit detail pass so figures hold up at 2K: folds, stitching, rivets, rim light, face and hair strands.
