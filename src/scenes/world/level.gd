@@ -54,6 +54,7 @@ var gt := 0.0
 var theme := "chapel"
 var prefix := ""
 var followers: Dictionary = {}
+var arena_fx: Node2D
 var cracked_props: Array = []
 var hearths: Array = []
 var entries: Array = []
@@ -102,6 +103,7 @@ func _ready() -> void:
 		var afx := Node2D.new()
 		afx.set_script(ArenaFxScript)
 		afx.set("level", self)
+		arena_fx = afx
 		add_child(afx)
 		move_child(afx, 0)
 	hud.fade = 1.0

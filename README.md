@@ -66,6 +66,10 @@ Each dungeon ends in a gate to its own arena map, holding a colossal multi-phase
 
 Arenas are themed to their boss: the Kelpie fights in a flooded cistern of the Nor' Loch (animated rippling water, kelp, drowned pillars) and the Golem in the dusty attic of the Old-New Synagogue (floorboards, rafters, clay shards, light shafts). The boss name shows on the health bar only for the first few seconds of the fight, so it never blocks the view.
 
+Arena motion: heroes, the boss and every strike kick up ripples, puddles and splashing droplets (water in the loch, dust in the attic); embers rise in the attic and swells drift across the loch.
+
+New boss attacks (all telegraphed): Kelpie – **Tide** (a wall of water sweeping the arena with one safe gap), **Whirlpool** (pulls you toward a damaging core, phase 2+), geysers with rising steam; Golem – **Quake** (stomp shockwave rings plus dust blasts), **Ember Beam** (a rotating furnace beam, phase 2+).
+
 Both bosses come from real regional folklore:
 
 - **Nor' Loch Kelpie** (Drowned Cistern, Edinburgh): the Scottish water-horse that lures travellers onto its back and drowns them. Tide rings with a gap to slip through, weedy mane lashes, water geysers, drowned-light summons, charging rush.

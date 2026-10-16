@@ -144,8 +144,8 @@ func _physics_process(delta: float) -> void:
 
 func _pool() -> Array:
 	if kind == "kelpie_giant":
-		return ["toll", "lash", "drop", "rush"] + (["summon"] if phase >= 2 else []) + (["toll", "drop"] if phase >= 3 else [])
-	return ["cogs", "hands", "vents", "rush"] + (["rift"] if phase >= 2 else []) + (["hands", "cogs"] if phase >= 3 else [])
+		return ["toll", "lash", "drop", "rush"] + ["tide"] + (["summon", "whirl"] if phase >= 2 else []) + (["toll", "drop", "tide"] if phase >= 3 else [])
+	return ["cogs", "hands", "vents", "rush"] + ["quake"] + (["rift", "beam"] if phase >= 2 else []) + (["hands", "cogs", "beam"] if phase >= 3 else [])
 
 
 func _begin_attack() -> void:
@@ -223,6 +223,41 @@ func _a_drop() -> void:
 	after(0.4 + n * 0.28 + 1.5, func(): _finish(1.2))
 
 
+func _a_tide() -> void:
+	winding = true
+	var sides := [Vector2.RIGHT, Vector2.LEFT, Vector2.DOWN, Vector2.UP]
+	var waves := phase
+	for i in waves:
+		after(0.5 + i * 1.9, func():
+			var d: Vector2 = sides[randi() % 4]
+			var c: Vector2 = _pp() - d * 380.0
+			var o := d.orthogonal()
+			var gap := randf_range(-110.0, 110.0)
+			var gp: Vector2 = _pp()
+			gap = clampf((gp - c).dot(o) + randf_range(-60.0, 60.0), -140.0, 140.0) if phase > 1 else (gp - c).dot(o)
+			Audio.sfx("bell")
+			fx.wave(c, d, 190.0, 260.0, 20.0, gap, 52.0, 1.1, 760.0, 1, Color("48c8e0")))
+	after(0.5 + waves * 1.9 + 1.6, func():
+		winding = false
+		_finish(1.4))
+
+
+func _a_whirl() -> void:
+	winding = true
+	after(0.6, func():
+		winding = false
+		Audio.sfx("roar")
+		level.shake(5.0)
+		var n := phase - 1
+		for i in n:
+			fx.whirl(_arena_pos(_pp() + Vector2.from_angle(randf() * TAU) * (60.0 + i * 40.0)), 100.0, 0.9, 5.0, Color("58d8e8")))
+	after(2.6, func(): _finish(1.0))
+	after(0.8, func():
+		var a := (_pp() - global_position).angle()
+		for i in 5:
+			fx.shot(global_position, Vector2.from_angle(a - 0.6 + 0.3 * i) * 120.0, 8.0, 3.0, 1, Color("90f0d8"), "orb"))
+
+
 func _a_summon() -> void:
 	winding = true
 	after(0.9, func():
@@ -255,6 +290,35 @@ func _a_cogs() -> void:
 	after(0.8 + volleys * 0.95 + 1.0, func():
 		level.spark(global_position, Color(0.9, 0.9, 0.9), 14)
 		_finish(1.6))
+
+
+func _a_quake() -> void:
+	winding = true
+	var n := 1 + phase
+	after(0.8, func(): winding = false)
+	for i in n:
+		after(0.9 + i * 0.75, func():
+			Audio.sfx("hit")
+			level.shake(10.0)
+			level.spark(global_position, Color("c8a878"), 16)
+			var gap := (_pp() - global_position).angle() + randf_range(-0.4, 0.4)
+			fx.ring(global_position, 140.0 + 15.0 * phase, 12.0, gap, 0.5, 1, Color("d8b078"), 440.0)
+			for j in 3:
+				fx.circle(_arena_pos(_pp() + Vector2.from_angle(randf() * TAU) * randf_range(20.0, 120.0)), 22.0, 0.9, 1, Color("c8a878"), 0.3, "steam"))
+	after(1.0 + n * 0.75 + 1.4, func(): _finish(1.3))
+
+
+func _a_beam() -> void:
+	winding = true
+	var a0 := (_pp() - global_position).angle()
+	var dir := 1.0 if randf() < 0.5 else -1.0
+	var start := a0 - dir * 0.9
+	after(0.6, func():
+		Audio.sfx("roar")
+		fx.sweep(global_position + Vector2(0, -50), start, dir * (0.8 + 0.12 * phase), 430.0, 20.0, 1.1, 2.0, 1, Color("ff8a3a")))
+	after(0.6 + 1.1 + 2.0 + 0.8, func():
+		winding = false
+		_finish(1.4))
 
 
 func _a_hands() -> void:
