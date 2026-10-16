@@ -4,6 +4,7 @@ extends Control
 const Art = preload("res://src/core/art.gd")
 
 var level: Node2D
+var title_t := 3.0
 var banner_title := ""
 var banner_sub := ""
 var banner_t := 0.0
@@ -42,6 +43,7 @@ func fade_to(a: float, secs: float) -> void:
 
 func _process(delta: float) -> void:
 	banner_t = maxf(0.0, banner_t - delta)
+	title_t = maxf(0.0, title_t - delta)
 	notice_t = maxf(0.0, notice_t - delta)
 	if Input.is_action_just_pressed("pause") and not Dialogue.blocking() and not level.frozen:
 		paused = not paused
@@ -106,10 +108,13 @@ func _draw() -> void:
 	for e in get_tree().get_nodes_in_group("enemies"):
 		if e.is_boss and e.state != "dormant":
 			boss = e
+	if boss == null:
+		title_t = 3.0
 	if boss != null:
 		var bx := 640.0 - 128.0
 		_frame(Rect2(bx, 8, 120, 24))
-		_txt(Vector2(bx + 12, 17), str(boss.get("title") if boss.get("title") != null else "FOE"), 6, GOLD)
+		if title_t > 0.0:
+			_txt(Vector2(bx + 12, 17), str(boss.get("title") if boss.get("title") != null else "FOE"), 6, GOLD)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(3, 3))
 		var segs := 16
 		var fill := int(ceil(float(boss.hp) / float(boss.max_hp) * segs))

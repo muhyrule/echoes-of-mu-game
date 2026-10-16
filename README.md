@@ -64,6 +64,8 @@ Prague (Ossuary Clock) → Transylvania → Paris Catacombs → Whitby Abbey →
 
 Each dungeon ends in a gate to its own arena map, holding a colossal multi-phase boss (phases at 66% / 33% HP, telegraphed attacks, exposed windows after a wall-crash take double damage).
 
+Arenas are themed to their boss: the Kelpie fights in a flooded cistern of the Nor' Loch (animated rippling water, kelp, drowned pillars) and the Golem in the dusty attic of the Old-New Synagogue (floorboards, rafters, clay shards, light shafts). The boss name shows on the health bar only for the first few seconds of the fight, so it never blocks the view.
+
 Both bosses come from real regional folklore:
 
 - **Nor' Loch Kelpie** (Drowned Cistern, Edinburgh): the Scottish water-horse that lures travellers onto its back and drowns them. Tide rings with a gap to slip through, weedy mane lashes, water geysers, drowned-light summons, charging rush.

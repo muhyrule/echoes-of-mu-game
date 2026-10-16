@@ -4,6 +4,7 @@ extends Node2D
 const Art = preload("res://src/core/art.gd")
 const PlayerScript = preload("res://src/entities/player.gd")
 const EnemyScript = preload("res://src/entities/enemy.gd")
+const ArenaFxScript = preload("res://src/entities/arena_fx.gd")
 const GiantScript = preload("res://src/entities/giant.gd")
 const PropScript = preload("res://src/entities/prop.gd")
 const FollowerScript = preload("res://src/entities/follower.gd")
@@ -19,6 +20,7 @@ const TOWN_THEMES := ["town_e", "town_p"]
 
 var map_name := ""
 var meta: Dictionary = {}
+var arena := ""
 var grid: Array = []
 var w := 0
 var h := 0
@@ -61,6 +63,7 @@ func _ready() -> void:
 	map_name = GameState.current_map
 	var f := FileAccess.open("res://data/maps/%s.json" % map_name, FileAccess.READ)
 	meta = JSON.parse_string(f.get_as_text())
+	arena = str(meta.get("arena", ""))
 	for row in meta.ascii:
 		grid.append(row)
 	h = grid.size()
@@ -93,6 +96,13 @@ func _ready() -> void:
 	if map_name == "chapel":
 		GameState.hp = GameState.max_hp
 	hud.show_banner(meta.title, meta.subtitle)
+	if arena != "":
+		hud.banner_t = 2.5
+		var afx := Node2D.new()
+		afx.set_script(ArenaFxScript)
+		afx.set("level", self)
+		add_child(afx)
+		move_child(afx, 0)
 	hud.fade = 1.0
 	hud.fade_to(0.0, 0.6)
 	if map_name == "chapel" and not GameState.flag("intro_done"):
@@ -643,6 +653,9 @@ func _draw() -> void:
 			if ch == "H":
 				_draw_house(r, x, y)
 				continue
+			if arena != "" and not (ch in FURNITURE):
+				_draw_arena_cell(r, x, y, ch)
+				continue
 			if ch in FURNITURE:
 				_draw_floor_plank(r, x, y)
 				_draw_furniture(r, ch, x, y)
@@ -748,6 +761,95 @@ func _draw() -> void:
 				draw_rect(Rect2(r.position + Vector2(0, 3), Vector2(16, 11)), Color("4d3624"))
 				draw_rect(Rect2(r.position + Vector2(0, 3), Vector2(16, 3)), Color("6a4a30"))
 				draw_rect(Rect2(r.position + Vector2(0, 13), Vector2(16, 1)), Color("2a1c12"))
+
+
+func _draw_arena_cell(r: Rect2, x: int, y: int, ch: String) -> void:
+	var o := r.position
+	var hv := (x * 73856093 ^ y * 19349663) & 0xffff
+	var loch := arena == "loch"
+	if ch == "#":
+		if _is_solid_char(Vector2i(x, y + 1)):
+			draw_rect(r, Color("0a1217") if loch else Color("120c08"))
+			return
+		var base := Color("2c4650") if loch else Color("3c2a1e")
+		draw_rect(r, base)
+		if loch:
+			for i in 3:
+				var yy := o.y + 3 + i * 5
+				draw_rect(Rect2(o.x, yy, TILE, 1), Color("1a2c34"))
+				draw_rect(Rect2(o.x + (hv >> (i * 3)) % 12, yy - 3, 1, 3), Color("1a2c34"))
+			draw_rect(Rect2(o.x, o.y, TILE, 1), Color("5a8a96"))
+			if hv % 3 == 0:
+				draw_rect(Rect2(o.x + 2, o.y + 4, 4, 9), Color(0.2, 0.5, 0.35, 0.55))
+				draw_rect(Rect2(o.x + 3, o.y + 12, 2, 3), Color(0.3, 0.65, 0.45, 0.6))
+			if hv % 5 == 1:
+				draw_rect(Rect2(o.x + 9, o.y + 3, 1, 10), Color(0.6, 0.85, 0.95, 0.3))
+			draw_colored_polygon(PackedVector2Array([o + Vector2(2 + hv % 8, 13), o + Vector2(6 + hv % 8, 13), o + Vector2(4 + hv % 8, 16)]), Color("1a2c34"))
+		else:
+			for i in 4:
+				draw_rect(Rect2(o.x + i * 4, o.y, 1, TILE), Color("1e140e"))
+			draw_rect(Rect2(o.x, o.y, TILE, 1), Color("6a4a32"))
+			if hv % 4 == 0:
+				draw_rect(Rect2(o.x + 2, o.y + 3, 12, 8), Color("7a5a48"))
+				draw_rect(Rect2(o.x + 2, o.y + 7, 12, 1), Color("4a3226"))
+				draw_rect(Rect2(o.x + 8, o.y + 3, 1, 4), Color("4a3226"))
+			if hv % 6 == 1:
+				draw_line(o + Vector2(0, 0), o + Vector2(16, 16), Color("5a3e2a"), 2.0)
+			if hv % 7 == 2:
+				draw_line(o + Vector2(1, 1), o + Vector2(7, 5), Color(0.9, 0.9, 0.85, 0.4), 1.0)
+				draw_line(o + Vector2(1, 1), o + Vector2(4, 8), Color(0.9, 0.9, 0.85, 0.4), 1.0)
+		draw_rect(Rect2(o.x, o.y + 13, TILE, 3), Color(0, 0, 0, 0.3))
+		return
+	if loch:
+		var deep := Color("12303a") if (x + y) % 2 == 0 else Color("0f2a34")
+		draw_rect(r, deep)
+		if hv % 4 == 0:
+			draw_rect(Rect2(o.x + 1, o.y + 1, 14, 14), Color(0.22, 0.4, 0.46, 0.35))
+			draw_rect(Rect2(o.x + 1, o.y + 1, 14, 1), Color(0.5, 0.75, 0.8, 0.22))
+		if hv % 3 == 1:
+			draw_rect(Rect2(o.x + 2 + hv % 6, o.y + 5 + hv % 7, 6, 1), Color(0.5, 0.85, 0.9, 0.2))
+		if hv % 11 == 2:
+			draw_circle(o + Vector2(8, 8), 4.0, Color("1e5a38"))
+			draw_circle(o + Vector2(7, 7), 2.5, Color("2e8a52"))
+			draw_line(o + Vector2(8, 8), o + Vector2(12, 4), Color("0f2a34"), 1.0)
+		if hv % 17 == 5:
+			for k in 3:
+				draw_line(o + Vector2(4 + k * 4, 15), o + Vector2(3 + k * 4 + hv % 3, 6), Color("2e7a4a"), 1.0)
+		if y > 0 and grid[y - 1][x] == "#":
+			draw_rect(Rect2(o.x, o.y, TILE, 3), Color(0.8, 0.95, 1.0, 0.25))
+			draw_rect(Rect2(o.x, o.y + 3, TILE, 2), Color(0.8, 0.95, 1.0, 0.1))
+		if ch == "o":
+			draw_set_transform(o + Vector2(8, 14), 0.0, Vector2(1.0, 0.4))
+			draw_circle(Vector2.ZERO, 11.0, Color(0.8, 0.95, 1.0, 0.25))
+			draw_circle(Vector2.ZERO, 8.0, Color(0.1, 0.25, 0.3, 0.8))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			draw_rect(Rect2(o + Vector2(3, 0), Vector2(10, 15)), Color(Art.OUT))
+			draw_rect(Rect2(o + Vector2(4, 1), Vector2(8, 13)), Color("6a8088"))
+			draw_rect(Rect2(o + Vector2(4, 1), Vector2(3, 13)), Color("8aa2aa"))
+			draw_rect(Rect2(o + Vector2(4, 8), Vector2(8, 6)), Color("2e7a4a"))
+			draw_colored_polygon(PackedVector2Array([o + Vector2(3, 1), o + Vector2(6, -2), o + Vector2(9, 0), o + Vector2(13, 1)]), Color("5a7078"))
+		return
+	draw_rect(r, Color("2a1e16") if (x + y) % 2 == 0 else Color("251a13"))
+	_draw_floor_plank(r, x, y)
+	draw_rect(r, Color(0.08, 0.06, 0.05, 0.3))
+	if hv % 5 == 0:
+		draw_colored_polygon(PackedVector2Array([o + Vector2(3, 10), o + Vector2(7, 6), o + Vector2(12, 9), o + Vector2(10, 13)]), Color("7a5a44"))
+		draw_line(o + Vector2(4, 10), o + Vector2(11, 9), Color("4a3226"), 1.0)
+	if hv % 7 == 1:
+		for k in 4:
+			draw_line(o + Vector2(2 + k * 3, 14), o + Vector2(6 + k * 3, 9 - k % 2), Color("c8a860"), 1.0)
+	if hv % 9 == 3:
+		draw_circle(o + Vector2(8, 8), 5.0, Color(0.7, 0.68, 0.64, 0.18))
+	if y > 0 and grid[y - 1][x] == "#":
+		draw_rect(Rect2(o.x, o.y, TILE, 4), Color(0, 0, 0, 0.35))
+	if ch == "o":
+		draw_rect(Rect2(o + Vector2(2, 14), Vector2(12, 2)), Color("4a4650"))
+		draw_rect(Rect2(o + Vector2(4, 0), Vector2(8, 15)), Color(Art.OUT))
+		draw_rect(Rect2(o + Vector2(5, 0), Vector2(6, 14)), Color("5a3e2a"))
+		draw_rect(Rect2(o + Vector2(5, 0), Vector2(2, 14)), Color("7a5a3e"))
+		for k in 2:
+			draw_rect(Rect2(o + Vector2(4, 3 + k * 7), Vector2(8, 2)), Color("3a3640"))
+			draw_rect(Rect2(o + Vector2(4, 3 + k * 7), Vector2(8, 1)), Color("6a6674"))
 
 
 func _house_base(x: int, y: int) -> int:

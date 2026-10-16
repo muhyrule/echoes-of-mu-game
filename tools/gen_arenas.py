@@ -12,10 +12,11 @@ W, H = 56, 42
 CX, CY = 28, 20
 
 
-def arena(name, theme, title, sub, music, boss, final_exit, back_label, pillars, candles):
+def arena(name, theme, style, title, sub, music, boss, final_exit, back_label, pillars, candles):
     m = G.Map(name, W, H, theme, title, sub, music)
     m.meta.pop("safe", None)
     m.meta["prefix"] = name
+    m.meta["arena"] = style
     m.meta["boss"] = boss
     m.meta["final_exit"] = final_exit
     for y in range(H):
@@ -67,10 +68,10 @@ def patch_dungeon(name, ch_old, label, target):
 
 
 def main():
-    arena("vault_arena", "vault", "The Drowned Cistern of the Nor' Loch", "Black water, and something that remembers every drowning", "crypt",
+    arena("vault_arena", "vault", "loch", "The Drowned Cistern of the Nor' Loch", "Black water, and something that remembers every drowning", "crypt",
           {"kind": "kelpie_giant", "done_flag": "edinburgh_done", "intro": "kelpie_intro", "defeated": "kelpie_defeated"},
           {"map": "chapel", "spawn": "from_vaults"}, "Back down to the Vaults", 10, 14)
-    arena("prague_arena", "prague", "The Attic of the Old-New Synagogue", "Clay, ash, and a word written on a brow", "clock",
+    arena("prague_arena", "prague", "attic", "The Attic of the Old-New Synagogue", "Clay, ash, and a word written on a brow", "clock",
           {"kind": "golem_giant", "done_flag": "prague_done", "intro": "golem_intro", "defeated": "golem_defeated", "leave": "isolde"},
           {"map": "chapel", "spawn": "from_prague"}, "Back to the Ossuary Clock", 12, 16)
     patch_dungeon("prague", "G", "The Altneuschul Attic", "prague_arena")
