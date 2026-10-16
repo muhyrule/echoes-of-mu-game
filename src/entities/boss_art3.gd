@@ -437,40 +437,318 @@ static func cacus(c: CanvasItem, t: float, ph: int, f: float, winding: bool, exp
 		c.draw_line(bp + Vector2(-8, -12), bp + Vector2(2, 0), Color("2a2624"), 1.4)
 		c.draw_line(bp + Vector2(2, 0), bp + Vector2(-4, 10), Color("2a2624"), 1.4)
 		c.draw_circle(bp + Vector2(12, -6), 2.0, Color(fire, 0.7))
-	# thick neck and the face: low brow, three burning eyes, furnace mouth
-	c.draw_rect(Rect2(-14, -176 + br, 28, 24), OUT)
-	c.draw_rect(Rect2(-12.6, -175 + br, 25.2, 22), BA._fl(skin_d, f))
-	var hy := -184.0 + br
-	var head := BA._sm([Vector2(-24, hy + 4), Vector2(-19, hy - 18), Vector2(0, hy - 26), Vector2(19, hy - 18), Vector2(24, hy + 4), Vector2(20, hy + 28), Vector2(0, hy + 38), Vector2(-20, hy + 28)], true, 5)
-	BA._shape(c, head, skin, f, skin_l)
-	BA._poly(c, [Vector2(-27, hy - 2), Vector2(0, hy - 9), Vector2(27, hy - 2), Vector2(23, hy + 6), Vector2(0, hy), Vector2(-23, hy + 6)], skin_d, f, 1.4)
-	for s in [-1.0, 1.0]:
-		c.draw_circle(Vector2(s * 11, hy + 7), 6.0, Color(eye, 0.25))
-		c.draw_circle(Vector2(s * 11, hy + 7), 3.4, OUT)
-		c.draw_circle(Vector2(s * 11, hy + 7), 2.4, eye)
-		c.draw_line(Vector2(s * 4, hy + 16), Vector2(s * 14, hy + 20), skin_d, 1.4)
-	c.draw_circle(Vector2(0, hy - 9), 5.0, Color(eye, 0.3))
-	c.draw_circle(Vector2(0, hy - 9), 2.6, eye)
-	c.draw_line(Vector2(-4, hy - 9), Vector2(4, hy - 9), OUT, 0.8)
-	var mouth_o := 8.0 + (8.0 if winding else 0.0)
-	BA._poly(c, [Vector2(-13, hy + 18), Vector2(13, hy + 18), Vector2(9, hy + 20 + mouth_o), Vector2(-9, hy + 20 + mouth_o)], Color("2a0a08"), f, 1.2)
-	c.draw_colored_polygon(PackedVector2Array([Vector2(-9, hy + 20), Vector2(9, hy + 20), Vector2(5, hy + 20 + mouth_o * 0.8), Vector2(-5, hy + 20 + mouth_o * 0.8)]), Color(fire, 0.85))
-	for k in 5:
-		BA._poly(c, [Vector2(-11 + k * 5.5, hy + 18), Vector2(-8.5 + k * 5.5, hy + 24), Vector2(-6 + k * 5.5, hy + 18)], bone, f, 0.6)
-	for k in 3:
-		B2._flame(c, Vector2(-5 + k * 5, hy + 22 + mouth_o * 0.5), 10.0 + mouth_o * 0.6, t + k, fire, 3.0)
-	# matted beard, charred hair and a pair of small horns
-	for k in 9:
-		var bx := -14.0 + k * 3.6
-		BA._poly(c, [Vector2(bx - 2.5, hy + 30), Vector2(bx + sin(t * 2.0 + k) * 1.5, hy + 50 + (k % 3) * 5), Vector2(bx + 2.5, hy + 30)], Color("2a1c18"), f, 0.8)
-	for k in 7:
-		var u := fmod(t * 0.9 + k * 0.14, 1.0)
-		c.draw_rect(Rect2(-18 + k * 6, hy + 36 - u * 50, 2, 2), Color(fire, 1.0 - u))
-	for k in 5:
-		c.draw_line(Vector2(-16 + k * 8, hy - 20 + abs(k - 2)), Vector2(-22 + k * 11, hy - 38 - (k % 2) * 6), Color("1c1210"), 3.0)
-	for s in [-1.0, 1.0]:
-		BA._poly(c, [Vector2(s * 16, hy - 16), Vector2(s * 30, hy - 30), Vector2(s * 26, hy - 12)], bone, f, 1.0)
+	_cacus_head(c, t, f, -180.0 + br, winding, skin, skin_l, skin_d, bone, fire, eye)
 	# embers rising around the body
 	for i in 5:
 		var u := fmod(t * 0.5 + i * 0.2, 1.0)
 		c.draw_rect(Rect2(-50 + i * 24, -u * 160, 2, 2), Color(fire, 0.9 * (1.0 - u)))
+
+
+# A brutish, low-slung head sunk between hunched shoulders, with great bull horns and a snarling furnace maw.
+static func _cacus_head(c: CanvasItem, t: float, f: float, hy: float, winding: bool, skin: Color, skin_l: Color, skin_d: Color, bone: Color, fire: Color, eye: Color) -> void:
+	var mo := 6.0 + (12.0 if winding else 0.0) + sin(t * 3.0) * 1.2
+	# charred mane swept back behind the skull
+	for k in 9:
+		var x := -30.0 + k * 7.5
+		BA._poly(c, [Vector2(x - 5, hy - 10), Vector2(x - 8 + sin(t * 2.0 + k) * 2.0, hy - 38 - (k % 3) * 7), Vector2(x + 5, hy - 12)], Color("1c1210"), f, 0.8)
+	# bull horns sweeping out from the temples
+	for s in [-1.0, 1.0]:
+		var horn: Array = [Vector2(s * 24, hy - 6), Vector2(s * 44, hy - 12), Vector2(s * 56, hy - 32), Vector2(s * 50, hy - 56)]
+		_limb(c, horn, [15.0, 12.0, 8.0, 1.5], bone, Color("fff4d8"), f)
+		c.draw_line(Vector2(s * 30, hy - 8), Vector2(s * 50, hy - 24), Color("a89870"), 1.0)
+		c.draw_rect(Rect2(Vector2(s * 26 - 4, hy - 12), Vector2(8, 5)), Color("b89048"))
+	# thick neck and trapezius hump
+	BA._poly(c, [Vector2(-52, hy + 44), Vector2(-34, hy + 18), Vector2(-18, hy + 8), Vector2(18, hy + 8), Vector2(34, hy + 18), Vector2(52, hy + 44)], skin, f, 1.4)
+	# skull: heavy, flat-topped, wide across the cheekbones
+	var head := BA._sm([Vector2(-30, hy - 4), Vector2(-24, hy - 20), Vector2(0, hy - 25), Vector2(24, hy - 20), Vector2(30, hy - 4), Vector2(28, hy + 14), Vector2(19, hy + 30), Vector2(0, hy + 34), Vector2(-19, hy + 30), Vector2(-28, hy + 14)], true, 5)
+	BA._shape(c, head, skin, f, skin_l)
+	# lava-scarred cracks
+	c.draw_polyline(PackedVector2Array([Vector2(-22, hy - 16), Vector2(-16, hy - 6), Vector2(-24, hy + 4)]), Color(fire, 0.8), 1.4)
+	c.draw_polyline(PackedVector2Array([Vector2(20, hy - 14), Vector2(14, hy - 2), Vector2(22, hy + 12)]), Color(fire, 0.8), 1.4)
+	c.draw_line(Vector2(10, hy + 2), Vector2(24, hy + 22), skin_d, 1.6)
+	# crushing brow ridge angled into a scowl
+	BA._poly(c, [Vector2(-32, hy - 10), Vector2(-4, hy + 2), Vector2(4, hy + 2), Vector2(32, hy - 10), Vector2(30, hy + 4), Vector2(4, hy + 8), Vector2(-4, hy + 8), Vector2(-30, hy + 4)], skin_d, f, 1.4)
+	# burning eyes sunk in shadow
+	for s in [-1.0, 1.0]:
+		var ec := Vector2(s * 13, hy + 10)
+		c.draw_circle(ec, 9.0, Color(eye, 0.2 + 0.05 * sin(t * 5.0)))
+		c.draw_rect(Rect2(ec + Vector2(-6, -2.4), Vector2(12, 5)), OUT)
+		c.draw_rect(Rect2(ec + Vector2(-4.6, -1.4), Vector2(9.2, 3)), eye)
+		c.draw_rect(Rect2(ec + Vector2(-1.2, -1.4), Vector2(2.4, 3)), OUT)
+		c.draw_line(ec + Vector2(-s * 7, -5), ec + Vector2(s * 7, -1), OUT, 2.2)
+	c.draw_line(Vector2(-3, hy + 12), Vector2(3, hy + 12), skin_d, 1.2)
+	for s in [-1.0, 1.0]:
+		c.draw_circle(Vector2(s * 4, hy + 17), 1.6, OUT)
+	# jutting underbite jaw and gaping furnace mouth
+	var jaw := PackedVector2Array([Vector2(-24, hy + 18), Vector2(24, hy + 18), Vector2(28, hy + 32 + mo * 0.5), Vector2(15, hy + 42 + mo), Vector2(-15, hy + 42 + mo), Vector2(-28, hy + 32 + mo * 0.5)])
+	BA._shape(c, jaw, skin_d, f, skin)
+	c.draw_rect(Rect2(-17, hy + 20, 34, 3 + mo), Color("2a0a08"))
+	c.draw_rect(Rect2(-14, hy + 22, 28, 1 + mo * 0.8), Color(fire, 0.85))
+	for k in 6:
+		BA._poly(c, [Vector2(-17 + k * 6, hy + 20), Vector2(-14 + k * 6, hy + 27), Vector2(-11 + k * 6, hy + 20)], bone, f, 0.6)
+	for k in 5:
+		BA._poly(c, [Vector2(-14 + k * 6, hy + 24 + mo), Vector2(-11 + k * 6, hy + 18 + mo), Vector2(-8 + k * 6, hy + 24 + mo)], Color("c8bea8"), f, 0.6)
+	# great lower tusks
+	for s in [-1.0, 1.0]:
+		BA._poly(c, [Vector2(s * 16, hy + 26 + mo), Vector2(s * 22, hy + 22 + mo), Vector2(s * 26, hy + 4), Vector2(s * 20, hy + 20 + mo)], bone, f, 1.0)
+	for k in 3:
+		B2._flame(c, Vector2(-6 + k * 6, hy + 26 + mo * 0.5), 10.0 + mo * 0.7, t + k, fire, 3.0)
+	# short singed beard with ember sparks
+	for k in 7:
+		var bx := -15.0 + k * 5.0
+		BA._poly(c, [Vector2(bx - 3, hy + 38 + mo), Vector2(bx + sin(t * 2.0 + k) * 1.5, hy + 50 + mo + (k % 3) * 3), Vector2(bx + 3, hy + 38 + mo)], Color("2a1c18"), f, 0.8)
+	for k in 6:
+		var u := fmod(t * 0.9 + k * 0.17, 1.0)
+		c.draw_rect(Rect2(-14 + k * 5, hy + 30 - u * 44, 2, 2), Color(fire, 1.0 - u))
+
+
+# ====================================================================== Strigoi of Poenari
+
+static func strigoi(c: CanvasItem, t: float, ph: int, f: float, winding: bool, exposed: float, moving: bool) -> void:
+	var cloak := Color("45182a")
+	var cloak_l := Color("7a2a44")
+	var lining := Color("a82438")
+	var skin := Color("d4ccd8")
+	var skin_d := Color("8a7c92")
+	var gold := Color("d0a858")
+	var armor := Color("2a2230")
+	var eye := Color(1.0, 0.25, 0.25) if exposed <= 0.0 else Color(1.0, 0.9, 0.4)
+	var br := sin(t * 1.6) * 1.5
+	var rear := 10.0 if winding else 0.0
+	B2._shadow(c, 74.0)
+	# blood mist pooling on the ground
+	for i in 5:
+		var u := fmod(t * 0.3 + i * 0.2, 1.0)
+		c.draw_circle(Vector2(-60 + i * 30, -4 - u * 12), 10.0 + u * 8.0, Color(0.6, 0.05, 0.1, 0.16 * (1.0 - u)))
+	# the forest of the impaled: stakes crowned with skulls and torn banners
+	for i in 7:
+		var x := -90.0 + i * 30.0
+		var h := 130.0 + (i % 3) * 20.0
+		var lean := (i - 3) * 1.6
+		c.draw_line(Vector2(x, 0), Vector2(x + lean, -h), OUT, 5.0)
+		c.draw_line(Vector2(x, 0), Vector2(x + lean, -h), Color("5a4030"), 3.0)
+		BA._poly(c, [Vector2(x - 3 + lean, -h), Vector2(x + lean, -h - 14), Vector2(x + 3 + lean, -h)], Color("7a5a40"), f, 1.0)
+		if i % 2 == 0:
+			B2._skull(c, Vector2(x + lean, -h + 10.0), 4.6, Color("d8d0c0"))
+		else:
+			BA._poly(c, [Vector2(x + lean, -h + 6), Vector2(x + lean + 14 + sin(t * 2.0 + i) * 3.0, -h + 10), Vector2(x + lean, -h + 24)], Color(lining, 0.85), f, 0.8)
+	# armoured greaves and long pointed sabatons
+	for s in [-1.0, 1.0]:
+		var lift: float = sin(t * 3.0 + s) * 3.0 if moving else 0.0
+		_limb(c, [Vector2(s * 10, -76), Vector2(s * 14, -44), Vector2(s * 13, -10 + lift)], [18.0, 14.0, 11.0], armor, Color("5a4a68"), f)
+		c.draw_circle(Vector2(s * 14, -44), 8.0, OUT)
+		c.draw_circle(Vector2(s * 14, -44), 6.6, BA._fl(Color("4a3e58"), f))
+		BA._poly(c, [Vector2(s * 4, -10 + lift), Vector2(s * 22, -10 + lift), Vector2(s * 40, 0 + lift), Vector2(s * 20, 4 + lift), Vector2(s * 4, 4 + lift)], armor, f, 1.2)
+		c.draw_line(Vector2(s * 8, -22 + lift * 0.5), Vector2(s * 18, -22 + lift * 0.5), gold, 1.4)
+	# vast bat-wing cloak with ribbed membranes
+	for s in [-1.0, 1.0]:
+		var tip := Vector2(s * 104, -176 - rear)
+		var wing := PackedVector2Array([Vector2(s * 16, -138 + br), Vector2(s * 56, -178 - rear), tip, Vector2(s * 92, -140 - rear * 0.5), Vector2(s * 98, -100), Vector2(s * 76, -108), Vector2(s * 78, -66), Vector2(s * 56, -84), Vector2(s * 50, -40), Vector2(s * 30, -76), Vector2(s * 22, -56)])
+		BA._shape(c, wing, cloak, f, cloak_l)
+		for k in 5:
+			var e := Vector2(s * (92 - k * 12), -134 + k * 20)
+			c.draw_line(Vector2(s * 20, -136 + br), e, Color(lining, 0.9), 1.6)
+			c.draw_line(Vector2(s * 20, -136 + br), e, Color(OUT, 0.35), 0.6)
+		c.draw_polyline(PackedVector2Array([Vector2(s * 56, -178 - rear), tip, Vector2(s * 92, -140 - rear * 0.5)]), gold, 1.8)
+	# armoured, gaunt torso: breastplate with a chiselled crest
+	var torso := BA._sm([Vector2(-24, -66), Vector2(24, -66), Vector2(30, -102), Vector2(28, -134 + br), Vector2(-28, -134 + br), Vector2(-30, -102)], true, 4)
+	BA._shape(c, torso, armor, f, Color("5a4a68"))
+	for k in 5:
+		c.draw_arc(Vector2(0, -124 + k * 9 + br * 0.3), 15.0 - k, 0.15, PI - 0.15, 8, Color(0.8, 0.74, 0.8, 0.6), 1.3)
+	c.draw_line(Vector2(0, -132), Vector2(0, -74), gold, 1.4)
+	BA._poly(c, [Vector2(-10, -128 + br), Vector2(10, -128 + br), Vector2(6, -112 + br), Vector2(0, -104 + br), Vector2(-6, -112 + br)], Color("3a2c44"), f, 1.2)
+	c.draw_circle(Vector2(-14, -96 + br), 7.0, Color(eye, 0.25 + 0.1 * sin(t * 4.0)))
+	c.draw_circle(Vector2(-14, -96 + br), 3.2, OUT)
+	c.draw_line(Vector2(-14, -104 + br), Vector2(-14, -88 + br), Color(eye, 0.9), 1.2)
+	# Order of the Dragon medallion
+	c.draw_circle(Vector2(12, -100 + br), 8.0, OUT)
+	c.draw_circle(Vector2(12, -100 + br), 6.8, gold)
+	c.draw_arc(Vector2(12, -100 + br), 4.4, 0.5, TAU - 0.5, 12, Color("5a3a18"), 1.4)
+	c.draw_circle(Vector2(12, -100 + br), 1.4, Color("5a3a18"))
+	# belt with hanging chains and a rosary of teeth
+	c.draw_rect(Rect2(-26, -72, 52, 7), OUT)
+	c.draw_rect(Rect2(-25, -71, 50, 5), Color("3a2a30"))
+	for i in 6:
+		c.draw_circle(Vector2(-20.0 + i * 8.0, -68.5), 1.3, gold)
+	BA._chain(c, Vector2(-18, -66), Vector2(-6, -48), 7.0, 6, gold)
+	BA._chain(c, Vector2(18, -66), Vector2(10, -46), 6.0, 5, gold)
+	# spiked pauldrons and the high collar
+	for s in [-1.0, 1.0]:
+		BA._poly(c, [Vector2(s * 20, -134 + br), Vector2(s * 44, -140 + br), Vector2(s * 50, -118), Vector2(s * 26, -114)], Color("3a2c44"), f, 1.4)
+		BA._poly(c, [Vector2(s * 38, -138 + br), Vector2(s * 54, -158 + br - rear * 0.4), Vector2(s * 46, -128)], Color("8a8898"), f, 1.0)
+		BA._poly(c, [Vector2(s * 8, -130 + br), Vector2(s * 30, -172 + br - rear * 0.4), Vector2(s * 24, -126 + br)], lining, f, 1.2)
+		c.draw_line(Vector2(s * 12, -132 + br), Vector2(s * 29, -166 + br - rear * 0.4), cloak_l, 1.2)
+	# arms ending in long talons
+	for s in [-1.0, 1.0]:
+		var sh := Vector2(s * 36, -126 + br)
+		var el := Vector2(s * (56 + rear), -100 - rear * 1.5)
+		var hand := Vector2(s * (50 + rear * 2.0), -70 - rear * 3.0 + sin(t * 2.0 + s) * 3.0)
+		_limb(c, [sh, el, hand], [14.0, 12.0, 9.0], Color("2e2234"), Color("5a4a68"), f)
+		c.draw_rect(Rect2(el.lerp(hand, 0.5) + Vector2(-6, -3), Vector2(12, 5)), gold)
+		c.draw_circle(hand, 6.0, OUT)
+		c.draw_circle(hand, 5.0, BA._fl(skin_d, f))
+		for k in 4:
+			var cl := hand + Vector2(s * (-4.0 + k * 4.0), 6.0)
+			c.draw_line(cl, cl + Vector2(s * (1 + k * 0.8), 14.0 + k), OUT, 3.0)
+			c.draw_line(cl, cl + Vector2(s * (1 + k * 0.8), 14.0 + k), Color("e8e0e8"), 1.4)
+	# head: gaunt pale face, swept black hair, long fangs, iron crown of stakes
+	var hy := -152.0 + br - rear * 0.5
+	BA._poly(c, [Vector2(-16, hy - 4), Vector2(-24, hy + 32), Vector2(-10, hy + 44), Vector2(0, hy + 24), Vector2(10, hy + 44), Vector2(24, hy + 32), Vector2(16, hy - 4)], Color("0e0810"), f, 1.0)
+	var face := BA._sm([Vector2(-12, hy - 8), Vector2(12, hy - 8), Vector2(13, hy + 8), Vector2(7, hy + 21), Vector2(-7, hy + 21), Vector2(-13, hy + 8)], true, 4)
+	BA._shape(c, face, skin, f, Color(1, 1, 1))
+	c.draw_line(Vector2(-10, hy + 6), Vector2(-5, hy + 16), skin_d, 1.2)
+	c.draw_line(Vector2(10, hy + 6), Vector2(5, hy + 16), skin_d, 1.2)
+	for s in [-1.0, 1.0]:
+		c.draw_circle(Vector2(s * 6.5, hy + 3), 6.0, Color(eye, 0.22))
+		BA._poly(c, [Vector2(s * 2, hy), Vector2(s * 11, hy - 3), Vector2(s * 10, hy + 5), Vector2(s * 2, hy + 4)], OUT, f, 0.6)
+		c.draw_circle(Vector2(s * 6.5, hy + 2.4), 2.2, eye)
+		c.draw_line(Vector2(s * 2, hy - 2), Vector2(s * 12, hy - 5), OUT, 1.6)
+	c.draw_line(Vector2(0, hy + 5), Vector2(1, hy + 11), skin_d, 1.0)
+	c.draw_rect(Rect2(-6, hy + 14, 12, 3), Color("5a1020"))
+	for s in [-1.0, 1.0]:
+		BA._poly(c, [Vector2(s * 4 - 1.2, hy + 14), Vector2(s * 4 + 1.2, hy + 14), Vector2(s * 4, hy + 24)], Color.WHITE, f, 0.6)
+	c.draw_line(Vector2(0, hy + 17), Vector2(0, hy + 24 + sin(t * 4.0) * 1.0), Color(0.7, 0.05, 0.1, 0.9), 1.0)
+	for k in 5:
+		var cx := -12.0 + k * 6.0
+		var ch := 14.0 + (3 - absf(k - 2)) * 5.0
+		BA._poly(c, [Vector2(cx - 2.6, hy - 8), Vector2(cx, hy - 8 - ch), Vector2(cx + 2.6, hy - 8)], Color("7a7686"), f, 1.0)
+		c.draw_circle(Vector2(cx, hy - 8 - ch), 1.2, Color(eye, 0.9))
+	c.draw_line(Vector2(-14, hy - 8), Vector2(14, hy - 8), gold, 2.4)
+	# bats wheeling about him
+	for i in 5:
+		var a := t * (1.1 + i * 0.12) + i * 1.7
+		B2._bat(c, Vector2(cos(a) * (70.0 + i * 8.0), -110.0 + sin(a * 1.3) * 36.0 - i * 10.0), t + i, Color("1c0c14"), 1.2)
+	if ph >= 3:
+		for k in 5:
+			var u := fmod(t * 0.8 + k * 0.2, 1.0)
+			c.draw_rect(Rect2(-10 + k * 5, -90 + u * 80, 2, 3), Color(0.7, 0.05, 0.1, 0.8 * (1.0 - u)))
+
+
+# ====================================================================== Ankou of the Ossuary
+
+static func ankou(c: CanvasItem, t: float, ph: int, f: float, winding: bool, exposed: float, moving: bool) -> void:
+	var bone := Color("dcd6c4")
+	var bone_d := Color("9a9482")
+	var cloak := Color("2c3240")
+	var cloak_l := Color("52607a")
+	var gold := Color("b8a868")
+	var eye := Color(0.4, 1.0, 0.9) if exposed <= 0.0 else Color(1.0, 0.9, 0.4)
+	var br := sin(t * 1.4) * 1.5
+	B2._shadow(c, 80.0)
+	# the death-cart: wheel, planks and a heap of skulls
+	var wc := Vector2(-62, -58)
+	c.draw_circle(wc, 46.0, OUT)
+	c.draw_circle(wc, 43.0, Color("5a4430"))
+	c.draw_circle(wc, 35.0, Color("1a1218"))
+	for k in 12:
+		var a := TAU * k / 12.0 + t * 0.05
+		c.draw_line(wc, wc + Vector2.from_angle(a) * 38.0, Color("7a5c40"), 2.6)
+	c.draw_arc(wc, 43.0, 0, TAU, 32, Color("8a6c50"), 1.6)
+	for k in 12:
+		var a := TAU * k / 12.0
+		c.draw_circle(wc + Vector2.from_angle(a) * 41.0, 1.6, gold)
+	c.draw_circle(wc, 7.0, gold)
+	c.draw_rect(Rect2(-130, -30, 70, 10), OUT)
+	c.draw_rect(Rect2(-129, -29, 68, 8), Color("5a4430"))
+	for i in 7:
+		B2._skull(c, Vector2(-124.0 + i * 11.0, -36.0 - (i % 2) * 6), 5.2, Color("c8c2b0"))
+	for i in 5:
+		c.draw_line(Vector2(-110 + i * 14, -26), Vector2(-98 + i * 14, -44), bone, 2.2)
+	# skeletal legs: femur, knee, tibia, foot bones
+	for s in [-1.0, 1.0]:
+		var lift: float = sin(t * 3.0 + s) * 3.0 if moving else 0.0
+		_limb(c, [Vector2(s * 10, -74), Vector2(s * 14, -38), Vector2(s * 11, -6 + lift)], [10.0, 8.0, 6.0], bone, Color.WHITE, f)
+		c.draw_circle(Vector2(s * 14, -38), 6.0, OUT)
+		c.draw_circle(Vector2(s * 14, -38), 5.0, BA._fl(bone, f))
+		for k in 3:
+			c.draw_line(Vector2(s * (4 + k * 5), -6 + lift), Vector2(s * (8 + k * 6), 2 + lift), bone, 2.2)
+	# ragged shroud with a tattered hem
+	var hem: Array = []
+	for i in 9:
+		hem.append(Vector2(-48.0 + i * 12.0, -8.0 + (i % 2) * 11.0 + sin(t * 2.0 + i) * 2.0))
+	var body: Array = [Vector2(-24, -140 + br), Vector2(24, -140 + br), Vector2(38, -100), Vector2(52, -40)]
+	hem.reverse()
+	body.append_array(hem)
+	body.append(Vector2(-52, -40))
+	body.append(Vector2(-38, -100))
+	var bp := PackedVector2Array(body)
+	BA._shape(c, bp, cloak, f, cloak_l)
+	for k in 6:
+		c.draw_line(Vector2(-32 + k * 13, -100), Vector2(-42 + k * 17, -14), Color(0.06, 0.07, 0.1, 0.5), 1.4)
+	for k in 4:
+		c.draw_line(Vector2(-40 + k * 26, -60), Vector2(-34 + k * 26, -30), Color(cloak_l, 0.6), 1.0)
+	# ribcage and spine glimpsed through a rent in the shroud
+	c.draw_rect(Rect2(-14, -122 + br, 28, 40), Color(0.03, 0.04, 0.06))
+	for k in 6:
+		c.draw_arc(Vector2(0, -118 + k * 6.6 + br * 0.4), 12.5 - k * 0.7, 0.15, PI - 0.15, 8, bone, 1.6)
+	for k in 7:
+		c.draw_circle(Vector2(0, -120 + k * 5.6 + br * 0.4), 1.5, bone_d)
+	c.draw_circle(Vector2(0, -96 + br), 5.0, Color(eye, 0.18 + 0.1 * sin(t * 3.0)))
+	# soul-lantern and hourglass at the waist
+	var lp := Vector2(30 + sin(t * 2.0) * 3.0, -62.0 + sin(t * 2.6) * 2.0)
+	c.draw_line(Vector2(22, -82), lp + Vector2(0, -6), Color("4a3828"), 1.2)
+	BA._poly(c, [lp + Vector2(-5, -5), lp + Vector2(5, -5), lp + Vector2(6, 6), lp + Vector2(-6, 6)], Color("2a2420"), f, 1.0)
+	c.draw_circle(lp, 11.0, Color(eye, 0.22))
+	BA._arch(c, lp.x, lp.y + 4, 3.2, 8.0, Color(eye, 0.95), Color("2a2420"))
+	var hg := Vector2(-24, -74)
+	BA._poly(c, [hg + Vector2(-5, -8), hg + Vector2(5, -8), hg + Vector2(0, 0)], Color("a8a090"), f, 1.0)
+	BA._poly(c, [hg + Vector2(0, 0), hg + Vector2(5, 8), hg + Vector2(-5, 8)], Color("a8a090"), f, 1.0)
+	c.draw_rect(Rect2(hg + Vector2(-1, 2), Vector2(2, 5)), Color(eye, 0.8))
+	# tattered cape over bony shoulders
+	for s in [-1.0, 1.0]:
+		BA._poly(c, [Vector2(s * 12, -140 + br), Vector2(s * 46, -132), Vector2(s * 50, -108), Vector2(s * 22, -118)], cloak_l, f, 1.2)
+		for k in 3:
+			BA._poly(c, [Vector2(s * (26 + k * 8), -112 + k * 2), Vector2(s * (30 + k * 8), -100 + k * 2), Vector2(s * (34 + k * 8), -112 + k * 2)], cloak_l, f, 0.8)
+	var swing := 0.0
+	if winding:
+		swing = sin(t * 10.0) * 0.1
+	# the scythe: ornate staff and a great out-turned blade
+	var sa := Vector2(66, -34)
+	var sb := Vector2(50, -184)
+	c.draw_line(sa, sb, OUT, 7.0)
+	c.draw_line(sa, sb, Color("5a4228"), 4.4)
+	BA._rivets(c, sa.lerp(sb, 0.1), sa.lerp(sb, 0.9), 7, gold)
+	var blade := PackedVector2Array()
+	for i in 14:
+		var u := i / 13.0
+		blade.append(sb + Vector2(u * -88.0 * cos(swing), -sin(u * PI) * 24.0 + u * 16.0))
+	for i in 14:
+		var u := 1.0 - i / 13.0
+		blade.append(sb + Vector2(u * -88.0 * cos(swing), -sin(u * PI) * 13.0 + u * 16.0 + 4.0))
+	c.draw_colored_polygon(blade, BA._fl(Color("b4bec8"), f))
+	c.draw_polyline(blade, OUT, 1.6)
+	c.draw_line(sb + Vector2(-4, -2), sb + Vector2(-80, 14), Color(1, 1, 1, 0.75), 1.2)
+	for k in 6:
+		c.draw_circle(sb + Vector2(-12 - k * 12, 7 + k * 1.5), 1.0, Color(eye, 0.85))
+	c.draw_circle(sb + Vector2(-86, 16), 6.0, Color(eye, 0.2))
+	for k in 2:
+		var hp := sa.lerp(sb, 0.3 + k * 0.28)
+		c.draw_circle(hp, 5.2, OUT)
+		c.draw_circle(hp, 4.0, bone)
+		for j in 4:
+			c.draw_line(hp + Vector2(-3, -3 + j * 2), hp + Vector2(-7, -4 + j * 2.6), bone, 1.2)
+	_limb(c, [Vector2(32, -128 + br), Vector2(48, -96), sa.lerp(sb, 0.3)], [9.0, 7.0, 6.0], bone, Color.WHITE, f)
+	# skull under a wide-brimmed hat and hood
+	var hy := -154.0 + br
+	BA._poly(c, [Vector2(-20, hy - 2), Vector2(-26, hy + 24), Vector2(26, hy + 24), Vector2(20, hy - 2)], Color("14161c"), f, 1.0)
+	var sk := BA._sm([Vector2(-13, hy), Vector2(13, hy), Vector2(15, hy + 12), Vector2(9, hy + 23), Vector2(-9, hy + 23), Vector2(-15, hy + 12)], true, 4)
+	BA._shape(c, sk, bone, f, Color.WHITE)
+	c.draw_line(Vector2(-9, hy + 2), Vector2(-4, hy + 8), bone_d, 1.0)
+	for s in [-1.0, 1.0]:
+		c.draw_circle(Vector2(s * 6.4, hy + 8), 8.0, Color(eye, 0.2))
+		c.draw_circle(Vector2(s * 6.4, hy + 8), 5.0, OUT)
+		c.draw_circle(Vector2(s * 6.4, hy + 8), 2.4, eye)
+	BA._poly(c, [Vector2(0, hy + 12), Vector2(-2.4, hy + 17), Vector2(2.4, hy + 17)], OUT, f, 0.6)
+	for k in 7:
+		c.draw_line(Vector2(-7 + k * 2.3, hy + 19), Vector2(-7 + k * 2.3, hy + 23), OUT, 1.2)
+	c.draw_line(Vector2(-9, hy + 19.4), Vector2(9, hy + 19.4), OUT, 1.0)
+	c.draw_colored_polygon(BA._ellipse(Vector2(0, hy - 2), 40.0, 7.5), OUT)
+	c.draw_colored_polygon(BA._ellipse(Vector2(0, hy - 3), 38.0, 6.0), Color("2a2630"))
+	c.draw_arc(Vector2(0, hy - 4), 35.0, 0.2, 2.9, 12, Color("464058"), 1.2)
+	BA._poly(c, [Vector2(-15, hy - 3), Vector2(-12, hy - 24), Vector2(12, hy - 24), Vector2(15, hy - 3)], Color("2a2630"), f, 1.2)
+	c.draw_rect(Rect2(-15, hy - 9, 30, 3.4), gold)
+	c.draw_circle(Vector2(0, hy - 7), 2.4, Color("d8d0a8"))
+	# drifting soul wisps
+	for i in 6:
+		var u := fmod(t * 0.4 + i * 0.17, 1.0)
+		c.draw_circle(Vector2(-70 + i * 30 + sin(t + i) * 6.0, -30 - u * 130.0), 2.6 - u, Color(eye, 0.7 * (1.0 - u)))
