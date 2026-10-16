@@ -132,6 +132,9 @@ func hurt(dmg: int, from_dir: Vector2) -> void:
 	invuln = 1.0
 	knock = from_dir * 170.0
 	Audio.sfx("hurt")
+	if level:
+		level.shake(4.0)
+		level.spark(global_position, Color(0.9, 0.3, 0.4), 12)
 	if GameState.hp <= 0:
 		dead = true
 		died.emit()

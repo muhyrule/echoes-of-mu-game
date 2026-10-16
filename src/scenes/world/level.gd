@@ -34,6 +34,12 @@ var pickups: Array = []
 var walkovers: Array = []
 var _busy := false
 var _nearest: Node2D
+var cam: Camera2D
+var shake_amt := 0.0
+var overlay: Node2D
+var fog: Array = []
+var windows: Array = []
+var gt := 0.0
 
 
 func _ready() -> void:
@@ -59,6 +65,7 @@ func _ready() -> void:
 	player.died.connect(_on_player_died)
 	_setup_camera()
 	_setup_hud()
+	_setup_fx()
 	_setup_atmosphere()
 	_spawn_follower()
 
@@ -198,7 +205,7 @@ func _place_player() -> void:
 
 
 func _setup_camera() -> void:
-	var cam := Camera2D.new()
+	cam = Camera2D.new()
 	cam.limit_left = 0
 	cam.limit_top = 0
 	cam.limit_right = w * TILE
@@ -225,8 +232,8 @@ func _setup_atmosphere() -> void:
 	var lamp := Art.make_light(Color("ffd9a0"), 1.6, 0.9)
 	player.add_child(lamp)
 	var g := Gradient.new()
-	g.offsets = PackedFloat32Array([0.45, 1.0])
-	g.colors = PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0.7)])
+	g.offsets = PackedFloat32Array([0.6, 1.0])
+	g.colors = PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0.55)])
 	var tex := GradientTexture2D.new()
 	tex.gradient = g
 	tex.fill = GradientTexture2D.FILL_RADIAL
@@ -242,6 +249,93 @@ func _setup_atmosphere() -> void:
 	vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.get_parent().add_child(vignette)
 	hud.get_parent().move_child(vignette, 0)
+
+
+func shake(a: float) -> void:
+	shake_amt = maxf(shake_amt, a)
+
+
+func spark(pos: Vector2, col := Color(1, 0.9, 0.6), n := 8) -> void:
+	var p := CPUParticles2D.new()
+	p.position = pos
+	p.emitting = true
+	p.one_shot = true
+	p.explosiveness = 1.0
+	p.amount = n
+	p.lifetime = 0.35
+	p.spread = 180.0
+	p.initial_velocity_min = 40.0
+	p.initial_velocity_max = 110.0
+	p.damping_min = 120.0
+	p.damping_max = 200.0
+	p.scale_amount_min = 0.8
+	p.scale_amount_max = 1.6
+	p.color = col
+	p.z_index = 20
+	add_child(p)
+	get_tree().create_timer(0.6).timeout.connect(p.queue_free)
+
+
+func _setup_fx() -> void:
+	var dust := CPUParticles2D.new()
+	dust.amount = 70
+	dust.lifetime = 7.0
+	dust.preprocess = 7.0
+	dust.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	dust.emission_rect_extents = Vector2(230, 130)
+	dust.direction = Vector2(1, -0.3)
+	dust.spread = 60.0
+	dust.initial_velocity_min = 2.0
+	dust.initial_velocity_max = 7.0
+	dust.scale_amount_min = 0.4
+	dust.scale_amount_max = 1.0
+	dust.color = Color(1, 0.9, 0.75, 0.35)
+	dust.local_coords = false
+	dust.z_index = 15
+	player.add_child(dust)
+	var tex := Art.light_texture()
+	for i in 9:
+		var f := Sprite2D.new()
+		f.texture = tex
+		f.scale = Vector2(randf_range(1.4, 2.6), randf_range(0.5, 0.9))
+		f.position = Vector2(randf() * w * TILE, randf() * h * TILE)
+		f.modulate = Color(0.55, 0.6, 0.85, 0.16) if map_name == "vaults" else Color(0.75, 0.6, 0.8, 0.12)
+		f.z_index = 14
+		f.set_meta("spd", randf_range(2.0, 6.0))
+		add_child(f)
+		fog.append(f)
+	overlay = Node2D.new()
+	overlay.z_index = 16
+	var mat := CanvasItemMaterial.new()
+	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	overlay.material = mat
+	overlay.draw.connect(_draw_overlay)
+	add_child(overlay)
+	var cols := [Color("d0405a"), Color("4a7be0"), Color("e0b040"), Color("40b08a")]
+	var n := 0
+	for x in range(3, w - 2, 5):
+		for y in range(0, h - 1):
+			if grid[y][x] == "#" and not _is_solid_char(Vector2i(x, y + 1)):
+				if map_name == "chapel":
+					windows.append([Vector2i(x, y), cols[n % 4]])
+				elif n % 2 == 0:
+					var tp := _make_prop("torch", Vector2i(x, y))
+					tp.position.y += 2
+				n += 1
+				break
+
+
+func _draw_overlay() -> void:
+	for wd in windows:
+		var c: Vector2i = wd[0]
+		var col: Color = wd[1]
+		var o := Vector2(c) * TILE
+		var pulse := 0.8 + 0.2 * sin(gt * 0.7 + c.x)
+		var top := o + Vector2(8, 14)
+		var shaft := PackedVector2Array([top + Vector2(-5, 0), top + Vector2(5, 0), top + Vector2(34, 120), top + Vector2(10, 120)])
+		var cs := PackedColorArray([Color(col.r, col.g, col.b, 0.22 * pulse), Color(col.r, col.g, col.b, 0.22 * pulse), Color(col.r, col.g, col.b, 0.0), Color(col.r, col.g, col.b, 0.0)])
+		overlay.draw_polygon(shaft, cs)
+		overlay.draw_circle(o + Vector2(8, 8), 14.0, Color(col.r, col.g, col.b, 0.05 * pulse))
 
 
 func _spawn_follower() -> void:
@@ -274,6 +368,14 @@ func _draw() -> void:
 					draw_rect(Rect2(r.position.x + (11 if (x + y) % 2 == 0 else 4), r.position.y + 8, 1, 8), mortar)
 					draw_rect(Rect2(r.position.x, r.position.y, TILE, 2), wall_face.lightened(0.12))
 					draw_rect(Rect2(r.position.x, r.position.y + 12, TILE, 4), Color(0, 0, 0, 0.28))
+					for wd in windows:
+						if wd[0] == c:
+							var wc: Color = wd[1]
+							draw_rect(Rect2(r.position + Vector2(3, 0), Vector2(10, 14)), Color(Art.OUT))
+							draw_colored_polygon(PackedVector2Array([r.position + Vector2(4, 13), r.position + Vector2(4, 5), r.position + Vector2(8, 1), r.position + Vector2(12, 5), r.position + Vector2(12, 13)]), wc.darkened(0.2))
+							draw_rect(Rect2(r.position + Vector2(7.5, 1), Vector2(1, 12)), Color(Art.OUT))
+							draw_rect(Rect2(r.position + Vector2(4, 8), Vector2(8, 1)), Color(Art.OUT))
+							draw_rect(Rect2(r.position + Vector2(5, 9), Vector2(2, 3)), wc.lightened(0.4))
 					draw_rect(Rect2(r.position.x + 8, r.position.y + 8, 1, 1), wall_face.lightened(0.08))
 					if (x * 31 + y * 17) % 9 == 0:
 						draw_rect(Rect2(r.position.x + 2, r.position.y + 9, 5, 4), Color(0.2, 0.4, 0.25, 0.55))
@@ -330,6 +432,16 @@ func _physics_process(_delta: float) -> void:
 
 
 func _process(_delta: float) -> void:
+	gt += _delta
+	if cam:
+		shake_amt = maxf(0.0, shake_amt - _delta * 14.0)
+		cam.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_amt
+	for f in fog:
+		f.position.x += f.get_meta("spd") * _delta
+		if f.position.x > w * TILE + 100:
+			f.position.x = -100
+	if overlay:
+		overlay.queue_redraw()
 	_nearest = null
 	var best := 24.0
 	for p in interactables:

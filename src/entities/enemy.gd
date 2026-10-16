@@ -85,6 +85,8 @@ func _physics_process(delta: float) -> void:
 		state = "stun"
 		st = 0.0
 		Audio.sfx("hit")
+	level.spark(global_position + Vector2(0, -4), Color(1, 0.85, 0.5), 10)
+	level.shake(2.0 if kind == "warden" else 1.0)
 	if dist < hit_radius + 8.0 and state != "stun" and state != "dormant":
 		player.hurt(contact_dmg, to.normalized() if dist > 0.1 else Vector2.DOWN)
 	queue_redraw()
