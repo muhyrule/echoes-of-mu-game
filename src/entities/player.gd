@@ -150,7 +150,10 @@ func _draw() -> void:
 		var a := facing.angle()
 		var k := 1.0 - attacking / 0.2
 		var col := Color(0.7, 0.85, 1.0, 0.8) if wraith else Color(0.95, 0.96, 1.0)
-		draw_arc(Vector2(0, -3), 20.0, a - 1.0 + k * 0.6, a + 1.0 + k * 0.6, 10, col, 3.0)
+		for i in 4:
+			var f := float(i) / 4.0
+			var c2 := Color(col.r, col.g, col.b, (1.0 - f) * 0.7 * (1.0 - k * 0.6))
+			draw_arc(Vector2(0, -3), 19.0 - f * 3.0, a - 1.1 + k * 0.8 - f * 0.5, a + 1.1 + k * 0.8, 14, c2, 3.5 - f * 2.0)
 		draw_line(Vector2(0, -3) + facing * 6.0, Vector2(0, -3) + facing * 22.0, col, 2.0)
 	elif not wraith:
 		draw_line(Vector2(4 * signf(facing.x + 0.01), -2), Vector2(4 * signf(facing.x + 0.01), -9), Color("c9ccd6"), 1.0)

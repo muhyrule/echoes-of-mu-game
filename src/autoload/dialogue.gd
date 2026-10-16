@@ -30,8 +30,8 @@ func _ready() -> void:
 
 func _build_ui() -> void:
 	_panel = Panel.new()
-	_panel.position = Vector2(24, 262)
-	_panel.size = Vector2(592, 82)
+	_panel.position = Vector2(72, 786)
+	_panel.size = Vector2(1776, 246)
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.08, 0.06, 0.12, 0.94)
 	sb.border_color = Color(0.62, 0.5, 0.78)
@@ -41,23 +41,23 @@ func _build_ui() -> void:
 	add_child(_panel)
 
 	_name_label = Label.new()
-	_name_label.position = Vector2(12, 4)
-	_name_label.add_theme_font_size_override("font_size", 14)
+	_name_label.position = Vector2(36, 12)
+	_name_label.add_theme_font_size_override("font_size", 42)
 	_name_label.add_theme_color_override("font_color", Color(0.95, 0.78, 0.45))
 	_panel.add_child(_name_label)
 
 	_text = Label.new()
-	_text.position = Vector2(12, 24)
-	_text.size = Vector2(568, 52)
+	_text.position = Vector2(36, 72)
+	_text.size = Vector2(1704, 156)
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_text.add_theme_font_size_override("font_size", 14)
+	_text.add_theme_font_size_override("font_size", 42)
 	_text.add_theme_color_override("font_color", Color(0.92, 0.9, 0.96))
 	_panel.add_child(_text)
 
 	_prompt = Label.new()
 	_prompt.text = "▼"
-	_prompt.position = Vector2(566, 62)
-	_prompt.add_theme_font_size_override("font_size", 12)
+	_prompt.position = Vector2(1698, 186)
+	_prompt.add_theme_font_size_override("font_size", 36)
 	_prompt.add_theme_color_override("font_color", Color(0.95, 0.78, 0.45))
 	_panel.add_child(_prompt)
 

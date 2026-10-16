@@ -203,6 +203,7 @@ func _setup_camera() -> void:
 	cam.limit_top = 0
 	cam.limit_right = w * TILE
 	cam.limit_bottom = h * TILE
+	cam.zoom = Vector2(3, 3)
 	player.add_child(cam)
 	cam.make_current()
 
@@ -219,8 +220,10 @@ func _setup_hud() -> void:
 
 func _setup_atmosphere() -> void:
 	var tint := CanvasModulate.new()
-	tint.color = Color(0.8, 0.82, 0.95) if map_name == "vaults" else Color(0.95, 0.88, 0.85)
+	tint.color = Color(0.38, 0.4, 0.56) if map_name == "vaults" else Color(0.55, 0.5, 0.62)
 	add_child(tint)
+	var lamp := Art.make_light(Color("ffd9a0"), 1.6, 0.9)
+	player.add_child(lamp)
 	var g := Gradient.new()
 	g.offsets = PackedFloat32Array([0.45, 1.0])
 	g.colors = PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0.7)])
@@ -235,7 +238,7 @@ func _setup_atmosphere() -> void:
 	vignette.texture = tex
 	vignette.stretch_mode = TextureRect.STRETCH_SCALE
 	vignette.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	vignette.size = Vector2(640, 360)
+	vignette.size = Vector2(1920, 1080)
 	vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.get_parent().add_child(vignette)
 	hud.get_parent().move_child(vignette, 0)
@@ -270,9 +273,25 @@ func _draw() -> void:
 					draw_rect(Rect2(r.position.x + (4 if (x + y) % 2 == 0 else 11), r.position.y, 1, 7), mortar)
 					draw_rect(Rect2(r.position.x + (11 if (x + y) % 2 == 0 else 4), r.position.y + 8, 1, 8), mortar)
 					draw_rect(Rect2(r.position.x, r.position.y, TILE, 2), wall_face.lightened(0.12))
+					draw_rect(Rect2(r.position.x, r.position.y + 12, TILE, 4), Color(0, 0, 0, 0.28))
+					draw_rect(Rect2(r.position.x + 8, r.position.y + 8, 1, 1), wall_face.lightened(0.08))
+					if (x * 31 + y * 17) % 9 == 0:
+						draw_rect(Rect2(r.position.x + 2, r.position.y + 9, 5, 4), Color(0.2, 0.4, 0.25, 0.55))
+						draw_rect(Rect2(r.position.x + 3, r.position.y + 11, 2, 3), Color(0.25, 0.5, 0.3, 0.5))
 				continue
 			var hv := (x * 73856093 ^ y * 19349663) % 7
 			draw_rect(r, floor_a if (x + y) % 2 == 0 else floor_b)
+			draw_rect(Rect2(r.position.x, r.position.y, TILE, 1), Color(0, 0, 0, 0.22))
+			draw_rect(Rect2(r.position.x, r.position.y, 1, TILE), Color(0, 0, 0, 0.22))
+			draw_rect(Rect2(r.position.x + 1, r.position.y + 1, TILE - 1, 1), Color(1, 1, 1, 0.04))
+			if y > 0 and grid[y - 1][x] == "#":
+				draw_rect(Rect2(r.position.x, r.position.y, TILE, 5), Color(0, 0, 0, 0.35))
+				draw_rect(Rect2(r.position.x, r.position.y + 5, TILE, 3), Color(0, 0, 0, 0.15))
+			if hv == 3 and vault:
+				draw_rect(Rect2(r.position + Vector2(3, 8), Vector2(10, 5)), Color(0.15, 0.2, 0.35, 0.6))
+				draw_rect(Rect2(r.position + Vector2(5, 9), Vector2(4, 1)), Color(0.6, 0.75, 1.0, 0.25))
+			if hv == 4:
+				draw_rect(Rect2(r.position + Vector2(11, 11), Vector2(3, 2)), Color(0.22, 0.4, 0.26, 0.6))
 			if hv == 0:
 				draw_line(r.position + Vector2(3, 5), r.position + Vector2(9, 9), Color(0, 0, 0, 0.25), 1.0)
 			if hv == 1:

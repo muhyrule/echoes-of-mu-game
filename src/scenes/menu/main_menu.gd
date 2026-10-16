@@ -46,11 +46,14 @@ func _choose(item: String) -> void:
 
 
 func _text(pos: Vector2, s: String, size: int, col: Color, center := true) -> void:
-	var p := pos
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	size *= 3
+	var p := pos * 3.0
 	if center:
 		p.x -= font.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x * 0.5
-	draw_string(font, p + Vector2(2, 2), s, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(0, 0, 0, 0.8))
+	draw_string(font, p + Vector2(3, 3), s, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(0, 0, 0, 0.8))
 	draw_string(font, p, s, HORIZONTAL_ALIGNMENT_LEFT, -1, size, col)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(3, 3))
 
 
 func _spire(x: float, base: float, wd: float, ht: float, col: Color) -> void:
@@ -59,6 +62,7 @@ func _spire(x: float, base: float, wd: float, ht: float, col: Color) -> void:
 
 
 func _draw() -> void:
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(3, 3))
 	draw_rect(Rect2(0, 0, 640, 360), Color("0b0716"))
 	for i in 12:
 		var y := i * 22.0
@@ -67,6 +71,8 @@ func _draw() -> void:
 		draw_rect(Rect2(s, Vector2(1, 1)), Color(1, 1, 1, 0.4 + 0.4 * sin(t * 2.0 + s.x)))
 	draw_circle(Vector2(480, 90), 34.0, Color("e8e2f5"))
 	draw_circle(Vector2(492, 84), 30.0, Color("0f0a1c"))
+	for r in 4:
+		draw_circle(Vector2(480, 90), 52.0 - r * 6.0, Color(0.6, 0.55, 0.9, 0.05))
 	var sil := Color("08050f")
 	draw_rect(Rect2(0, 270, 640, 90), sil)
 	_spire(80, 280, 22, 70, sil)
@@ -77,6 +83,12 @@ func _draw() -> void:
 	_spire(470, 280, 14, 48, sil)
 	_spire(560, 280, 24, 80, sil)
 	draw_rect(Rect2(396, 200, 8, 16), Color("ffd166") if int(t * 2.0) % 3 != 0 else Color("a8741a"))
+	for fx in [60, 170, 290, 420, 540]:
+		var drift := fmod(t * 6.0 + fx * 1.7, 700.0) - 30.0
+		draw_rect(Rect2(drift, 262 + (fx % 4) * 6, 120, 10), Color(0.5, 0.45, 0.7, 0.07))
+		draw_rect(Rect2(drift + 20, 258 + (fx % 4) * 6, 80, 6), Color(0.5, 0.45, 0.7, 0.06))
+	for wx in [248, 252, 400, 404]:
+		draw_rect(Rect2(wx, 235 + (wx % 3) * 14, 2, 4), Color("ffd166") if int(t * 1.3 + wx) % 4 != 0 else Color("40301a"))
 	_text(Vector2(320, 98), "ECHOES OF MU", 44, Color("e8dcff"))
 	_text(Vector2(320, 124), "A Gothic Journey Through the Old World", 14, Color("b7a5d9"))
 	for i in items.size():
