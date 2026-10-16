@@ -48,6 +48,9 @@ func _physics_process(delta: float) -> void:
 		moving = false
 		queue_redraw()
 		return
+	for sid in ["tonic", "elixir", "candle"]:
+		if Input.is_action_just_pressed("use_" + sid):
+			use_supply(sid)
 
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	moving = dir != Vector2.ZERO
@@ -96,13 +99,13 @@ func _check_push(dir: Vector2, delta: float) -> void:
 
 func _start_attack() -> void:
 	attacking = 0.2
-	attack_cd = {"wraith": 0.42, "gargoyle": 0.6}.get(GameState.form, 0.32)
+	attack_cd = {"wraith": 0.42, "gargoyle": 0.6}.get(GameState.form, 0.32) * Gear.cooldown_mult()
 	_hit_set.clear()
 	Audio.sfx("slash")
 
 
 func _sword_hits() -> void:
-	var dmg: int = {"wraith": 1, "gargoyle": 3}.get(GameState.form, 2)
+	var dmg: int = {"wraith": 1, "gargoyle": 3}.get(GameState.form, 2) + Gear.atk_bonus()
 	var reach: float = {"wraith": 24.0, "gargoyle": 26.0}.get(GameState.form, 30.0)
 	if GameState.form == "gargoyle" and level:
 		level.try_break(global_position + facing * 12.0)
@@ -114,6 +117,25 @@ func _sword_hits() -> void:
 		if near or (to.length() < reach + e.hit_radius and to.normalized().dot(facing) > 0.25):
 			_hit_set.append(e)
 			e.hurt(dmg, to.normalized() if to.length() > 0.1 else facing)
+
+
+func use_supply(sid: String) -> void:
+	if int(GameState.supplies.get(sid, 0)) <= 0:
+		return
+	if sid != "candle" and GameState.hp >= GameState.max_hp:
+		return
+	GameState.supplies[sid] -= 1
+	match sid:
+		"tonic":
+			GameState.hp = mini(GameState.max_hp, GameState.hp + 3)
+		"elixir":
+			GameState.hp = GameState.max_hp
+		"candle":
+			invuln = maxf(invuln, 8.0)
+	Audio.sfx("switch")
+	if level:
+		level.spark(global_position, Color(1.0, 0.8, 0.4), 10)
+		level.hud.show_notice("Used %s" % Gear.SUPPLIES[sid].name)
 
 
 func cycle_form() -> void:
@@ -132,8 +154,10 @@ func hurt(dmg: int, from_dir: Vector2) -> void:
 		return
 	if GameState.form == "gargoyle":
 		dmg = maxi(1, dmg - 1)
+	var armor := Gear.def_total()
+	dmg = maxi(1, dmg - armor / 3)
 	GameState.hp -= dmg
-	invuln = 1.0
+	invuln = 1.0 + 0.06 * armor
 	knock = from_dir * 170.0
 	Audio.sfx("hurt")
 	if level:

@@ -344,3 +344,62 @@ SECRETS.update({
     "bk_barrel": "A cask of barley water, cool and sweet. You feel refreshed.",
 })
 ITEMS.update({"ch_crate": "Peggy's Note", "ch_barrel": "Rab's Honey Cake", "bk_crate": "Scrap of Red Cloth", "bk_barrel": "Barley Water"})
+
+
+# ------------------------------------------------------------------ shops
+d("edin_ewan",
+  ("Ewan", "Apothecary. Tonics for the hurt, elixirs for the nearly dead, and candles blessed against what lingers in the dark. Coin first, miracles after."))
+d("edin_ewan_again",
+  ("Ewan", "Business has never been so brisk. I would prefer the town healthier and me poorer."))
+d("edin_brenda",
+  ("Brenda", "Armoury. Mail for you, Mu. Plate for the lass with the maul. Leathers for any urchin who'll stand still to be measured. Take your time."))
+d("edin_brenda_again",
+  ("Brenda", "Every plate I sell comes back dented. That's how I know it did its job."))
+d("edin_iain",
+  ("Iain", "Weapons. Each blade here was forged for someone's hand. Find the one that fits yours, and don't swing it at the furniture."))
+d("edin_iain_again",
+  ("Iain", "A sword is a promise. Keep it, and it keeps you."))
+d("edin_isla",
+  ("Isla", "The Lantern Rest. Warm beds, hot broth, and a window that faces away from the vaults. Sleep, and the road will wait."))
+d("edin_isla_again",
+  ("Isla", "Nobody sleeps well in the Old Town any more. But a bed is still a bed."))
+d("pra_ludek",
+  ("Ludek", "Welcome to the Silver Retort. Tonics, elixirs, wards. Zdenek's craft is sharper, mine is cheaper and I don't lecture."))
+d("pra_ludek_again",
+  ("Ludek", "Take two candles. Take three. The dead down there are not gentle."))
+d("pra_dagmar",
+  ("Dagmar", "Armour of the Guild of Bohemian Smiths, though the Guild is mostly me now. Fit for knights, thieves and clock-keepers alike."))
+d("pra_dagmar_again",
+  ("Dagmar", "I once armoured a statue. It never complained, either."))
+d("pra_radek",
+  ("Radek", "Weapons, and the best steel in the city. Every hero in your party has a blade waiting in this shop. Ask the clock if you doubt me."))
+d("pra_radek_again",
+  ("Radek", "The Ossuary does not forgive a dull edge. Sharpen often."))
+d("pra_olga",
+  ("Olga", "The Rose and Hourglass. Beds are clean, stew is hot, and the bells are only a little loud. Rest and you will be saved."))
+d("pra_olga_again",
+  ("Olga", "I keep a candle burning for every guest. Don't blow them out when you leave."))
+
+SECRETS.update({
+    "ap_jar": "A jar of dried marsh-heather with a scrawled label: 'For Marta's chest. Does nothing. Marta likes it.'",
+    "ap_chest": "A small lead box of pressed violets, tied with blue thread. Someone intended to deliver it.",
+    "ar_helm": "A battered helm hung high on the rack. Inside the brim, scratched with a nail: 'T. was here, aged 11. Wearing it.'",
+    "ar_trunk": "A trunk of spare buckles. Under them, a handful of silver nobles somebody forgot to bank.",
+    "wp_anvil": "A cold anvil with a notch cut for a very particular chisel. The notch is bell-shaped.",
+    "wp_crate": "A crate of straw packing. Wrapped inside, a whetstone worn to a thumbprint and a few spare coins.",
+    "in_trunk": "A guest's forgotten trunk. A letter on top: 'To whoever finds this: I heard the bells under the hill. Do not go down at night.' Under it, a purse.",
+    "in_cask": "A cask of small ale, still sweet. Spiced with something that must be a secret.",
+    "pa_jar": "A jar of black powder labelled 'NOT FOR THE CLOCK-KEEPER'. Probably wise.",
+    "pa_chest": "Scales, a mortar and a note: 'Ask Zdenek about the bell metal. He pretends not to know.'",
+    "pr_rack": "A shield hung crooked. On the back, scratched in anger: 'The Guild forgot us.'",
+    "pr_trunk": "A trunk of tarnished spurs and a pouch of old Bohemian groschen.",
+    "pw_anvil": "An anvil that rings a half-tone flat. Radek says it was cast from the old bell. He says that a lot.",
+    "pw_crate": "A crate of offcuts. Among them, a small blade shaped like a key.",
+    "pi_trunk": "A traveller's trunk. Inside, a sketched map of the Ossuary with one corridor circled and a single word: 'Run.' A purse is tucked beneath.",
+    "pi_cask": "A cask of honey mead, laid down the year the clock stopped. It tastes of better days.",
+})
+ITEMS.update({
+    "ap_chest": "Marta's Violets", "ar_helm": "Tomas's Helm Scratch", "ar_trunk": "Forgotten Nobles",
+    "wp_crate": "Thumbprint Whetstone", "in_trunk": "Stranger's Warning", "pa_chest": "Cartographer's Note",
+    "pr_trunk": "Bohemian Groschen", "pw_crate": "Key-Shaped Blade", "pi_trunk": "Circled Corridor Map",
+})

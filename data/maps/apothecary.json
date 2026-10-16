@@ -1,0 +1,81 @@
+{
+ "theme": "interior",
+ "title": "Ewan's Apothecary",
+ "subtitle": "Dried herbs hang from every beam",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "a": {
+   "id": "edin_ewan",
+   "pal": {
+    "coat": "#3a4a3a",
+    "accent": "#c0a070",
+    "hair": "#8a8a90",
+    "skin": "#c4a083",
+    "style": "beard",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "shop": "items",
+   "tier": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "edinburgh",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "d": {
+   "kind": "urn",
+   "id": "ap_jar",
+   "text": "A jar of dried marsh-heather with a scrawled label: 'For Marta's chest. Does nothing. Marta likes it.'",
+   "reward": "lore",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "chest",
+   "id": "ap_chest",
+   "text": "A small lead box of pressed violets, tied with blue thread. Someone intended to deliver it.",
+   "item": "Marta's Violets",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "%": {
+   "kind": "barrel",
+   "empty": "Nothing but old stores and dust."
+  },
+  "+": {
+   "kind": "crate",
+   "empty": "Nothing but old stores and dust."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#.ZZZZZZZZ..ZZZZZ...ZZZZZZZZ.#",
+  "#..........................U.#",
+  "#.%.d........................#",
+  "#.+......l.........l.........#",
+  "#............................#",
+  "#.....JJJJJJJJaJJJJJJJJJ.....#",
+  "#............................#",
+  "#............................#",
+  "#.........RRRRRRRRRR......l..#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#...TT....RRRRRRRRRR...TT....#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#..l.....................e.%.#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

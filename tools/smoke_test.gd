@@ -152,7 +152,7 @@ func run() -> void:
 	GS.set_flag("intro_done")
 	GS.set_flag("isolde_joined")
 	lv = await load_level("edinburgh", "from_chapel")
-	check(lv.entries.size() == 6, "edinburgh has 5 buildings and a dungeon gate")
+	check(lv.entries.size() == 10, "edinburgh has 9 buildings and a dungeon gate")
 	var gate: Node2D
 	for e in lv.entries:
 		if e.def.map == "vaults":
@@ -184,6 +184,44 @@ func run() -> void:
 		if e.def.map == "archive":
 			arch = e
 	check(lv.w >= 100 and lv.player.position.distance_to(arch.position) < 40.0, "leaving an interior returns to its door")
+
+	# Shops, gear, supplies, inn
+	GS.new_game()
+	GS.set_flag("intro_done")
+	GS.party = ["isolde"]
+	GS.gold = 500
+	for m in ["apothecary", "armoury", "weaponsmith", "lantern_inn", "drowned_candle", "silver_retort", "guild_armoury", "bohemian_steel", "rose_inn"]:
+		lv = await load_level(m, "start")
+		var keeper_shop := ""
+		for p in lv.interactables:
+			if p.def.has("shop"):
+				keeper_shop = p.def.shop
+		check(keeper_shop != "", m + " has a shopkeeper")
+	lv = await load_level("armoury", "start")
+	var before_hp: int = GS.max_hp
+	lv.open_shop("armor", 2)
+	await frames(10)
+	var sh: Node
+	for ch in lv.get_children():
+		if ch is CanvasLayer and ch.get_child_count() > 0 and ch.get_child(0).has_method("_buy"):
+			sh = ch.get_child(0)
+	check(sh != null and lv.frozen, "shop opens and freezes the world")
+	sh._buy(sh.entries[0])
+	check("mu_a1" in GS.owned and GS.equip["mu"]["armor"] == "mu_a1", "buying armour equips it")
+	check(GS.max_hp == before_hp + 1 and GS.gold == 430, "armour raises max hp and costs gold")
+	sh.closed.emit()
+	await frames(10)
+	check(not lv.frozen, "closing the shop thaws the world")
+	GS.hp = 2
+	lv.player.use_supply("tonic")
+	check(GS.hp == 5 and int(GS.supplies.get("tonic", 0)) == 0, "tonic heals three hearts")
+	GS.save_game()
+	var g0: int = GS.gold
+	GS.gold = 0
+	GS.equip = {}
+	GS.load_game()
+	check(GS.gold == g0 and GS.equip["mu"]["armor"] == "mu_a1" and GS.max_hp == before_hp + 1, "gear and gold survive save and load")
+	check(Gear.atk_bonus() == 0 and Gear.def_total() >= 1, "gear stat maths")
 
 	print("SMOKE TEST DONE, failures: %d" % fails)
 	quit(fails)

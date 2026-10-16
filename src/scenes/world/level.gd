@@ -9,7 +9,8 @@ const FollowerScript = preload("res://src/entities/follower.gd")
 const HudScript = preload("res://src/scenes/world/hud.gd")
 
 const TILE := 16
-const SOLID_CHARS := ["#", "o", "=", "H", "Z", "Y", "U"]
+const SOLID_CHARS := ["#", "o", "=", "H", "Z", "Y", "U", "T", "J", "F"]
+const FURNITURE := ["Z", "Y", "U", "T", "J", "F", "C", "R"]
 const TOWN_THEMES := ["town_e", "town_p"]
 
 var map_name := ""
@@ -79,7 +80,8 @@ func _ready() -> void:
 	_spawn_followers()
 
 	Audio.play_music(meta.get("music", "crypt"))
-	if map_name == "chapel" or meta.get("safe", false):
+	GameState.refresh_stats()
+	if map_name == "chapel":
 		GameState.hp = GameState.max_hp
 	hud.show_banner(meta.title, meta.subtitle)
 	hud.fade = 1.0
@@ -566,7 +568,7 @@ func _draw() -> void:
 			if ch == "H":
 				_draw_house(r, x, y)
 				continue
-			if ch == "Z" or ch == "Y" or ch == "U":
+			if ch in FURNITURE:
 				_draw_floor_plank(r, x, y)
 				_draw_furniture(r, ch, x, y)
 				continue
@@ -615,7 +617,12 @@ func _draw() -> void:
 			if interior:
 				_draw_floor_plank(r, x, y)
 			else:
-				draw_rect(r, floor_a if (x + y) % 2 == 0 else floor_b)
+				var fa := floor_a
+				var fb := floor_b
+				if (theme == "town_e" or theme == "town_p") and ((x >= 50 and x <= 62) or (x >= 44 and x <= 68 and y >= 19 and y <= 25)):
+					fa = floor_a.lightened(0.12)
+					fb = floor_b.lightened(0.12)
+				draw_rect(r, fa if (x + y) % 2 == 0 else fb)
 				draw_rect(Rect2(r.position.x, r.position.y, TILE, 1), Color(0, 0, 0, 0.22))
 				draw_rect(Rect2(r.position.x, r.position.y, 1, TILE), Color(0, 0, 0, 0.22))
 				draw_rect(Rect2(r.position.x + 1, r.position.y + 1, TILE - 1, 1), Color(1, 1, 1, 0.04))
@@ -714,6 +721,12 @@ func _draw_house(r: Rect2, x: int, y: int) -> void:
 			draw_rect(Rect2(o.x + 2, o.y + 12, 12, 2), Color("3a3040"))
 
 
+func _char_at(x: int, y: int) -> String:
+	if x < 0 or y < 0 or x >= w or y >= h:
+		return "#"
+	return grid[y][x]
+
+
 func _draw_floor_plank(r: Rect2, x: int, y: int) -> void:
 	var o := r.position
 	var base := Color("5a4228") if y % 2 == 0 else Color("523a24")
@@ -747,6 +760,83 @@ func _draw_furniture(r: Rect2, ch: String, x: int, y: int) -> void:
 				bxp += bw + 0.5
 				k += 1
 		draw_rect(Rect2(o.x + 1, o.y + 1, 14, 1), Color("6a4a30"))
+	elif ch == "T":
+		draw_rect(Rect2(o.x + 1, o.y + 12, 14, 3), Color(0, 0, 0, 0.3))
+		draw_rect(Rect2(o.x + 1, o.y + 3, 14, 11), O)
+		draw_rect(Rect2(o.x + 2, o.y + 4, 12, 8), Color("7a5430"))
+		draw_rect(Rect2(o.x + 2, o.y + 4, 12, 2), Color("9a7040"))
+		draw_rect(Rect2(o.x + 2, o.y + 12, 12, 2), Color("4a3220"))
+		draw_rect(Rect2(o.x + 2, o.y + 7, 12, 1), Color(0, 0, 0, 0.18))
+		var k := (x * 7 + y * 3) % 4
+		if k == 0:
+			draw_rect(Rect2(o.x + 6, o.y + 5, 3, 4), O)
+			draw_rect(Rect2(o.x + 6.6, o.y + 5.6, 1.8, 2.8), Color("c8a050"))
+		elif k == 1:
+			draw_circle(o + Vector2(8, 7.5), 3.0, O)
+			draw_circle(o + Vector2(8, 7.5), 2.2, Color("c8c0b0"))
+			draw_circle(o + Vector2(8, 7.5), 1.2, Color("7a3a24"))
+		elif k == 2:
+			draw_rect(Rect2(o.x + 4, o.y + 5, 4, 3), Color("e8e0c8"))
+			draw_rect(Rect2(o.x + 9, o.y + 6, 3, 3), O)
+			draw_rect(Rect2(o.x + 9.6, o.y + 6.6, 1.8, 1.8), Color("c8a050"))
+		else:
+			draw_rect(Rect2(o.x + 5, o.y + 5, 6, 3), Color("d8c8a0"))
+			draw_rect(Rect2(o.x + 7, o.y + 4, 1, 5), Color("c0334f"))
+	elif ch == "J":
+		draw_rect(Rect2(o.x, o.y + 2, TILE, 14), O)
+		draw_rect(Rect2(o.x, o.y + 3, TILE, 4), Color("a07a48"))
+		draw_rect(Rect2(o.x, o.y + 3, TILE, 1), Color("c8a068"))
+		draw_rect(Rect2(o.x, o.y + 7, TILE, 8), Color("5a3a22"))
+		draw_rect(Rect2(o.x + 1, o.y + 9, 6, 5), Color("6a4a2a"))
+		draw_rect(Rect2(o.x + 9, o.y + 9, 6, 5), Color("6a4a2a"))
+		draw_rect(Rect2(o.x + 1, o.y + 9, 6, 5), Color("3a2414"), false, 0.7)
+		draw_rect(Rect2(o.x + 9, o.y + 9, 6, 5), Color("3a2414"), false, 0.7)
+		if (x + y) % 3 == 0:
+			draw_rect(Rect2(o.x + 4, o.y + 1, 2, 2), Color("e0c060"))
+			draw_rect(Rect2(o.x + 7, o.y + 1.5, 2, 1.5), Color("c8a040"))
+	elif ch == "F":
+		draw_rect(Rect2(o.x, o.y, TILE, TILE), O)
+		draw_rect(Rect2(o.x + 1, o.y + 1, 14, 14), Color("3a2a1c"))
+		draw_rect(Rect2(o.x + 1, o.y + 1, 14, 2), Color("5a4430"))
+		var kk := (x * 5 + y * 11) % 3
+		for i in 3:
+			var px := o.x + 3.5 + i * 4.2
+			if kk == 0:
+				draw_rect(Rect2(px, o.y + 3, 1.2, 10), Color("c4c8d4"))
+				draw_rect(Rect2(px - 1, o.y + 10, 3.2, 1.2), Color("c8a050"))
+			elif kk == 1:
+				draw_circle(Vector2(px + 0.6, o.y + 8), 2.8, Color("8a8d98"))
+				draw_circle(Vector2(px + 0.2, o.y + 7.4), 1.2, Color("c4c8d4"))
+			else:
+				draw_rect(Rect2(px, o.y + 4, 3, 8), Color("4a4d58"))
+				draw_rect(Rect2(px, o.y + 4, 3, 1.4), Color("8a8d98"))
+				draw_rect(Rect2(px + 1.2, o.y + 6, 0.8, 4), Color("c8a050"))
+		draw_rect(Rect2(o.x + 1, o.y + 13, 14, 1.4), Color("2a1c12"))
+	elif ch == "C":
+		draw_rect(Rect2(o.x + 3, o.y + 12, 10, 3), Color(0, 0, 0, 0.28))
+		draw_rect(Rect2(o.x + 3, o.y + 2, 10, 5), O)
+		draw_rect(Rect2(o.x + 4, o.y + 3, 8, 3), Color("6a4a2a"))
+		draw_rect(Rect2(o.x + 3, o.y + 7, 10, 6), O)
+		draw_rect(Rect2(o.x + 4, o.y + 8, 8, 4), Color("8a5a30"))
+		draw_rect(Rect2(o.x + 4, o.y + 8, 8, 1), Color("a87a48"))
+	elif ch == "R":
+		draw_rect(Rect2(o.x, o.y, TILE, TILE), Color("6a1e30"))
+		draw_rect(Rect2(o.x, o.y, TILE, TILE), Color(0, 0, 0, 0.0))
+		var up := _char_at(x, y - 1) != "R"
+		var dn := _char_at(x, y + 1) != "R"
+		var lf := _char_at(x - 1, y) != "R"
+		var rt := _char_at(x + 1, y) != "R"
+		var gc := Color("c8a050")
+		if up:
+			draw_rect(Rect2(o.x, o.y, TILE, 2), gc)
+		if dn:
+			draw_rect(Rect2(o.x, o.y + 14, TILE, 2), gc)
+		if lf:
+			draw_rect(Rect2(o.x, o.y, 2, TILE), gc)
+		if rt:
+			draw_rect(Rect2(o.x + 14, o.y, 2, TILE), gc)
+		draw_rect(Rect2(o.x + 6, o.y + 6, 4, 4), Color("3a1020"))
+		draw_rect(Rect2(o.x + 7, o.y + 7, 2, 2), gc)
 	elif ch == "Y":
 		var bc: Color = [Color("6a1e30"), Color("2c4a7a"), Color("4a5a2e"), Color("5a3a6a")][(x * 3 + y) % 4]
 		draw_rect(Rect2(o.x, o.y + 1, TILE, 15), O)
@@ -954,7 +1044,8 @@ func _search(p: Node2D) -> void:
 		GameState.items.append(d.item)
 	match reward:
 		"maxhp":
-			GameState.max_hp += 1
+			GameState.base_hp += 1
+			GameState.refresh_stats()
 			GameState.hp = GameState.max_hp
 			Audio.sfx("form")
 		"heal":
@@ -965,7 +1056,9 @@ func _search(p: Node2D) -> void:
 		_:
 			Audio.sfx("switch")
 	if d.has("item"):
-		hud.show_notice("Found: %s  (%d secrets)" % [d.item, GameState.items.size()])
+		var coin := int(18 * Gear.gold_mult())
+		GameState.gold += coin
+		hud.show_notice("Found: %s  (+%d gold)" % [d.item, coin])
 	elif reward == "maxhp" or reward == "heal":
 		hud.show_notice("Vitality restored" if reward == "heal" else "Your vitality grows")
 	GameState.save_game()
@@ -973,11 +1066,32 @@ func _search(p: Node2D) -> void:
 	p.queue_redraw()
 
 
+func open_shop(kind: String, tier: int) -> void:
+	var sh := Control.new()
+	sh.set_script(load("res://src/scenes/world/shop.gd"))
+	sh.kind = kind
+	sh.tier = tier
+	sh.level = self
+	var layer := CanvasLayer.new()
+	layer.layer = 20
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	layer.add_child(sh)
+	add_child(layer)
+	frozen = true
+	await sh.closed
+	layer.queue_free()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	frozen = false
+
+
 func _talk(p: Node2D) -> void:
 	if not p.def.is_empty():
 		var did := _pick_dialogue(p.def)
 		await Dialogue.play(did)
 		GameState.set_flag("talked_" + p.def.id)
+		if p.def.has("shop"):
+			await open_shop(p.def.shop, p.def.get("tier", 2))
 		return
 	if p.id == "aldous":
 		if not GameState.flag("isolde_joined"):
@@ -1045,7 +1159,10 @@ func boss_awake() -> void:
 func enemy_died(e: Node2D) -> void:
 	if e.is_boss:
 		_boss_defeated(e.position)
-	elif randf() < 0.3:
+	else:
+		var coin := int(randi_range(2, 5) * Gear.gold_mult())
+		GameState.gold += coin
+	if not e.is_boss and randf() < 0.3:
 		var c := Vector2i(int(e.position.x / TILE), int(e.position.y / TILE))
 		_make_prop("heart", c)
 		var hp_prop: Node2D = pickups.back()
@@ -1069,7 +1186,9 @@ func _boss_defeated(pos: Vector2) -> void:
 			followers[bi.leave].queue_free()
 		followers.erase(bi.leave)
 		_relink_followers()
+		GameState.refresh_stats()
 		hud.show_notice("%s leaves the party" % bi.leave.capitalize())
+	GameState.gold += int(80 * Gear.gold_mult())
 	var final_cell: Vector2i = marks.get("X", Vector2i(int(pos.x / TILE), int(pos.y / TILE)))
 	walkovers.append(_make_prop("final", final_cell))
 	GameState.hp = GameState.max_hp

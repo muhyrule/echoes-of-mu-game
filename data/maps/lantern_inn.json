@@ -1,0 +1,81 @@
+{
+ "theme": "interior",
+ "title": "The Lantern Rest",
+ "subtitle": "A lamp in every window, a bed for every road",
+ "music": "inn",
+ "safe": true,
+ "spawns": {
+  "start": "@"
+ },
+ "npcs": {
+  "a": {
+   "id": "edin_isla",
+   "pal": {
+    "coat": "#6a3a3a",
+    "accent": "#c0a070",
+    "hair": "#7a4a2a",
+    "skin": "#c4a083",
+    "style": "braid",
+    "item": "none"
+   },
+   "face": [
+    0,
+    1
+   ],
+   "shop": "inn",
+   "tier": 2
+  }
+ },
+ "doors": {
+  "5": {
+   "map": "edinburgh",
+   "label": "Leave",
+   "style": "inner"
+  }
+ },
+ "objects": {
+  "d": {
+   "kind": "chest",
+   "id": "in_trunk",
+   "text": "A guest's forgotten trunk. A letter on top: 'To whoever finds this: I heard the bells under the hill. Do not go down at night.' Under it, a purse.",
+   "item": "Stranger's Warning",
+   "reward": "relic",
+   "empty": "You've already searched here."
+  },
+  "e": {
+   "kind": "barrel",
+   "id": "in_cask",
+   "text": "A cask of small ale, still sweet. Spiced with something that must be a secret.",
+   "reward": "heal",
+   "empty": "You've already searched here."
+  },
+  "%": {
+   "kind": "barrel",
+   "empty": "Nothing but old stores and dust."
+  },
+  "+": {
+   "kind": "crate",
+   "empty": "Nothing but old stores and dust."
+  }
+ },
+ "ascii": [
+  "##############################",
+  "##############################",
+  "#..Y.Y.Y...ZZZZZZZ...Y.Y.Y...#",
+  "#..........................U.#",
+  "#.%.e........................#",
+  "#.+......l.........l.........#",
+  "#............................#",
+  "#.....JJJJJJJJaJJJJJJJJJ.....#",
+  "#............................#",
+  "#............................#",
+  "#.........RRRRRRRRRR......l..#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#...TT....RRRRRRRRRR...TT....#",
+  "#...CC....RRRRRRRRRR...CC....#",
+  "#..l.....................d.%.#",
+  "#..............@.............#",
+  "###############5##############",
+  "##############################"
+ ]
+}

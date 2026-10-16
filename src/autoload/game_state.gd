@@ -6,6 +6,11 @@ const LEVEL_SCENE := "res://src/scenes/world/Level.tscn"
 
 var flags: Dictionary = {}
 var max_hp := 6
+var base_hp := 6
+var gold := 0
+var supplies: Dictionary = {}
+var owned: Array = []
+var equip: Dictionary = {}
 var hp := 6
 var keys := 0
 var forms: Array = ["mu"]
@@ -31,6 +36,9 @@ func _setup_input() -> void:
 		"form": [KEY_Q, KEY_K],
 		"reset_puzzle": [KEY_R],
 		"pause": [KEY_ESCAPE],
+		"use_tonic": [KEY_1],
+		"use_elixir": [KEY_2],
+		"use_candle": [KEY_3],
 	}
 	for action in binds:
 		if not InputMap.has_action(action):
@@ -51,8 +59,13 @@ func set_flag(name: String, value := true) -> void:
 
 func new_game() -> void:
 	flags = {}
-	max_hp = 6
-	hp = 6
+	base_hp = 6
+	gold = 40
+	supplies = {"tonic": 1}
+	owned = []
+	equip = {}
+	refresh_stats()
+	hp = max_hp
 	keys = 0
 	forms = ["mu"]
 	form = "mu"
@@ -62,13 +75,19 @@ func new_game() -> void:
 	spawn = "start"
 
 
+func refresh_stats() -> void:
+	max_hp = base_hp + Gear.hp_bonus()
+	hp = mini(hp, max_hp)
+
+
 func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
 
 
 func save_game() -> void:
 	var data := {
-		"flags": flags, "max_hp": max_hp, "hp": hp, "keys": keys,
+		"flags": flags, "max_hp": max_hp, "base_hp": base_hp, "gold": gold,
+		"supplies": supplies, "owned": owned, "equip": equip, "hp": hp, "keys": keys,
 		"forms": forms, "form": form, "party": party, "items": items,
 		"map": current_map, "spawn": spawn,
 	}
@@ -85,8 +104,11 @@ func load_game() -> bool:
 	if typeof(data) != TYPE_DICTIONARY:
 		return false
 	flags = data.get("flags", {})
-	max_hp = int(data.get("max_hp", 6))
-	hp = max_hp
+	base_hp = int(data.get("base_hp", data.get("max_hp", 6)))
+	gold = int(data.get("gold", 0))
+	supplies = data.get("supplies", {})
+	owned = data.get("owned", [])
+	equip = data.get("equip", {})
 	keys = int(data.get("keys", 0))
 	forms = data.get("forms", ["mu"])
 	form = data.get("form", "mu")
@@ -94,6 +116,8 @@ func load_game() -> bool:
 	items = data.get("items", [])
 	current_map = data.get("map", "chapel")
 	spawn = data.get("spawn", "start")
+	refresh_stats()
+	hp = max_hp
 	return true
 
 

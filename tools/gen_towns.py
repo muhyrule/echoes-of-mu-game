@@ -11,7 +11,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from towns_text import DIALOGUE, ITEMS, SECRETS  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-POOL = list("adefhijkmnpqstuvwyz") + list("CFJORT") + list("!%*+~^;:?()<>/")
+POOL = list("adefhijkmnpqstuvwyz") + list("O") + list("!*~^;:?()<>/") + list("αβγδεζηθικλμνξπρστυφχψω")
+DOOR_CHARS = list("567890") + list("ΓΔΘΛΞΠΣΦΨΩ")
 
 
 class Map:
@@ -22,7 +23,8 @@ class Map:
                      "safe": True, "spawns": {"start": "@"}, "npcs": {}, "doors": {}, "objects": {},
                      "triggers": {}}
         self.pool = list(POOL)
-        self.door_digits = list("5678960")
+        self.door_digits = list(DOOR_CHARS)
+        self.kind_ch = {}
         self.decor = {}
 
     def rect(self, x, y, w, h, ch="."):
@@ -36,7 +38,7 @@ class Map:
     def alloc(self):
         return self.pool.pop(0)
 
-    def npc(self, x, y, id, pal, variants=None, face=(0, 1), hide_if=None, wander=0):
+    def npc(self, x, y, id, pal, variants=None, face=(0, 1), hide_if=None, wander=0, shop=None, tier=2):
         ch = self.alloc()
         d = {"id": id, "pal": pal, "face": list(face)}
         vs = list(variants or [])
@@ -48,11 +50,19 @@ class Map:
             d["hide_if"] = hide_if
         if wander:
             d["wander"] = wander
+        if shop:
+            d["shop"] = shop
+            d["tier"] = tier
         self.meta["npcs"][ch] = d
         self.put(x, y, ch)
 
     def obj(self, x, y, kind, id=None, reward=None):
+        if not id and kind in self.kind_ch:
+            self.put(x, y, self.kind_ch[kind])
+            return
         ch = self.alloc()
+        if not id:
+            self.kind_ch[kind] = ch
         d = {"kind": kind}
         if id:
             d["id"] = id
@@ -97,6 +107,51 @@ class Map:
         with open(os.path.join(ROOT, "data", "maps", self.name + ".json"), "w") as f:
             json.dump(out, f, indent=1)
             f.write("\n")
+
+
+def free(m, x, y):
+    return 0 < x < m.w - 1 and 0 < y < m.h - 1 and m.g[y][x] == "."
+
+
+def put_free(m, x, y, ch):
+    if free(m, x, y):
+        m.put(x, y, ch)
+
+
+def rug(m, x0, y0, w, h):
+    for yy in range(y0, y0 + h):
+        for xx in range(x0, x0 + w):
+            put_free(m, xx, yy, "R")
+
+
+def table(m, x, y, n=2, chairs=True):
+    for i in range(n):
+        put_free(m, x + i, y, "T")
+        if chairs:
+            put_free(m, x + i, y - 1, "C")
+            put_free(m, x + i, y + 1, "C")
+
+
+def counter(m, x0, x1, y, gap=None):
+    for x in range(x0, x1 + 1):
+        if x != gap:
+            put_free(m, x, y, "J")
+
+
+def rack(m, x0, x1, y=2):
+    for x in range(x0, x1 + 1):
+        m.put(x, y, "F")
+
+
+def auto_furnish(m):
+    furnish(m, tables=[(4, m.h - 6, 2), (m.w - 7, m.h - 6, 2)], rugs=[(m.w // 2 - 5, m.h - 8, 10, 4)])
+
+
+def furnish(m, tables=(), rugs=()):
+    for r in rugs:
+        rug(m, *r)
+    for t in tables:
+        table(m, *t)
 
 
 def pal(coat, accent, hair, skin="#c4a083", style="short", **kw):
@@ -166,6 +221,70 @@ def shelves(m, x0, x1, y=2):
         m.put(x, y, "Z")
 
 
+def shop_interior(name, title, sub, af, town_map, kind, kid, kpal, secrets, tier=2, w=30, h=18):
+    m = interior(name, title, sub, af, town_map, w=w, h=h)
+    if kind == "weapons":
+        rack(m, 3, 9)
+        rack(m, 20, 26)
+        m.put(14, 2, "Z")
+    elif kind == "armor":
+        rack(m, 3, 7)
+        rack(m, 22, 26)
+        rack(m, 11, 17)
+    elif kind == "items":
+        shelves(m, 2, 9)
+        shelves(m, 20, 27)
+        shelves(m, 12, 16)
+    else:
+        for bx in (3, 5, 7, 21, 23, 25):
+            m.put(bx, 2, "Y")
+        shelves(m, 11, 17)
+    m.put(27, 3, "U")
+    counter(m, 6, 23, 7, gap=14)
+    m.npc(14, 7, kid, kpal, shop=kind, tier=tier)
+    furnish(m, tables=[(4, 12, 2), (23, 12, 2)], rugs=[(10, 10, 10, 4)])
+    for sx, sy, sk, sid, rw in secrets:
+        m.obj(sx, sy, sk, sid, rw)
+    m.decorate(2, 4, "barrel")
+    m.decorate(2, 5, "crate")
+    m.decorate(27, 14, "barrel")
+    lamps(m, [(9, 5), (19, 5), (3, 14), (26, 10)])
+    auto_furnish(m)
+    m.save()
+
+
+def enrich_edinburgh():
+    af = "edinburgh_done"
+    shop_interior("apothecary", "Ewan's Apothecary", "Dried herbs hang from every beam", af, "edinburgh", "items", "edin_ewan",
+                  pal("#3a4a3a", "#c0a070", "#8a8a90", style="beard", item="none"),
+                  [(4, 4, "urn", "ap_jar", "lore"), (25, 14, "chest", "ap_chest", None)])
+    shop_interior("armoury", "Brenda's Armoury", "Plate, mail and leather, hung for fittings", af, "edinburgh", "armor", "edin_brenda",
+                  pal("#5a3a2a", "#8a8d98", "#6a3a24", style="braid", mail=True, item="none"),
+                  [(10, 4, "crate", "ar_helm", "lore"), (25, 14, "chest", "ar_trunk", None)], tier=2)
+    shop_interior("weaponsmith", "Iain's Forge", "A cold anvil and a warm fire", af, "edinburgh", "weapons", "edin_iain",
+                  pal("#4a3a30", "#a0a0a8", "#2a2a2e", style="beard", item="none"),
+                  [(12, 4, "barrel", "wp_anvil", "lore"), (25, 14, "crate", "wp_crate", None)], tier=2)
+    shop_interior("lantern_inn", "The Lantern Rest", "A lamp in every window, a bed for every road", af, "edinburgh", "inn", "edin_isla",
+                  pal("#6a3a3a", "#c0a070", "#7a4a2a", style="braid", item="none"),
+                  [(25, 14, "chest", "in_trunk", None), (4, 4, "barrel", "in_cask", "heal")])
+
+
+def enrich_prague():
+    af = "prague_done"
+    shop_interior("silver_retort", "Ludek's Silver Retort", "Glass vessels, quietly bubbling", af, "prague_town", "items", "pra_ludek",
+                  pal("#3a3a5a", "#c0a070", "#4a4a4e", style="beard", item="none"),
+                  [(4, 4, "urn", "pa_jar", "lore"), (25, 14, "chest", "pa_chest", None)])
+    shop_interior("guild_armoury", "Dagmar's Guild Armoury", "The last of the Bohemian Smiths", af, "prague_town", "armor", "pra_dagmar",
+                  pal("#5a4a3a", "#8a8d98", "#2a2a2e", style="braid", mail=True, item="none"),
+                  [(10, 4, "crate", "pr_rack", "lore"), (25, 14, "chest", "pr_trunk", None)], tier=3)
+    shop_interior("bohemian_steel", "Radek's Bohemian Steel", "Every blade ringing a different note", af, "prague_town", "weapons", "pra_radek",
+                  pal("#3a3a3a", "#b0b0b8", "#4a3a2a", style="beard", item="none"),
+                  [(12, 4, "barrel", "pw_anvil", "lore"), (25, 14, "crate", "pw_crate", None)], tier=3)
+    shop_interior("rose_inn", "The Rose and Hourglass", "Clean linen and a clock that keeps its own time", af, "prague_town", "inn", "pra_olga",
+                  pal("#6a3a50", "#e0d0b0", "#2a1a1a", style="braid", item="none"),
+                  [(25, 14, "chest", "pi_trunk", None), (4, 4, "barrel", "pi_cask", "heal")])
+
+
 def build_edinburgh():
     af = "edinburgh_done"
     t = town("edinburgh", "town_e", "Edinburgh — The Old Town",
@@ -178,10 +297,10 @@ def build_edinburgh():
     t.building(36, 4, 8)
     t.building(100, 4, 9)
     t.building(6, 15, 8, "chandlery", "Enter Peggy's Chandlery")
-    t.building(20, 15, 7)
-    t.building(34, 15, 8)
-    t.building(70, 15, 8)
-    t.building(84, 15, 7)
+    t.building(20, 15, 7, "apothecary", "Enter the Apothecary")
+    t.building(34, 15, 8, "armoury", "Enter the Armoury")
+    t.building(70, 15, 8, "weaponsmith", "Enter the Weaponsmith")
+    t.building(84, 15, 7, "lantern_inn", "Enter the Lantern Rest")
     t.building(6, 28, 9)
     t.building(20, 28, 7)
     t.door(56, 2, "vaults", "Descend into the Vaults", style="gate", requires="edin_writ", locked="edin_gate_locked")
@@ -223,6 +342,7 @@ def build_edinburgh():
     c.decorate(22, 3, "barrel")
     c.npc(14, 7, "edin_marta", pal("#5a3a4a", "#c0a070", "#9a9aa0", style="braid", item="none"))
     lamps(c, [(14, 3), (21, 13)])
+    auto_furnish(c)
     c.save()
 
     m = interior("mason_yard", "Rae's Masonry", "Chisels, chalk and a very old arch", af, "edinburgh", music="inn")
@@ -235,6 +355,7 @@ def build_edinburgh():
     m.npc(12, 9, "edin_duncan", pal("#5a4a3a", "#8a8d98", "#aaaaae", style="beard", item="none"))
     m.npc(20, 11, "edin_kirsty", pal("#4a5a4a", "#c0a070", "#4a2a1a", style="braid"))
     lamps(m, [(3, 3), (27, 3)])
+    auto_furnish(m)
     m.save()
 
     d = interior("drowned_candle", "The Drowned Candle", "Fire, ale and a bard with a verse for everyone", af,
@@ -248,9 +369,10 @@ def build_edinburgh():
     d.obj(33, 14, "crate", "i_crate")
     d.decorate(2, 4, "barrel")
     d.decorate(3, 3, "barrel")
-    d.npc(10, 6, "edin_morag", pal("#6a3038", "#c0a070", "#7a3a24", style="braid", item="none"))
+    d.npc(10, 6, "edin_morag", pal("#6a3038", "#c0a070", "#7a3a24", style="braid", item="none"), shop="pub")
     d.npc(27, 10, "edin_fergus", pal("#2c4a5a", "#c0a070", "#4a3a2a", item="none"))
     lamps(d, [(6, 15), (30, 15)])
+    auto_furnish(d)
     d.save()
 
     p = interior("chandlery", "Peggy's Chandlery", "Wax, wicks and candles that lean south", af, "edinburgh", music="inn")
@@ -260,6 +382,7 @@ def build_edinburgh():
     p.obj(24, 12, "barrel", "ch_barrel", "heal")
     p.npc(14, 8, "edin_peggy_shop", pal("#6a4a3a", "#c0a070", "#7a3a24", style="braid"))
     lamps(p, [(10, 13), (21, 4)])
+    auto_furnish(p)
     p.save()
 
     a = interior("archive", "The Burgh Archive", "Every name the town ever owned", af, "edinburgh")
@@ -273,6 +396,7 @@ def build_edinburgh():
            {"if": "edin_duncan", "id": "edin_euphemia_mark"}])
     a.npc(24, 10, "edin_ruaridh", pal("#4a4a56", "#8a7436", "#2a2a2e"))
     lamps(a, [(11, 4), (22, 12)])
+    auto_furnish(a)
     a.save()
 
 
@@ -288,10 +412,10 @@ def build_prague():
     t.building(36, 4, 8)
     t.building(100, 4, 9)
     t.building(6, 15, 8, "bakery", "Enter the Bakery")
-    t.building(20, 15, 7)
-    t.building(34, 15, 8)
-    t.building(70, 15, 8)
-    t.building(84, 15, 7)
+    t.building(20, 15, 7, "silver_retort", "Enter the Silver Retort")
+    t.building(34, 15, 8, "guild_armoury", "Enter the Guild Armoury")
+    t.building(70, 15, 8, "bohemian_steel", "Enter Bohemian Steel")
+    t.building(84, 15, 7, "rose_inn", "Enter the Rose and Hourglass")
     t.building(6, 28, 9)
     t.building(20, 28, 7)
     t.door(56, 2, "prague", "Descend to the Ossuary", style="gate", requires="pra_pass", locked="pra_gate_locked")
@@ -328,6 +452,7 @@ def build_prague():
     b.obj(24, 12, "barrel", "bk_barrel", "heal")
     b.npc(14, 8, "pra_vit_shop", pal("#6a5a3a", "#e0d0b0", "#4a3a2a", style="beard", item="none"))
     lamps(b, [(10, 13), (21, 4)])
+    auto_furnish(b)
     b.save()
 
     r = interior("raven_tavern", "The Sleeping Raven", "Beer, bread and bad dreams", af, "prague_town", w=36, h=20)
@@ -339,10 +464,11 @@ def build_prague():
     r.obj(33, 4, "crate", "t_crate")
     r.obj(33, 14, "chest", "t_chest")
     r.decorate(2, 4, "barrel")
-    r.npc(10, 6, "pra_anezka", pal("#6a3038", "#c0a070", "#2a1a1a", style="braid", item="none"))
+    r.npc(10, 6, "pra_anezka", pal("#6a3038", "#c0a070", "#2a1a1a", style="braid", item="none"), shop="pub")
     r.npc(22, 6, "pra_jiri", pal("#3a3a44", "#8a8d98", "#c8c8d0", style="beard", item="none"),
           [{"if": af, "id": "pra_jiri_again"}])
     lamps(r, [(6, 15), (30, 15)])
+    auto_furnish(r)
     r.save()
 
     o = interior("orloj_lodge", "The Clock-Keeper's Lodge", "Thirty years of winding, and a cot in the attic", af,
@@ -360,6 +486,7 @@ def build_prague():
           [{"if": af, "id": "pra_lucie_after"}, {"if": "pra_pass", "id": "pra_lucie_again"},
            {"if": "pra_rumour", "id": "pra_lucie_pass"}])
     lamps(o, [(14, 3), (22, 13)])
+    auto_furnish(o)
     o.save()
 
     z = interior("alchemist", "Zdenek's Laboratory", "The vapours smell faintly of silence", af, "prague_town", music="inn")
@@ -370,6 +497,7 @@ def build_prague():
     z.obj(16, 3, "tomes", "z_tomes")
     z.npc(14, 8, "pra_zdenek", pal("#3a4a3a", "#c0a070", "#9a9aa0", style="beard", item="none"))
     lamps(z, [(11, 4), (24, 12)])
+    auto_furnish(z)
     z.save()
 
     c = interior("cartographer", "Miloš the Cartographer", "Maps of places that do not want to be mapped", af,
@@ -381,12 +509,15 @@ def build_prague():
     c.obj(26, 12, "urn", "m_urn")
     c.npc(14, 8, "pra_milos", pal("#5a3a2a", "#c0a070", "#4a4a4e", style="beard", item="none"))
     lamps(c, [(21, 4), (22, 13)])
+    auto_furnish(c)
     c.save()
 
 
 if __name__ == "__main__":
     build_edinburgh()
     build_prague()
+    enrich_edinburgh()
+    enrich_prague()
     with open(os.path.join(ROOT, "data", "dialogue_towns.json"), "w") as f:
         json.dump(DIALOGUE, f, indent=1, ensure_ascii=False)
         f.write("\n")

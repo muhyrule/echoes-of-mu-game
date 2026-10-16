@@ -157,10 +157,10 @@ func _make_table(harm: Array) -> PackedFloat32Array:
 
 func _ensure_tables() -> void:
 	if _tables.is_empty():
-		_tables["organ"] = _make_table([1.0, 0.8, 0.55, 0.5, 0.3, 0.22, 0.1])
-		_tables["piano"] = _make_table([1.0, 0.45, 0.28, 0.14, 0.07])
-		_tables["strings"] = _make_table([1.0, 0.5, 0.33, 0.25, 0.2, 0.16, 0.14, 0.12])
-		_tables["pluck"] = _make_table([1.0, 0.7, 0.5, 0.38, 0.28, 0.2, 0.12])
+		_tables["organ"] = _make_table([1.0, 0.6, 0.3, 0.2, 0.08, 0.04])
+		_tables["piano"] = _make_table([1.0, 0.32, 0.12, 0.04])
+		_tables["strings"] = _make_table([1.0, 0.42, 0.2, 0.1, 0.05, 0.03])
+		_tables["pluck"] = _make_table([1.0, 0.5, 0.25, 0.12, 0.06])
 
 
 static func _midi(tok: String) -> int:
@@ -589,52 +589,125 @@ func _build_theme(name: String) -> AudioStreamWAV:
 			for m in n[0]:
 				_render_note(buf, int(pos * spb * RATE), m, dur, v.inst, v.vol)
 			pos += n[1]
-	for cfg in [[int(0.31 * RATE), 0.42], [int(0.47 * RATE), 0.36]]:
+	_smooth_and_verb(buf)
+	return _make(buf, true)
+
+
+# circular one-pole low-pass: two laps so the filter state at the loop seam is consistent
+static func _lowpass(buf: PackedFloat32Array, a: float) -> void:
+	var n := buf.size()
+	var y := buf[n - 1]
+	for lap in 2:
+		for i in n:
+			y += a * (buf[i] - y)
+			if lap == 1:
+				buf[i] = y
+
+
+# tone smoothing, cheap comb/allpass room tail wrapped around the loop, then soft limiting
+func _smooth_and_verb(buf: PackedFloat32Array) -> void:
+	var n := buf.size()
+	_lowpass(buf, 0.42)
+	_lowpass(buf, 0.6)
+	var wet := PackedFloat32Array()
+	wet.resize(n)
+	for cfg in [[int(0.0297 * RATE), 0.62], [int(0.0371 * RATE), 0.6], [int(0.0411 * RATE), 0.58], [int(0.0437 * RATE), 0.56]]:
 		var d: int = cfg[0]
 		var g: float = cfg[1]
 		var y := PackedFloat32Array()
-		y.resize(n_total)
-		for pass_i in 2:
-			for i in n_total:
-				y[i] = buf[i] + g * y[(i - d + n_total) % n_total]
-		for i in n_total:
-			buf[i] += y[i] * 0.25
+		y.resize(n)
+		var lp := 0.0
+		for lap in 3:
+			for i in n:
+				var j := i - d
+				if j < 0:
+					j += n
+				lp += 0.55 * (y[j] - lp)
+				y[i] = buf[i] + g * lp
+		for i in n:
+			wet[i] += y[i] * 0.16
+	# a longer, darker tap pair adds a slow bloom
+	for cfg in [[int(0.113 * RATE), 0.5], [int(0.167 * RATE), 0.45]]:
+		var d: int = cfg[0]
+		var g: float = cfg[1]
+		var y := PackedFloat32Array()
+		y.resize(n)
+		var lp := 0.0
+		for lap in 3:
+			for i in n:
+				var j := i - d
+				if j < 0:
+					j += n
+				lp += 0.3 * (y[j] - lp)
+				y[i] = buf[i] + g * lp
+		for i in n:
+			wet[i] += y[i] * 0.14
+	_lowpass(wet, 0.35)
+	for i in n:
+		buf[i] = buf[i] * 0.8 + wet[i]
 	var peak := 0.001
-	for i in n_total:
+	for i in n:
 		peak = maxf(peak, absf(buf[i]))
 	var k := 0.8 / peak
-	for i in n_total:
-		buf[i] *= k
-	return _make(buf, true)
+	for i in n:
+		buf[i] = tanh(buf[i] * k * 1.25) * 0.78
 
 
 func _render_note(buf: PackedFloat32Array, start: int, midi: int, dur: float, inst: String, vol: float) -> void:
 	var f := 440.0 * pow(2.0, float(midi - 69) / 12.0)
-	var rel := 0.25 if inst != "organ" else 0.12
+	var rel := 0.2
+	match inst:
+		"organ": rel = 0.16
+		"strings": rel = 0.3
+		"piano": rel = 0.18
+		"pluck": rel = 0.1
 	var n := int((dur + rel) * RATE)
 	if inst == "bell" or inst == "timp":
 		n = int(2.2 * RATE) if inst == "bell" else int(0.7 * RATE)
 	var total := buf.size()
 	var phase := 0.0
 	var tb: PackedFloat32Array = _tables.get(inst, _tables["organ"])
+	var att := 0.02
+	match inst:
+		"strings": att = 0.16
+		"organ": att = 0.05
+		"piano": att = 0.012
+		"pluck": att = 0.008
+	# lower voices sit rounder and quieter, bright ones stay clear
+	var gain := vol
+	if f < 140.0:
+		gain *= 0.8
+	var vphase := fmod(float(start) * 0.37, TAU)
 	for i in n:
 		var t := float(i) / RATE
 		var v := 0.0
 		match inst:
 			"bell":
-				v = (sin(TAU * f * t) + 0.5 * sin(TAU * f * 2.41 * t) + 0.3 * sin(TAU * f * 3.97 * t)) * exp(-t * 1.8) * (minf(t * 400.0, 1.0))
+				var ba := minf(t / 0.015, 1.0)
+				ba = ba * ba * (3.0 - 2.0 * ba)
+				v = (sin(TAU * f * t) + 0.25 * sin(TAU * f * 2.0 * t) * exp(-t * 2.0) + 0.12 * sin(TAU * f * 2.76 * t) * exp(-t * 3.0)) * exp(-t * 1.5) * ba * 0.8
 			"timp":
-				v = sin(TAU * f * 1.6 * t * (1.0 + 0.5 * exp(-t * 25.0))) * exp(-t * 7.0)
+				var ta := minf(t / 0.006, 1.0)
+				v = sin(TAU * f * 1.6 * t * (1.0 + 0.3 * exp(-t * 18.0))) * exp(-t * 6.0) * ta * 0.8
 			_:
-				var vib := 1.0 + (0.004 * sin(TAU * 5.4 * t) if inst == "strings" else 0.0)
+				var vib := 1.0
+				if inst == "strings":
+					vib += 0.003 * sin(TAU * 5.0 * t + vphase) * minf(t / 0.5, 1.0)
 				phase += f * vib / RATE
-				v = tb[int((phase - floorf(phase)) * TS) % TS]
-				var env := minf(t / (0.12 if inst == "strings" else (0.02 if inst == "organ" else 0.005)), 1.0)
+				var ph := (phase - floorf(phase)) * TS
+				var i0 := int(ph) % TS
+				var fr := ph - floorf(ph)
+				v = lerpf(tb[i0], tb[(i0 + 1) % TS], fr)
+				var env := minf(t / att, 1.0)
+				env = env * env * (3.0 - 2.0 * env)
 				if inst == "piano":
-					env *= exp(-t * 2.2)
+					env *= 0.55 * exp(-t * 4.5) + 0.45 * exp(-t * 1.4)
 				elif inst == "pluck":
 					env *= exp(-t * 6.0)
+				elif inst == "strings":
+					v *= 1.0 + 0.04 * sin(TAU * 4.3 * t + vphase)
 				if t > dur:
-					env *= maxf(0.0, 1.0 - (t - dur) / rel)
+					var rk := clampf((t - dur) / rel, 0.0, 1.0)
+					env *= 0.5 + 0.5 * cos(PI * rk)
 				v *= env
-		buf[(start + i) % total] += v * vol
+		buf[(start + i) % total] += v * gain

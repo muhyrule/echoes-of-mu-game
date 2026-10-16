@@ -40,3 +40,11 @@ Prague (Ossuary Clock) → Transylvania → Paris Catacombs → Whitby Abbey →
 
 ## Scrolling towns
 - Towns are now 112x44 tiles with a smooth-following camera: a market square, rows of houses with chimney smoke, a fenced kirkyard, a lamp-lit avenue to the dungeon gate, and about 10 citizens each. Many citizens wander their neighbourhood. Each town gains a fifth enterable shop (Peggy's Chandlery, Vit's Bakery) with more secrets.
+
+## Shops, gear and the economy
+
+- Every town now has an Apothecary (supplies), an Armoury, a Weaponsmith and an Inn; the existing taverns are Pubs. Talk to the keeper to trade.
+- Each hero has their own weapon class and armour class (Mu: sword/mail, Isolde: maul/plate, Wren: daggers/leathers, Corvin: clockwork/robes), with tiered gear defined in `src/core/gear.gd`. Mu's gear applies fully; party members' gear contributes as aid (Isolde: shield and defence, Wren: strike speed and +25% gold, Corvin: vitality).
+- Gold drops from enemies, bosses and secret relics. Supplies are used with keys 1 (Tonic), 2 (Elixir), 3 (Warding Candle). The Inn's "Rest" fully heals and saves; towns no longer heal on entry.
+- Shop UI: `src/scenes/world/shop.gd`. Maps use new furniture tiles (table `T`, counter `J`, rack `F`, chair `C`, rug `R`); regenerate with `python3 tools/gen_towns.py`.
+- Music was smoothed (softer timbres, low-pass, light room reverb, soft limiting); verified numerically only.

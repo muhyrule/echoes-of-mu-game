@@ -770,5 +770,101 @@
    "who": "Vit",
    "text": "Sit by the oven. Take a loaf if you like. Nobody's buying today."
   }
+ ],
+ "edin_ewan": [
+  {
+   "who": "Ewan",
+   "text": "Apothecary. Tonics for the hurt, elixirs for the nearly dead, and candles blessed against what lingers in the dark. Coin first, miracles after."
+  }
+ ],
+ "edin_ewan_again": [
+  {
+   "who": "Ewan",
+   "text": "Business has never been so brisk. I would prefer the town healthier and me poorer."
+  }
+ ],
+ "edin_brenda": [
+  {
+   "who": "Brenda",
+   "text": "Armoury. Mail for you, Mu. Plate for the lass with the maul. Leathers for any urchin who'll stand still to be measured. Take your time."
+  }
+ ],
+ "edin_brenda_again": [
+  {
+   "who": "Brenda",
+   "text": "Every plate I sell comes back dented. That's how I know it did its job."
+  }
+ ],
+ "edin_iain": [
+  {
+   "who": "Iain",
+   "text": "Weapons. Each blade here was forged for someone's hand. Find the one that fits yours, and don't swing it at the furniture."
+  }
+ ],
+ "edin_iain_again": [
+  {
+   "who": "Iain",
+   "text": "A sword is a promise. Keep it, and it keeps you."
+  }
+ ],
+ "edin_isla": [
+  {
+   "who": "Isla",
+   "text": "The Lantern Rest. Warm beds, hot broth, and a window that faces away from the vaults. Sleep, and the road will wait."
+  }
+ ],
+ "edin_isla_again": [
+  {
+   "who": "Isla",
+   "text": "Nobody sleeps well in the Old Town any more. But a bed is still a bed."
+  }
+ ],
+ "pra_ludek": [
+  {
+   "who": "Ludek",
+   "text": "Welcome to the Silver Retort. Tonics, elixirs, wards. Zdenek's craft is sharper, mine is cheaper and I don't lecture."
+  }
+ ],
+ "pra_ludek_again": [
+  {
+   "who": "Ludek",
+   "text": "Take two candles. Take three. The dead down there are not gentle."
+  }
+ ],
+ "pra_dagmar": [
+  {
+   "who": "Dagmar",
+   "text": "Armour of the Guild of Bohemian Smiths, though the Guild is mostly me now. Fit for knights, thieves and clock-keepers alike."
+  }
+ ],
+ "pra_dagmar_again": [
+  {
+   "who": "Dagmar",
+   "text": "I once armoured a statue. It never complained, either."
+  }
+ ],
+ "pra_radek": [
+  {
+   "who": "Radek",
+   "text": "Weapons, and the best steel in the city. Every hero in your party has a blade waiting in this shop. Ask the clock if you doubt me."
+  }
+ ],
+ "pra_radek_again": [
+  {
+   "who": "Radek",
+   "text": "The Ossuary does not forgive a dull edge. Sharpen often."
+  }
+ ],
+ "pra_olga": [
+  {
+   "who": "Olga",
+   "text": "The Rose and Hourglass. Beds are clean, stew is hot, and the bells are only a little loud. Rest and you will be saved."
+  }
+ ],
+ "pra_olga_again": [
+  {
+   "who": "Olga",
+   "text": "I keep a candle burning for every guest. Don't blow them out when you leave."
+  }
  ]
 }

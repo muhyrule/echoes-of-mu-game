@@ -123,6 +123,8 @@ func _draw() -> void:
 	var fname: String = {"wraith": "Wraith", "gargoyle": "Gargoyle"}.get(GameState.form, "Mu")
 	var hint_q := "  [Q]" if GameState.forms.size() > 1 else ""
 	_txt(Vector2(12, 62), "Form: %s%s" % [fname, hint_q], 12, {"wraith": Color("9fd0ff"), "gargoyle": Color("c2cad8")}.get(GameState.form, Color("d9c9ff")))
+	_txt(Vector2(12, 78), "Gold %d" % GameState.gold, 12, Color("f0d070"))
+	_txt(Vector2(12, 94), "[1] Tonic %d  [2] Elixir %d  [3] Candle %d" % [int(GameState.supplies.get("tonic", 0)), int(GameState.supplies.get("elixir", 0)), int(GameState.supplies.get("candle", 0))], 9, Color("b8b0c8"))
 	if banner_t > 0.0:
 		var a := minf(1.0, banner_t)
 		_txt(Vector2(320, 120), banner_title, 22, Color(0.95, 0.88, 1.0, a), true)
