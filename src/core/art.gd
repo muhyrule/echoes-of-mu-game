@@ -6,6 +6,9 @@ const OUT := Color("100d17")
 const PAL_MU := {"coat": Color("5a3f86"), "accent": Color("d23b3b"), "skin": Color("f0cba6"), "hair": Color("e8e6f2"), "boots": Color("2a1f2e"), "style": "short", "item": "sheath"}
 const PAL_WRAITH := {"coat": Color("5b9ad6"), "accent": Color("d6f1ff"), "skin": Color("d8eefb"), "hair": Color("9fd0ff"), "boots": Color("2c4a6b"), "style": "short", "item": "none"}
 const PAL_ISOLDE := {"coat": Color("5f8a5c"), "accent": Color("a8693a"), "skin": Color("ecbf9a"), "hair": Color("b5502e"), "boots": Color("3a2a22"), "style": "braid", "item": "hammer"}
+const PAL_GARGOYLE := {"coat": Color("7d8696"), "accent": Color("c0523a"), "skin": Color("98a2b2"), "hair": Color("5a6372"), "boots": Color("3a4250"), "style": "short", "item": "none"}
+const PAL_WREN := {"coat": Color("3f7a92"), "accent": Color("e0b040"), "skin": Color("e8b894"), "hair": Color("2a2230"), "boots": Color("3a2a22"), "style": "short", "item": "none"}
+const PAL_CORVIN := {"coat": Color("7a4a32"), "accent": Color("c0c4d0"), "skin": Color("c99f7a"), "hair": Color("8a8a96"), "boots": Color("2a2018"), "style": "beard", "item": "none"}
 const PAL_ALDOUS := {"coat": Color("2e2c3a"), "accent": Color("c7a84f"), "skin": Color("e0bf9c"), "hair": Color("e6e6ee"), "boots": Color("1c1a22"), "style": "beard", "item": "none"}
 
 static var _light_tex: GradientTexture2D
@@ -225,9 +228,9 @@ static func bat(c: CanvasItem, t: float, flash: float) -> void:
 	c.draw_line(Vector2(0.6, -1.5), Vector2(0.6, -0.3), Color.WHITE, 0.5)
 
 
-static func warden(c: CanvasItem, f: Vector2, t: float, flash: float, winding: bool) -> void:
+static func warden(c: CanvasItem, f: Vector2, t: float, flash: float, winding: bool, brass := false) -> void:
 	shadow(c, 15.0)
-	var steel := Color("6f7587") if flash <= 0.0 else Color.WHITE
+	var steel := (Color("b58f4a") if brass else Color("6f7587")) if flash <= 0.0 else Color.WHITE
 	if winding and int(t * 20.0) % 2 == 0:
 		steel = Color("c05555")
 	var dark := steel.darkened(0.4)

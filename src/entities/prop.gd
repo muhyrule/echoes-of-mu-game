@@ -24,7 +24,7 @@ func setup(k: String, c: Vector2i, lvl: Node2D, npc_id := "") -> void:
 	level = lvl
 	id = npc_id
 	position = Vector2(c) * 16.0 + Vector2(8, 8)
-	solid = kind in ["door", "gate", "bars", "block", "npc", "shrine", "table"]
+	solid = kind in ["door", "gate", "bars", "block", "npc", "shrine", "table", "cracked"]
 	if solid:
 		body = StaticBody2D.new()
 		body.collision_layer = 2 if kind == "bars" else 1
@@ -54,6 +54,8 @@ func _add_light() -> void:
 			light = Art.make_light(Color("ffe08a"), 0.35, 0.8)
 		"plate":
 			light = Art.make_light(Color("66e0ff"), 0.45, 0.0)
+		"gear":
+			light = null
 		"table":
 			light = Art.make_light(Color("ffcf80"), 0.5, 0.5)
 	if light:
@@ -214,12 +216,37 @@ func _draw() -> void:
 			draw_line(Vector2(0, 1.2), Vector2(3.5, -1.5), Color("7a2a2a"), 0.5)
 			draw_line(Vector2(-3, 3), Vector2(4, 3), Color("2a3a6a"), 0.5)
 			draw_circle(Vector2(2, 1.5), 0.9, Color("c0392b"))
+		"cracked":
+			draw_rect(Rect2(-8, -8, 16, 16), Color(Art.OUT))
+			draw_rect(Rect2(-7.2, -7.2, 14.4, 14.4), Color("6b6478"))
+			draw_rect(Rect2(-7.2, -7.2, 14.4, 2.0), Color("8d87a0"))
+			for ln in [[Vector2(-7, -3), Vector2(-3, -1), Vector2(-4, 3), Vector2(1, 5)], [Vector2(2, -7), Vector2(1, -2), Vector2(5, 1), Vector2(4, 6)]]:
+				for i in 3:
+					draw_line(ln[i], ln[i + 1], Color(Art.OUT), 1.0)
+			draw_rect(Rect2(-7.2, 5.2, 14.4, 2.0), Color("4a4659"))
+			draw_circle(Vector2(-1, 0), 1.1, Color(1.0, 0.7, 0.3, 0.35 + 0.25 * sin(t * 3.0)))
+		"gear":
+			var gc := Color("a8864a")
+			draw_circle(Vector2.ZERO, 9.5, Color(0, 0, 0, 0.18))
+			for i in 10:
+				var a := t * 0.35 + i * TAU / 10.0
+				var pa := Vector2.from_angle(a)
+				var pb := pa.orthogonal()
+				draw_colored_polygon(PackedVector2Array([pa * 6.5 + pb * 1.9, pa * 9.0 + pb * 1.3, pa * 9.0 - pb * 1.3, pa * 6.5 - pb * 1.9]), Color(Art.OUT))
+			draw_circle(Vector2.ZERO, 7.4, Color(Art.OUT))
+			draw_circle(Vector2.ZERO, 6.6, gc)
+			draw_arc(Vector2.ZERO, 4.6, 0, TAU, 20, gc.darkened(0.35), 1.0)
+			draw_circle(Vector2.ZERO, 2.0, Color(Art.OUT))
+			draw_circle(Vector2.ZERO, 1.3, gc.lightened(0.3))
+			for i in 4:
+				var a2 := t * 0.35 + i * TAU / 4.0 + 0.4
+				draw_line(Vector2.from_angle(a2) * 2.0, Vector2.from_angle(a2) * 5.8, gc.darkened(0.35), 0.8)
 		"candle":
 			Art.candle(self, t, position.x)
 		"torch":
 			Art.torch(self, t, position.x)
 		"npc":
-			var pal: Dictionary = Art.PAL_ALDOUS if id == "aldous" else Art.PAL_ISOLDE
+			var pal: Dictionary = {"aldous": Art.PAL_ALDOUS, "wren": Art.PAL_WREN, "corvin": Art.PAL_CORVIN}.get(id, Art.PAL_ISOLDE)
 			Art.person(self, Vector2.DOWN, t, pal, false)
 			if is_interactable() and level.get("_nearest") == self:
 				var bob := sin(t * 5.0) * 1.0

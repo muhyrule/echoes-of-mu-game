@@ -19,6 +19,8 @@ var facing := Vector2.RIGHT
 var wander := Vector2.ZERO
 var charge_dir := Vector2.RIGHT
 var summoned := false
+var is_boss := false
+var max_hp := 1
 
 
 func setup(k: String, lvl: Node2D) -> void:
@@ -31,12 +33,14 @@ func setup(k: String, lvl: Node2D) -> void:
 		"bat":
 			hp = 1
 			speed = 60.0
-		"warden":
-			hp = 16
-			speed = 34.0
+		"warden", "revenant":
+			hp = 16 if k == "warden" else 24
+			speed = 34.0 if k == "warden" else 38.0
 			hit_radius = 14.0
 			contact_dmg = 2
 			state = "dormant"
+			is_boss = true
+	max_hp = hp
 
 
 func _ready() -> void:
@@ -45,7 +49,7 @@ func _ready() -> void:
 	collision_mask = 1 if kind == "bat" else 3
 	var shape := CollisionShape2D.new()
 	var c := CircleShape2D.new()
-	c.radius = 10.0 if kind == "warden" else 5.0
+	c.radius = 10.0 if is_boss else 5.0
 	shape.shape = c
 	add_child(shape)
 	if level:
@@ -75,18 +79,18 @@ func _physics_process(delta: float) -> void:
 		"bat":
 			var wob := Vector2(cos(t * 3.1), sin(t * 4.3)) * 40.0
 			move = (to.normalized() * speed + wob) if dist < 140.0 else wob * 0.5
-		"warden":
+		"warden", "revenant":
 			move = _warden_ai(delta, to, dist)
 	velocity = move + knock
 	if move != Vector2.ZERO:
 		facing = move.normalized()
 	move_and_slide()
-	if kind == "warden" and state == "charge" and is_on_wall():
+	if is_boss and state == "charge" and is_on_wall():
 		state = "stun"
 		st = 0.0
 		Audio.sfx("hit")
 	level.spark(global_position + Vector2(0, -4), Color(1, 0.85, 0.5), 10)
-	level.shake(2.0 if kind == "warden" else 1.0)
+	level.shake(2.0 if is_boss else 1.0)
 	if dist < hit_radius + 8.0 and state != "stun" and state != "dormant":
 		player.hurt(contact_dmg, to.normalized() if dist > 0.1 else Vector2.DOWN)
 	queue_redraw()
@@ -132,9 +136,9 @@ func hurt(dmg: int, dir: Vector2) -> void:
 		return
 	hp -= dmg * (2 if state == "stun" else 1)
 	flash = 0.12
-	knock = dir * (70.0 if kind == "warden" else 190.0)
+	knock = dir * (70.0 if is_boss else 190.0)
 	Audio.sfx("hit")
-	if kind == "warden" and not summoned and hp <= 8:
+	if is_boss and not summoned and hp <= max_hp / 2:
 		summoned = true
 		level.spawn_enemy("bat", global_position + Vector2(-24, -10))
 		level.spawn_enemy("bat", global_position + Vector2(24, -10))
@@ -151,8 +155,8 @@ func _draw() -> void:
 		"bat":
 			draw_set_transform(Vector2(0, sin(t * 6.0) * 2.0 - 6.0), 0.0, Vector2.ONE)
 			Art.bat(self, t, flash)
-		"warden":
+		"warden", "revenant":
 			var dormant := state == "dormant"
 			if dormant:
 				draw_set_transform(Vector2(0, 4), 0.0, Vector2.ONE)
-			Art.warden(self, facing, t, flash, state == "windup")
+			Art.warden(self, facing, t, flash, state == "windup", kind == "revenant")

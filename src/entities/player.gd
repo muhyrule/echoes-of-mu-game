@@ -53,7 +53,7 @@ func _physics_process(delta: float) -> void:
 	moving = dir != Vector2.ZERO
 	if moving and attacking <= 0.0:
 		facing = dir.normalized()
-	var spd := 118.0 if GameState.form == "wraith" else 88.0
+	var spd := 118.0 if GameState.form == "wraith" else (70.0 if GameState.form == "gargoyle" else 88.0)
 	if attacking > 0.0:
 		spd *= 0.3
 	knock = knock.move_toward(Vector2.ZERO, 700.0 * delta)
@@ -96,14 +96,16 @@ func _check_push(dir: Vector2, delta: float) -> void:
 
 func _start_attack() -> void:
 	attacking = 0.2
-	attack_cd = 0.42 if GameState.form == "wraith" else 0.32
+	attack_cd = {"wraith": 0.42, "gargoyle": 0.6}.get(GameState.form, 0.32)
 	_hit_set.clear()
 	Audio.sfx("slash")
 
 
 func _sword_hits() -> void:
-	var dmg := 1 if GameState.form == "wraith" else 2
-	var reach := 24.0 if GameState.form == "wraith" else 30.0
+	var dmg: int = {"wraith": 1, "gargoyle": 3}.get(GameState.form, 2)
+	var reach: float = {"wraith": 24.0, "gargoyle": 26.0}.get(GameState.form, 30.0)
+	if GameState.form == "gargoyle" and level:
+		level.try_break(global_position + facing * 12.0)
 	for e in get_tree().get_nodes_in_group("enemies"):
 		if e in _hit_set:
 			continue
@@ -128,6 +130,8 @@ func cycle_form() -> void:
 func hurt(dmg: int, from_dir: Vector2) -> void:
 	if invuln > 0.0 or dead:
 		return
+	if GameState.form == "gargoyle":
+		dmg = maxi(1, dmg - 1)
 	GameState.hp -= dmg
 	invuln = 1.0
 	knock = from_dir * 170.0
@@ -144,19 +148,45 @@ func _draw() -> void:
 	if invuln > 0.0 and int(t * 20.0) % 2 == 0:
 		return
 	var wraith := GameState.form == "wraith"
-	var pal := Art.PAL_WRAITH if wraith else Art.PAL_MU
+	var garg := GameState.form == "gargoyle"
+	var pal := Art.PAL_WRAITH if wraith else (Art.PAL_GARGOYLE if garg else Art.PAL_MU)
 	var yoff := sin(t * 3.0) * 1.5 if wraith else 0.0
 	draw_set_transform(Vector2(0, yoff), 0.0, Vector2.ONE)
+	if garg:
+		_draw_wings()
 	Art.person(self, facing, t, pal, moving, 0.75 if wraith else 1.0)
+	if garg:
+		_draw_horns()
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	if attacking > 0.0:
 		var a := facing.angle()
 		var k := 1.0 - attacking / 0.2
-		var col := Color(0.7, 0.85, 1.0, 0.8) if wraith else Color(0.95, 0.96, 1.0)
+		var col := Color(0.7, 0.85, 1.0, 0.8) if wraith else (Color(0.85, 0.9, 1.0) if garg else Color(0.95, 0.96, 1.0))
 		for i in 4:
 			var f := float(i) / 4.0
 			var c2 := Color(col.r, col.g, col.b, (1.0 - f) * 0.7 * (1.0 - k * 0.6))
 			draw_arc(Vector2(0, -3), 19.0 - f * 3.0, a - 1.1 + k * 0.8 - f * 0.5, a + 1.1 + k * 0.8, 14, c2, 3.5 - f * 2.0)
 		draw_line(Vector2(0, -3) + facing * 6.0, Vector2(0, -3) + facing * 22.0, col, 2.0)
-	elif not wraith:
+	elif not wraith and not garg:
 		draw_line(Vector2(4 * signf(facing.x + 0.01), -2), Vector2(4 * signf(facing.x + 0.01), -9), Color("c9ccd6"), 1.0)
+
+
+func _draw_wings() -> void:
+	var flap := sin(t * (9.0 if moving else 2.5)) * (2.5 if moving else 1.0)
+	for sgn in [-1.0, 1.0]:
+		var wing := PackedVector2Array([
+			Vector2(sgn * 3, -12), Vector2(sgn * 13, -22 + flap), Vector2(sgn * 21, -17 + flap),
+			Vector2(sgn * 17, -10), Vector2(sgn * 19, -4 + flap * 0.5), Vector2(sgn * 11, -5), Vector2(sgn * 4, -3)])
+		draw_colored_polygon(wing, Color(Art.OUT))
+		var inner := PackedVector2Array([
+			Vector2(sgn * 4, -11), Vector2(sgn * 12.5, -20.5 + flap), Vector2(sgn * 19, -16.5 + flap),
+			Vector2(sgn * 15.5, -10), Vector2(sgn * 17, -5.5 + flap * 0.5), Vector2(sgn * 10.5, -6.5), Vector2(sgn * 5, -5)])
+		draw_colored_polygon(inner, Color("5a6372"))
+		draw_line(Vector2(sgn * 4, -11), Vector2(sgn * 18, -16 + flap), Color("8d97a8"), 0.7)
+		draw_line(Vector2(sgn * 5, -9), Vector2(sgn * 16, -8 + flap * 0.5), Color("8d97a8"), 0.5)
+
+
+func _draw_horns() -> void:
+	for sgn in [-1.0, 1.0]:
+		draw_colored_polygon(PackedVector2Array([Vector2(sgn * 3.2, -17.5), Vector2(sgn * 5.5, -23.5), Vector2(sgn * 1.5, -19.5)]), Color(Art.OUT))
+		draw_colored_polygon(PackedVector2Array([Vector2(sgn * 3.0, -18), Vector2(sgn * 4.8, -22.2), Vector2(sgn * 2.0, -19)]), Color("a9b2c2"))

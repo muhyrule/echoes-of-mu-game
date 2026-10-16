@@ -21,3 +21,9 @@ Wayfarer's Chapel (hub) → meet Isolde → Edinburgh South Bridge Vaults: key &
 
 ## Roadmap
 Prague (Ossuary Clock) → Transylvania → Paris Catacombs → Whitby Abbey → Venice → Rome. Companions Corvin and Wren join; companions part ways for their own arcs. Gargoyle Form (break cracked walls, push heavy objects), proper pixel art and composed music.
+
+## Chapter II update
+- **Gargoyle form** (shrine in Prague): slow, heavy stone strikes, reduced damage taken, breaks cracked walls.
+- **Party**: Wren (Prague) and Corvin (cell chamber) join; Isolde leaves after the Revenant boss.
+- **Chapter II – Prague, The Ossuary Clock**: gear orrery, bars/key puzzle, cracked-wall passage, Revenant boss.
+- **Scrolling chapel**: 64x42 hub with nave, transepts, vestry and chapter house; portal leads to Edinburgh, then Prague.

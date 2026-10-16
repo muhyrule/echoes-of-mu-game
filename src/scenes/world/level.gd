@@ -40,6 +40,10 @@ var overlay: Node2D
 var fog: Array = []
 var windows: Array = []
 var gt := 0.0
+var theme := "chapel"
+var prefix := ""
+var followers: Dictionary = {}
+var cracked_props: Array = []
 
 
 func _ready() -> void:
@@ -51,6 +55,8 @@ func _ready() -> void:
 	h = grid.size()
 	w = grid[0].length()
 	triggers = meta.get("triggers", {})
+	theme = meta.get("theme", "chapel")
+	prefix = meta.get("prefix", map_name)
 
 	entities = Node2D.new()
 	entities.y_sort_enabled = true
@@ -67,7 +73,7 @@ func _ready() -> void:
 	_setup_hud()
 	_setup_fx()
 	_setup_atmosphere()
-	_spawn_follower()
+	_spawn_followers()
 
 	Audio.play_music(meta.get("music", "crypt"))
 	if map_name == "chapel":
@@ -77,6 +83,23 @@ func _ready() -> void:
 	hud.fade_to(0.0, 0.6)
 	if map_name == "chapel" and not GameState.flag("intro_done"):
 		_run_events("intro")
+
+
+func _broken_key(c: Vector2i) -> String:
+	return "%s_broken_%d_%d" % [map_name, c.x, c.y]
+
+
+func try_break(pos: Vector2) -> void:
+	for p in cracked_props.duplicate():
+		if is_instance_valid(p) and p.position.distance_to(pos) < 15.0:
+			cracked_props.erase(p)
+			GameState.set_flag(_broken_key(p.cell))
+			Audio.sfx("hit")
+			shake(5.0)
+			for i in 3:
+				spark(p.position + Vector2(randf_range(-6, 6), randf_range(-6, 6)), Color(0.7, 0.66, 0.78), 12)
+			hud.show_notice("The wall crumbles!")
+			p.unlock()
 
 
 func _is_solid_char(c: Vector2i) -> bool:
@@ -130,7 +153,7 @@ func _build_world() -> void:
 	add_child(walls)
 	var shape_res := RectangleShape2D.new()
 	shape_res.size = Vector2(TILE, TILE)
-	var gate_flag := GameState.flag("vault_gate_open")
+	var gate_flag := GameState.flag(prefix + "_gate_open")
 	flags_plate = gate_flag
 	for y in h:
 		for x in w:
@@ -156,13 +179,14 @@ func _build_world() -> void:
 				"b":
 					spawn_enemy("bat", _cell_center(c))
 				"G":
-					if not GameState.flag("edinburgh_done"):
-						spawn_enemy("warden", _cell_center(c))
+					var bi: Dictionary = meta.get("boss", {})
+					if not bi.is_empty() and not GameState.flag(bi.done_flag):
+						spawn_enemy(bi.kind, _cell_center(c))
 				"K":
-					if not GameState.flag("vault_key_taken"):
+					if not GameState.flag(prefix + "_key_taken"):
 						_make_prop("key", c)
 				"D":
-					if not GameState.flag("vault_door_open"):
+					if not GameState.flag(prefix + "_door_open"):
 						_make_prop("door", c)
 				"B":
 					bars_props.append(_make_prop("bars", c))
@@ -181,7 +205,8 @@ func _build_world() -> void:
 					walkovers.append(_make_prop("exit", c))
 				"X":
 					marks["X"] = c
-					if GameState.flag("edinburgh_done"):
+					var bd: Dictionary = meta.get("boss", {})
+					if not bd.is_empty() and GameState.flag(bd.done_flag):
 						walkovers.append(_make_prop("final", c))
 				"A":
 					_make_prop("npc", c, "aldous")
@@ -190,6 +215,17 @@ func _build_world() -> void:
 						_make_prop("npc", c, "isolde")
 				"M":
 					_make_prop("table", c)
+				"N":
+					if not GameState.flag("wren_joined"):
+						_make_prop("npc", c, "wren")
+				"V":
+					if not GameState.flag("corvin_joined"):
+						_make_prop("npc", c, "corvin")
+				"Q":
+					_make_prop("gear", c)
+				"x":
+					if not GameState.flag(_broken_key(c)):
+						cracked_props.append(_make_prop("cracked", c))
 				"L":
 					_make_prop("portal", c)
 				"c":
@@ -227,7 +263,7 @@ func _setup_hud() -> void:
 
 func _setup_atmosphere() -> void:
 	var tint := CanvasModulate.new()
-	tint.color = Color(0.38, 0.4, 0.56) if map_name == "vaults" else Color(0.55, 0.5, 0.62)
+	tint.color = {"vault": Color(0.38, 0.4, 0.56), "prague": Color(0.46, 0.46, 0.52), "chapel": Color(0.55, 0.5, 0.62)}[theme]
 	add_child(tint)
 	var lamp := Art.make_light(Color("ffd9a0"), 1.6, 0.9)
 	player.add_child(lamp)
@@ -294,12 +330,12 @@ func _setup_fx() -> void:
 	dust.z_index = 15
 	player.add_child(dust)
 	var tex := Art.light_texture()
-	for i in 9:
+	for i in clampi(w * h / 150, 9, 28):
 		var f := Sprite2D.new()
 		f.texture = tex
 		f.scale = Vector2(randf_range(1.4, 2.6), randf_range(0.5, 0.9))
 		f.position = Vector2(randf() * w * TILE, randf() * h * TILE)
-		f.modulate = Color(0.55, 0.6, 0.85, 0.16) if map_name == "vaults" else Color(0.75, 0.6, 0.8, 0.12)
+		f.modulate = {"vault": Color(0.55, 0.6, 0.85, 0.16), "prague": Color(0.85, 0.7, 0.45, 0.1), "chapel": Color(0.75, 0.6, 0.8, 0.12)}[theme]
 		f.z_index = 14
 		f.set_meta("spd", randf_range(2.0, 6.0))
 		add_child(f)
@@ -316,7 +352,7 @@ func _setup_fx() -> void:
 	for x in range(3, w - 2, 5):
 		for y in range(0, h - 1):
 			if grid[y][x] == "#" and not _is_solid_char(Vector2i(x, y + 1)):
-				if map_name == "chapel":
+				if theme == "chapel":
 					windows.append([Vector2i(x, y), cols[n % 4]])
 				elif n % 2 == 0:
 					var tp := _make_prop("torch", Vector2i(x, y))
@@ -338,20 +374,46 @@ func _draw_overlay() -> void:
 		overlay.draw_circle(o + Vector2(8, 8), 14.0, Color(col.r, col.g, col.b, 0.05 * pulse))
 
 
-func _spawn_follower() -> void:
-	if GameState.flag("isolde_joined"):
-		var f := Node2D.new()
-		f.set_script(FollowerScript)
-		entities.add_child(f)
-		f.start(player)
+const FOLLOW_PAL := {"isolde": Art.PAL_ISOLDE, "wren": Art.PAL_WREN, "corvin": Art.PAL_CORVIN}
+
+
+func _spawn_follower(id: String) -> void:
+	if followers.has(id) and is_instance_valid(followers[id]):
+		return
+	var lead: Node2D = player
+	for fid in GameState.party:
+		if fid == id:
+			break
+		if followers.has(fid) and is_instance_valid(followers[fid]):
+			lead = followers[fid]
+	var f := Node2D.new()
+	f.set_script(FollowerScript)
+	entities.add_child(f)
+	f.start(lead, FOLLOW_PAL[id])
+	followers[id] = f
+
+
+func _relink_followers() -> void:
+	var lead: Node2D = player
+	for fid in GameState.party:
+		if followers.has(fid) and is_instance_valid(followers[fid]):
+			followers[fid].target = lead
+			lead = followers[fid]
+
+
+func _spawn_followers() -> void:
+	for id in GameState.party:
+		if FOLLOW_PAL.has(id):
+			_spawn_follower(id)
 
 
 func _draw() -> void:
-	var vault := map_name == "vaults"
-	var floor_a := Color("2c2a33") if vault else Color("38323f")
-	var floor_b := Color("26242d") if vault else Color("322c38")
+	var vault := theme == "vault"
+	var prague := theme == "prague"
+	var floor_a := Color("2c2a33") if vault else (Color("34363f") if prague else Color("38323f"))
+	var floor_b := Color("26242d") if vault else (Color("2a2c35") if prague else Color("322c38"))
 	var wall_top := Color("15131b")
-	var wall_face := Color("4a4558") if vault else Color("5a4f66")
+	var wall_face := Color("4a4558") if vault else (Color("565a66") if prague else Color("5a4f66"))
 	var mortar := Color("2a2633")
 	for y in h:
 		for x in w:
@@ -377,7 +439,10 @@ func _draw() -> void:
 							draw_rect(Rect2(r.position + Vector2(4, 8), Vector2(8, 1)), Color(Art.OUT))
 							draw_rect(Rect2(r.position + Vector2(5, 9), Vector2(2, 3)), wc.lightened(0.4))
 					draw_rect(Rect2(r.position.x + 8, r.position.y + 8, 1, 1), wall_face.lightened(0.08))
-					if (x * 31 + y * 17) % 9 == 0:
+					if prague and (x + y) % 3 == 0:
+						draw_rect(Rect2(r.position.x + 3, r.position.y + 5, 2, 2), Color("b58f4a"))
+						draw_rect(Rect2(r.position.x + 3, r.position.y + 5, 2, 1), Color("e0c27a"))
+					if (x * 31 + y * 17) % 9 == 0 and not prague:
 						draw_rect(Rect2(r.position.x + 2, r.position.y + 9, 5, 4), Color(0.2, 0.4, 0.25, 0.55))
 						draw_rect(Rect2(r.position.x + 3, r.position.y + 11, 2, 3), Color(0.25, 0.5, 0.3, 0.5))
 				continue
@@ -398,7 +463,11 @@ func _draw() -> void:
 				draw_line(r.position + Vector2(3, 5), r.position + Vector2(9, 9), Color(0, 0, 0, 0.25), 1.0)
 			if hv == 1:
 				draw_rect(Rect2(r.position + Vector2(10, 3), Vector2(2, 2)), Color(1, 1, 1, 0.05))
-			if map_name == "chapel" and x >= 18 and x <= 21:
+			if prague and (x + y) % 2 == 0:
+				draw_rect(r, Color(0.7, 0.55, 0.3, 0.07))
+			if prague and x % 6 == 0:
+				draw_rect(Rect2(r.position.x, r.position.y, 1, TILE), Color(0.72, 0.56, 0.28, 0.5))
+			if ch == ",":
 				draw_rect(r, Color("5a2030"))
 				draw_rect(Rect2(r.position.x, r.position.y, 1, TILE), Color("8a6a3a"))
 				draw_rect(Rect2(r.position.x + 15, r.position.y, 1, TILE), Color("8a6a3a"))
@@ -470,7 +539,7 @@ func _process(_delta: float) -> void:
 
 
 func _reset_puzzle() -> void:
-	if GameState.flag("vault_gate_open"):
+	if GameState.flag(prefix + "_gate_open"):
 		return
 	for b in blocks:
 		if not is_instance_valid(b) or b.moving:
@@ -486,10 +555,10 @@ func _pickup(p: Node2D) -> void:
 	pickups.erase(p)
 	if p.kind == "key":
 		GameState.keys += 1
-		GameState.set_flag("vault_key_taken")
+		GameState.set_flag(prefix + "_key_taken")
 		Audio.sfx("pickup")
 		p.queue_free()
-		_run_events("vault_key")
+		_run_events(prefix + "_key")
 	elif p.kind == "heart":
 		GameState.hp = mini(GameState.max_hp, GameState.hp + 1)
 		Audio.sfx("pickup")
@@ -502,7 +571,7 @@ func check_plate() -> void:
 	for b in blocks:
 		if is_instance_valid(b) and b.cell == plate_cell and not b.moving:
 			flags_plate = true
-			GameState.set_flag("vault_gate_open")
+			GameState.set_flag(prefix + "_gate_open")
 			Audio.sfx("switch")
 			for g in gates:
 				if is_instance_valid(g):
@@ -523,11 +592,11 @@ func _interact(p: Node2D) -> void:
 		"door":
 			if GameState.keys > 0:
 				GameState.keys -= 1
-				GameState.set_flag("vault_door_open")
+				GameState.set_flag(prefix + "_door_open")
 				Audio.sfx("door")
 				p.unlock()
 			else:
-				await Dialogue.play("vault_locked")
+				await Dialogue.play(prefix + "_locked")
 		"npc":
 			await _talk(p)
 		"shrine":
@@ -537,8 +606,12 @@ func _interact(p: Node2D) -> void:
 		"portal":
 			if not GameState.flag("isolde_joined"):
 				await Dialogue.play("portal_alone")
+			elif GameState.flag("prague_done"):
+				await Dialogue.play("portal_done2")
 			elif GameState.flag("edinburgh_done"):
-				await Dialogue.play("portal_done")
+				_busy = false
+				_leave("prague", "start")
+				return
 			else:
 				_busy = false
 				_leave("vaults", "start")
@@ -550,6 +623,8 @@ func _talk(p: Node2D) -> void:
 	if p.id == "aldous":
 		if not GameState.flag("isolde_joined"):
 			await Dialogue.play("aldous_pre")
+		elif GameState.flag("prague_done"):
+			await Dialogue.play("aldous_prague")
 		elif GameState.flag("edinburgh_done"):
 			await Dialogue.play("aldous_after")
 		else:
@@ -557,28 +632,45 @@ func _talk(p: Node2D) -> void:
 	elif p.id == "isolde":
 		await Dialogue.play("isolde_meet")
 		GameState.set_flag("isolde_joined")
-		GameState.party.append("isolde")
-		interactables.erase(p)
-		p.unlock()
-		_spawn_follower()
-		hud.show_notice("Isolde joins the party")
-		Audio.sfx("pickup")
-		GameState.save_game()
+		_join_party(p, "isolde", "Isolde")
+	elif p.id == "wren":
+		await Dialogue.play("wren_meet")
+		GameState.set_flag("wren_joined")
+		_join_party(p, "wren", "Wren")
+	elif p.id == "corvin":
+		await Dialogue.play("corvin_meet")
+		GameState.set_flag("corvin_joined")
+		_join_party(p, "corvin", "Corvin")
+
+
+func _join_party(p: Node2D, id: String, display: String) -> void:
+	GameState.party.append(id)
+	interactables.erase(p)
+	p.unlock()
+	_spawn_follower(id)
+	hud.show_notice("%s joins the party" % display)
+	Audio.sfx("pickup")
+	GameState.save_game()
 
 
 func _shrine() -> void:
-	if not GameState.flag("wraith_unlocked"):
-		await Dialogue.play("shrine")
-		if not "wraith" in GameState.forms:
-			GameState.forms.append("wraith")
+	var sh: Dictionary = meta.get("shrine", {})
+	if sh.is_empty():
+		return
+	var form: String = sh.form
+	if not GameState.flag(form + "_unlocked"):
+		await Dialogue.play(sh.dialogue)
+		if not form in GameState.forms:
+			GameState.forms.append(form)
+		GameState.set_flag(form + "_unlocked")
 		GameState.hp = GameState.max_hp
 		Audio.sfx("form")
-		hud.show_notice("Wraith Form unlocked — press Q")
+		hud.show_notice(sh.notice)
 		GameState.save_game()
 	else:
 		GameState.hp = GameState.max_hp
 		Audio.sfx("switch")
-		await Dialogue.play("shrine_after")
+		await Dialogue.play(sh.after)
 
 
 func _run_events(id: String) -> void:
@@ -588,11 +680,11 @@ func _run_events(id: String) -> void:
 
 
 func boss_awake() -> void:
-	_run_events("warden_intro")
+	_run_events(meta.get("boss", {}).get("intro", "warden_intro"))
 
 
 func enemy_died(e: Node2D) -> void:
-	if e.kind == "warden":
+	if e.is_boss:
 		_boss_defeated(e.position)
 	elif randf() < 0.3:
 		var c := Vector2i(int(e.position.x / TILE), int(e.position.y / TILE))
@@ -603,13 +695,22 @@ func enemy_died(e: Node2D) -> void:
 
 func _boss_defeated(pos: Vector2) -> void:
 	for en in get_tree().get_nodes_in_group("enemies"):
-		if en != null and en.kind != "warden":
+		if en != null and not en.is_boss:
 			en.queue_free()
 	Audio.sfx("bell")
 	_busy = true
 	await get_tree().create_timer(0.8).timeout
-	Audio.play_music("crypt")
-	await Dialogue.play("warden_defeated")
+	Audio.play_music(meta.get("music", "crypt"))
+	var bi: Dictionary = meta.get("boss", {})
+	await Dialogue.play(bi.get("defeated", "warden_defeated"))
+	if bi.has("leave") and bi.leave in GameState.party:
+		GameState.party.erase(bi.leave)
+		GameState.set_flag(bi.leave + "_left")
+		if followers.has(bi.leave) and is_instance_valid(followers[bi.leave]):
+			followers[bi.leave].queue_free()
+		followers.erase(bi.leave)
+		_relink_followers()
+		hud.show_notice("%s leaves the party" % bi.leave.capitalize())
 	var final_cell: Vector2i = marks.get("X", Vector2i(int(pos.x / TILE), int(pos.y / TILE)))
 	walkovers.append(_make_prop("final", final_cell))
 	GameState.hp = GameState.max_hp
@@ -620,7 +721,8 @@ func _boss_defeated(pos: Vector2) -> void:
 
 func _leave_via(p: Node2D) -> void:
 	if p.kind == "final" or p.kind == "exit":
-		_leave("chapel", "from_vaults")
+		var ex: Dictionary = meta.get("exit", {"map": "chapel", "spawn": "start"})
+		_leave(ex.map, ex.spawn)
 
 
 func _leave(map: String, spawn: String) -> void:

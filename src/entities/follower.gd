@@ -12,8 +12,9 @@ var moving := false
 const DELAY := 16
 
 
-func start(p: Node2D) -> void:
+func start(p: Node2D, palette: Dictionary = Art.PAL_ISOLDE) -> void:
 	target = p
+	pal = palette
 	global_position = p.global_position + Vector2(-12, 4)
 	for i in DELAY:
 		trail.append(global_position)

@@ -38,5 +38,23 @@
   "##...........#..........c###c....X...c##",
   "############################..........##",
   "########################################"
- ]
+ ],
+ "theme": "vault",
+ "prefix": "vault",
+ "boss": {
+  "kind": "warden",
+  "done_flag": "edinburgh_done",
+  "intro": "warden_intro",
+  "defeated": "warden_defeated"
+ },
+ "exit": {
+  "map": "chapel",
+  "spawn": "from_vaults"
+ },
+ "shrine": {
+  "form": "wraith",
+  "dialogue": "shrine",
+  "after": "shrine_after",
+  "notice": "Wraith Form unlocked \u2014 press Q"
+ }
 }

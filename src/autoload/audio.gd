@@ -13,6 +13,7 @@ const THEMES := {
 	# chords as root semitone offsets from A2 (110 Hz); arpeggio over minor/major triads
 	"chapel": {"chords": [[0, 3, 7], [-4, 0, 3], [-2, 2, 5], [-5, -1, 2]], "step": 0.45, "gain": 0.5},
 	"crypt": {"chords": [[0, 3, 7], [0, 3, 6], [-2, 1, 5], [-1, 3, 6]], "step": 0.28, "gain": 0.55},
+	"clock": {"chords": [[0, 3, 7], [2, 5, 9], [-3, 0, 4], [-5, -2, 2]], "step": 0.34, "gain": 0.5},
 	"boss": {"chords": [[0, 3, 6], [-1, 2, 6], [-4, -1, 2], [-5, -2, 1]], "step": 0.16, "gain": 0.6},
 }
 

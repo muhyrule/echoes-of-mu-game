@@ -71,9 +71,9 @@ func _draw() -> void:
 		Art.heart(self, Vector2(18 + i * 18, 18), 5.0, col)
 	draw_rect(Rect2(10, 32, 90, 18), Color(0, 0, 0, 0.0))
 	_txt(Vector2(12, 52), "Key x%d" % GameState.keys, 12, Color("e6c15a"))
-	var fname := "Wraith" if GameState.form == "wraith" else "Mu"
+	var fname: String = {"wraith": "Wraith", "gargoyle": "Gargoyle"}.get(GameState.form, "Mu")
 	var hint_q := "  [Q]" if GameState.forms.size() > 1 else ""
-	_txt(Vector2(12, 68), "Form: %s%s" % [fname, hint_q], 12, Color("9fd0ff") if GameState.form == "wraith" else Color("d9c9ff"))
+	_txt(Vector2(12, 68), "Form: %s%s" % [fname, hint_q], 12, {"wraith": Color("9fd0ff"), "gargoyle": Color("c2cad8")}.get(GameState.form, Color("d9c9ff")))
 	if banner_t > 0.0:
 		var a := minf(1.0, banner_t)
 		_txt(Vector2(320, 120), banner_title, 22, Color(0.95, 0.88, 1.0, a), true)
