@@ -1,12 +1,12 @@
 extends CharacterBody2D
-## Arena bosses: the Hollow Warden of the Bell (bell_giant) and the Clockwork Revenant (clock_giant).
+## Arena bosses: the Nor' Loch Kelpie of Edinburgh (kelpie_giant) and the Golem of Prague (golem_giant).
 ## Both are huge multi-phase foes with telegraphed, theme-specific attack patterns.
 
 const Art = preload("res://src/core/art.gd")
 const HazardScript = preload("res://src/entities/hazards.gd")
 const E := 1.0 / 3.2  # extras are authored at 3.2x body size
 
-var kind := "bell_giant"
+var kind := "kelpie_giant"
 var title := "FOE"
 var level: Node2D
 var player: Node2D
@@ -36,13 +36,13 @@ var rushing := false
 func setup(k: String, lvl: Node2D) -> void:
 	kind = k
 	level = lvl
-	if k == "bell_giant":
-		title = "HOLLOW WARDEN"
+	if k == "kelpie_giant":
+		title = "NOR' LOCH KELPIE"
 		hp = 70
 		speed = 30.0
 		scale = Vector2(3.0, 3.0)
 	else:
-		title = "CLOCKWORK REVENANT"
+		title = "GOLEM OF PRAGUE"
 		hp = 90
 		speed = 34.0
 		scale = Vector2(2.4, 2.4)
@@ -76,7 +76,7 @@ func after(sec: float, fn: Callable) -> void:
 
 
 func _gold() -> Color:
-	return Color("f0c860") if kind == "bell_giant" else Color("ffb040")
+	return Color("7fe8e0") if kind == "kelpie_giant" else Color("d8b078")
 
 
 func _physics_process(delta: float) -> void:
@@ -102,7 +102,7 @@ func _physics_process(delta: float) -> void:
 				state = "intro"
 				st = 0.0
 				Audio.sfx("roar")
-				Audio.play_music("boss" if kind == "bell_giant" else "boss2")
+				Audio.play_music("boss" if kind == "kelpie_giant" else "boss2")
 				level.shake(6.0)
 				level.boss_awake()
 		"intro":
@@ -142,7 +142,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _pool() -> Array:
-	if kind == "bell_giant":
+	if kind == "kelpie_giant":
 		return ["toll", "lash", "drop", "rush"] + (["summon"] if phase >= 2 else []) + (["toll", "drop"] if phase >= 3 else [])
 	return ["cogs", "hands", "vents", "rush"] + (["rift"] if phase >= 2 else []) + (["hands", "cogs"] if phase >= 3 else [])
 
@@ -178,7 +178,7 @@ func _arena_pos(p: Vector2) -> Vector2:
 	return p
 
 
-# ---------------------------------------------------------- Hollow Warden
+# ---------------------------------------------------------- Nor' Loch Kelpie (tide rings, mane lashes, geysers, drowned lights)
 
 func _a_toll() -> void:
 	winding = true
@@ -191,7 +191,7 @@ func _a_toll() -> void:
 	for i in n:
 		after(0.95 + i * 0.6, func():
 			var gap := (_pp() - global_position).angle() + randf_range(-0.35, 0.35) * (phase - 1)
-			fx.ring(global_position, 125.0 + 12.0 * phase, 11.0, gap, 0.55 - 0.05 * phase, 1, Color("ffd878"), 420.0)
+			fx.ring(global_position, 125.0 + 12.0 * phase, 11.0, gap, 0.55 - 0.05 * phase, 1, Color("78e8f0"), 420.0)
 			Audio.sfx("bell"))
 	after(1.0 + n * 0.6 + 1.6, func(): _finish(1.4))
 
@@ -202,10 +202,10 @@ func _a_lash() -> void:
 	for i in n:
 		after(0.4 + i * 0.8, func():
 			var d := _pp() - global_position
-			fx.line(global_position, d, 420.0, 24.0, 0.85 - 0.1 * phase, 1, Color("b8a0ff"))
+			fx.line(global_position, d, 420.0, 24.0, 0.85 - 0.1 * phase, 1, Color("5fd0c0"))
 			if phase == 3:
-				fx.line(global_position, d.rotated(0.5), 420.0, 20.0, 0.75, 1, Color("b8a0ff"))
-				fx.line(global_position, d.rotated(-0.5), 420.0, 20.0, 0.75, 1, Color("b8a0ff")))
+				fx.line(global_position, d.rotated(0.5), 420.0, 20.0, 0.75, 1, Color("5fd0c0"))
+				fx.line(global_position, d.rotated(-0.5), 420.0, 20.0, 0.75, 1, Color("5fd0c0")))
 	after(0.4 + n * 0.8 + 0.8, func(): _finish(0.6))
 
 
@@ -218,7 +218,7 @@ func _a_drop() -> void:
 			var p := _pp()
 			if i > 0:
 				p = _arena_pos(p + Vector2.from_angle(randf() * TAU) * randf_range(25.0, 110.0))
-			fx.circle(p, 27.0, 1.0, 1, Color("ffd060"), 0.3, "bell"))
+			fx.circle(p, 27.0, 1.0, 1, Color("60d8f0"), 0.3, "steam"))
 	after(0.4 + n * 0.28 + 1.5, func(): _finish(1.2))
 
 
@@ -237,7 +237,7 @@ func _a_summon() -> void:
 	after(2.6, func(): _finish(1.6))
 
 
-# ---------------------------------------------------------- Clockwork Revenant
+# ---------------------------------------------------------- Golem of Prague (clay boulders, sweeping arms, stomps, mud)
 
 func _a_cogs() -> void:
 	winding = true
@@ -250,7 +250,7 @@ func _a_cogs() -> void:
 			var base := (_pp() - global_position).angle() + (0.18 if v % 2 == 1 else 0.0)
 			for i in n:
 				var a := base - 0.55 + 1.1 * float(i) / float(maxi(n - 1, 1))
-				fx.shot(global_position + Vector2.from_angle(a) * 28.0, Vector2.from_angle(a) * (150.0 + 18.0 * phase), 7.0, 3.5, 1, Color("e0a040")))
+				fx.shot(global_position + Vector2.from_angle(a) * 28.0, Vector2.from_angle(a) * (150.0 + 18.0 * phase), 9.0, 3.5, 1, Color("a07448"), "orb"))
 	after(0.8 + volleys * 0.95 + 1.0, func():
 		level.spark(global_position, Color(0.9, 0.9, 0.9), 14)
 		_finish(1.6))
@@ -266,9 +266,9 @@ func _a_hands() -> void:
 		after(0.5 + i * gap, func():
 			Audio.sfx("switch")
 			var a := base + dir * i * 0.5236
-			fx.line(global_position, Vector2.from_angle(a), 380.0, 15.0, 0.6, 1, Color("ffc040"))
+			fx.line(global_position, Vector2.from_angle(a), 380.0, 22.0, 0.6, 1, Color("c89a60"))
 			if phase == 3:
-				fx.line(global_position, Vector2.from_angle(a + PI), 380.0, 15.0, 0.6, 1, Color("60d8e0")))
+				fx.line(global_position, Vector2.from_angle(a + PI), 380.0, 22.0, 0.6, 1, Color("c89a60")))
 	after(0.5 + steps * gap + 1.2, func():
 		winding = false
 		_finish(1.0))
@@ -277,7 +277,7 @@ func _a_hands() -> void:
 func _a_vents() -> void:
 	winding = true
 	var rings := [[6, 100.0], [10, 190.0], [14, 280.0]]
-	var col := Color("7fe0e0")
+	var col := Color("c8a878")
 	for r in mini(phase + 1, 3):
 		var n: int = rings[r][0]
 		var rad: float = rings[r][1]
@@ -298,10 +298,10 @@ func _a_rift() -> void:
 		Audio.sfx("switch")
 		for i in 3:
 			if fx.count_kind("zone") < 4:
-				fx.zone(_arena_pos(_pp() + Vector2.from_angle(randf() * TAU) * (0.0 if i == 0 else 70.0)), 46.0, 7.0, Color("80c8ff"))
+				fx.zone(_arena_pos(_pp() + Vector2.from_angle(randf() * TAU) * (0.0 if i == 0 else 70.0)), 46.0, 7.0, Color("6a5038"))
 		var a := (_pp() - global_position).angle()
 		for i in 3:
-			fx.shot(global_position + Vector2.from_angle(a) * 28.0, Vector2.from_angle(a - 0.3 + 0.3 * i) * 130.0, 7.0, 3.0, 1, Color("e0a040")))
+			fx.shot(global_position + Vector2.from_angle(a) * 28.0, Vector2.from_angle(a - 0.3 + 0.3 * i) * 130.0, 9.0, 3.0, 1, Color("a07448"), "orb"))
 	after(3.0, func(): _finish(0.8))
 
 
@@ -327,12 +327,12 @@ func _rush_crash() -> void:
 	Audio.sfx("hit")
 	level.shake(9.0)
 	level.spark(global_position + charge_dir * 28.0, Color(1, 0.8, 0.5), 20)
-	if kind == "bell_giant":
+	if kind == "kelpie_giant":
 		for i in 4:
-			fx.circle(_arena_pos(global_position + Vector2.from_angle(randf() * TAU) * randf_range(50.0, 130.0)), 27.0, 1.1 + i * 0.2, 1, Color("ffd060"), 0.3, "bell")
+			fx.circle(_arena_pos(global_position + Vector2.from_angle(randf() * TAU) * randf_range(50.0, 130.0)), 27.0, 1.1 + i * 0.2, 1, Color("60d8f0"), 0.3, "steam")
 	else:
 		for i in 6:
-			fx.shot(global_position, Vector2.from_angle(TAU * float(i) / 6.0 + 0.3) * 150.0, 7.0, 3.0, 1, Color("e0a040"))
+			fx.shot(global_position, Vector2.from_angle(TAU * float(i) / 6.0 + 0.3) * 150.0, 9.0, 3.0, 1, Color("a07448"), "orb")
 
 
 func hurt(dmg: int, dir: Vector2) -> void:
@@ -374,9 +374,9 @@ func _phase_up(p: int) -> void:
 
 
 func _phase_line() -> String:
-	if kind == "bell_giant":
-		return "The Warden tolls the second bell!" if phase == 2 else "The last bell cracks \u2014 the Warden rages!"
-	return "The Revenant's gears scream faster!" if phase == 2 else "Time itself stutters around the Revenant!"
+	if kind == "kelpie_giant":
+		return "The Loch surges around the Kelpie!" if phase == 2 else "The Kelpie rears \u2014 the whole cistern is a flood!"
+	return "The Golem's clay hardens and its stride quickens!" if phase == 2 else "The Golem's brow blazes \u2014 it rages unchecked!"
 
 
 # ---------------------------------------------------------- drawing
@@ -405,27 +405,20 @@ func _draw() -> void:
 		tint = Color(1.0, 0.72 + 0.1 * sin(t * 8.0), 0.72)
 	if exposed > 0.0 and int(t * 12.0) % 2 == 0:
 		tint = Color(1.5, 1.4, 0.9)
+	if kind == "golem_giant":
+		tint = Color(tint.r * 1.1, tint.g * 0.82, tint.b * 0.62, tint.a)
 	if dormant:
 		tint = Color(0.55, 0.55, 0.65)
 	self_modulate = Color(tint, 0.45 + 0.55 * rise) if state == "intro" else tint
 	var bob := sin(t * 1.8) * 1.2 if not dormant else 0.0
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2(E, E))
-	if kind == "clock_giant":
-		_gear(Vector2(0, -80), 70.0, 14, t * 0.35, Color("6e5326"))
-		_gear(Vector2(-34, -10), 14.0, 10, -t * 0.9, Color("8a6a30"))
-		_gear(Vector2(34, -10), 14.0, 10, -t * 0.9 + 0.3, Color("8a6a30"))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	if kind == "bell_giant":
-		Art.warden(self, facing, t, flash, winding)
+	if kind == "kelpie_giant":
+		_draw_kelpie(bob)
 	else:
 		Art.colossus(self, facing, t, flash, winding)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2(E, E))
-	if kind == "bell_giant":
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2(E * 1.7, E * 1.7))
-		_draw_bell(bob)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(E, E))
-	else:
-		_draw_clock_face(bob)
+		_draw_emet(bob)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(E, E))
 	if exposed > 0.0 and state != "dying":
 		for i in 4:
 			var a := t * 4.0 + TAU * i / 4.0
@@ -435,29 +428,61 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
-func _draw_bell(off: float) -> void:
-	var sway := sin(t * 1.7) * 0.08 + (0.35 if winding else 0.0)
-	var anchor := Vector2(-48, -52 + off)
-	var pos := anchor + Vector2(sin(sway) * 40.0, cos(sway) * 40.0 + 4.0)
-	draw_line(anchor, pos + Vector2(0, -16), Color("3a3440"), 3.0)
+func _draw_kelpie(off: float) -> void:
+	var o := Color(Art.OUT)
+	var hit := flash > 0.0
+	var body := Color("1f4a55") if not hit else Color.WHITE
+	var lite := Color("3a8a94") if not hit else Color.WHITE
+	for i in 3:
+		var r := 22.0 + i * 6.0 + fmod(t * 8.0, 6.0)
+		draw_arc(Vector2(0, 8), r, 0.2, PI - 0.2, 20, Color(0.5, 0.9, 0.95, 0.35 - i * 0.1), 1.0)
+		draw_arc(Vector2(0, 8), r, PI + 0.2, TAU - 0.2, 20, Color(0.5, 0.9, 0.95, 0.35 - i * 0.1), 1.0)
+	draw_circle(Vector2(0, 6), 20.0, Color(0.1, 0.3, 0.35, 0.8))
+	var sw := sin(t * 1.6) * 2.0 + (4.0 if winding else 0.0)
+	var neck := PackedVector2Array([Vector2(-14, 8), Vector2(-8, -24 + off), Vector2(-2 + sw, -40 + off), Vector2(10 + sw, -38 + off), Vector2(12, -26 + off), Vector2(14, 8)])
+	draw_colored_polygon(neck, o)
+	var neck_in := PackedVector2Array([Vector2(-12, 6), Vector2(-6, -23 + off), Vector2(-1 + sw, -38 + off), Vector2(9 + sw, -36 + off), Vector2(10, -26 + off), Vector2(12, 6)])
+	draw_colored_polygon(neck_in, body)
+	var hd := PackedVector2Array([Vector2(-6 + sw, -44 + off), Vector2(8 + sw, -46 + off), Vector2(22 + sw, -36 + off), Vector2(20 + sw, -31 + off), Vector2(6 + sw, -33 + off), Vector2(-4 + sw, -36 + off)])
+	draw_colored_polygon(hd, o)
+	var hd_in := PackedVector2Array([Vector2(-4 + sw, -43 + off), Vector2(8 + sw, -44.5 + off), Vector2(20 + sw, -36 + off), Vector2(19 + sw, -33 + off), Vector2(6 + sw, -34.5 + off), Vector2(-3 + sw, -37 + off)])
+	draw_colored_polygon(hd_in, lite)
+	draw_colored_polygon(PackedVector2Array([Vector2(-2 + sw, -44 + off), Vector2(0 + sw, -52 + off), Vector2(4 + sw, -44 + off)]), body)
+	var eye := Color(0.6, 1.0, 0.95) if exposed <= 0.0 else Color(1, 0.9, 0.4)
+	draw_circle(Vector2(8 + sw, -39 + off), 2.0, eye)
+	draw_circle(Vector2(8 + sw, -39 + off), 4.0, Color(eye, 0.25))
+	for i in 7:
+		var y := -42.0 + i * 7.0
+		var wv := sin(t * 2.2 + i) * 3.0
+		draw_line(Vector2(-4 + sw * (1.0 - i / 7.0), y + off), Vector2(-14 + wv, y + 8.0 + off), Color("2e7a4a"), 2.2)
+		draw_line(Vector2(-14 + wv, y + 8.0 + off), Vector2(-17 + wv * 1.4, y + 14.0 + off), Color("56b070"), 1.4)
 	for i in 5:
-		draw_circle(anchor.lerp(pos + Vector2(0, -16), i / 4.0), 2.2, Color("6a6474"))
-	var body := PackedVector2Array([pos + Vector2(-5, -14), pos + Vector2(5, -14), pos + Vector2(14, 8), pos + Vector2(18, 16), pos + Vector2(-18, 16), pos + Vector2(-14, 8)])
-	draw_colored_polygon(body, Color(Art.OUT))
-	var inner := PackedVector2Array([pos + Vector2(-3.5, -12.5), pos + Vector2(3.5, -12.5), pos + Vector2(12, 8), pos + Vector2(15, 14), pos + Vector2(-15, 14), pos + Vector2(-12, 8)])
-	draw_colored_polygon(inner, Color("a8782c") if flash <= 0.0 else Color.WHITE)
-	draw_line(pos + Vector2(-8, -8), pos + Vector2(-11, 8), Color("e0b45a"), 2.0)
-	draw_circle(pos + Vector2(0, 16), 3.0, Color("3a3440"))
+		var dp := fmod(t * 14.0 + i * 9.0, 30.0)
+		draw_circle(Vector2(14.0 + i * 2.0 + sw, -30.0 + dp + off), 1.1, Color(0.7, 0.95, 1.0, 0.7))
+	var lp := Vector2(-6 + sw, -26 + off + sin(t * 2.0) * 1.5)
+	draw_circle(lp, 6.0, Color(1.0, 0.8, 0.3, 0.18))
+	draw_circle(lp, 2.2, Color("ffd060"))
 
 
-func _draw_clock_face(off: float) -> void:
-	var c := Vector2(0, -48 + off)
-	draw_circle(c, 17.0, Color(Art.OUT))
-	draw_circle(c, 15.0, Color("e8dcc0") if flash <= 0.0 else Color.WHITE)
-	for i in 12:
-		var a := TAU * i / 12.0
-		draw_line(c + Vector2.from_angle(a) * 12.0, c + Vector2.from_angle(a) * 14.0, Color("2a2018"), 1.0)
-	var m := t * (1.6 if phase < 3 else 5.0)
-	draw_line(c, c + Vector2.from_angle(m) * 12.0, Color("2a2018"), 1.4)
-	draw_line(c, c + Vector2.from_angle(m / 12.0) * 8.0, Color("7a2a2a"), 1.8)
-	draw_circle(c, 1.5, Color("2a2018"))
+func _draw_emet(off: float) -> void:
+	var c := Vector2(0, -48 + off) * 1.0
+	var col := Color(1.0, 0.75, 0.3, 0.95) if phase < 3 else Color(1.0, 0.35 + 0.2 * sin(t * 10.0), 0.2, 1.0)
+	draw_circle(c, 17.0, Color(col, 0.12))
+	var glyphs := 3 if phase < 3 else 2
+	var start := -9.0 if phase < 3 else -3.0
+	for g in glyphs:
+		var gx := c.x + start + g * 9.0
+		var gy := c.y
+		match g + (0 if phase < 3 else 1):
+			0:
+				draw_line(Vector2(gx - 4, gy - 5), Vector2(gx + 3, gy - 5), col, 1.8)
+				draw_line(Vector2(gx + 3, gy - 5), Vector2(gx - 3, gy + 5), col, 1.8)
+				draw_line(Vector2(gx - 4, gy + 5), Vector2(gx + 4, gy + 5), col, 1.8)
+			1:
+				draw_line(Vector2(gx - 4, gy - 5), Vector2(gx + 4, gy - 5), col, 1.8)
+				draw_line(Vector2(gx + 4, gy - 5), Vector2(gx + 4, gy + 5), col, 1.8)
+				draw_line(Vector2(gx - 4, gy + 5), Vector2(gx - 4, gy + 1), col, 1.8)
+			_:
+				draw_line(Vector2(gx - 5, gy - 5), Vector2(gx + 5, gy - 5), col, 1.8)
+				draw_line(Vector2(gx, gy - 5), Vector2(gx, gy + 5), col, 1.8)
+				draw_line(Vector2(gx - 5, gy + 5), Vector2(gx + 5, gy + 5), col, 1.8)

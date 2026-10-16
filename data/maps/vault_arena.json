@@ -1,7 +1,7 @@
 {
  "theme": "vault",
- "title": "The Belfry of the Cracked Bell",
- "subtitle": "Something enormous waits above the ropes",
+ "title": "The Drowned Cistern of the Nor' Loch",
+ "subtitle": "Black water, and something that remembers every drowning",
  "music": "crypt",
  "spawns": {
   "start": "@"
@@ -15,10 +15,10 @@
  },
  "prefix": "vault_arena",
  "boss": {
-  "kind": "bell_giant",
+  "kind": "kelpie_giant",
   "done_flag": "edinburgh_done",
-  "intro": "warden_intro",
-  "defeated": "warden_defeated"
+  "intro": "kelpie_intro",
+  "defeated": "kelpie_defeated"
  },
  "final_exit": {
   "map": "chapel",

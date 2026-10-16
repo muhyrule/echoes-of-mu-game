@@ -9,7 +9,7 @@ A gothic top-down action-adventure built with **Godot 4.3** (GDScript). Mu, a be
 Controls: **WASD/Arrows** move · **Space/J** sword · **E/Enter** interact & advance text · **Q/K** shift form · **R** reset block puzzle · **Esc** pause.
 
 ## Vertical slice (Chapter I)
-Wayfarer's Chapel (hub) → meet Isolde → Edinburgh South Bridge Vaults: key & locked door, block-and-plate puzzle, Wraith Form shrine (pass through iron bars, fast, weaker strikes), Hollow Warden boss (charge attacks, adds at half health), return to the hub. Progress saves automatically on map change.
+Wayfarer's Chapel (hub) → meet Isolde → Edinburgh South Bridge Vaults: key & locked door, block-and-plate puzzle, Wraith Form shrine (pass through iron bars, fast, weaker strikes), Nor' Loch Kelpie boss (charge attacks, adds at half health), return to the hub. Progress saves automatically on map change.
 
 ## Layout
 - `src/autoload/` – `GameState` (flags, party, save/load, input), `Audio` (procedural SFX/music), `Dialogue` (JSON-driven text box)
@@ -64,5 +64,7 @@ Prague (Ossuary Clock) → Transylvania → Paris Catacombs → Whitby Abbey →
 
 Each dungeon ends in a gate to its own arena map, holding a colossal multi-phase boss (phases at 66% / 33% HP, telegraphed attacks, exposed windows after a wall-crash take double damage).
 
-- **Hollow Warden** (Belfry of the Cracked Bell, Edinburgh): tolling shockwave rings with a gap to slip through, chain lashes, falling bells, bat summons, charging rush.
-- **Clockwork Revenant** (Great Gear of the Orloj, Prague): cog volleys, sweeping clock-hand beams, steam-vent rings, time rifts that slow you, charging rush.
+Both bosses come from real regional folklore:
+
+- **Nor' Loch Kelpie** (Drowned Cistern, Edinburgh): the Scottish water-horse that lures travellers onto its back and drowns them. Tide rings with a gap to slip through, weedy mane lashes, water geysers, drowned-light summons, charging rush.
+- **Golem of Prague** (Attic of the Old-New Synagogue): Rabbi Loew's clay guardian, animated by the word *emet* on its brow (it loses the first letter in its final phase). Clay boulder volleys, sweeping arm blows, stomp shockwaves, mud pits that slow you, charging rush.

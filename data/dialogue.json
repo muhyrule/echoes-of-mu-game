@@ -186,16 +186,6 @@
    "text": "No. But I think the shade can. Q to shift form, then walk through — and shift back before the fight."
   }
  ],
- "warden_intro": [
-  {
-   "who": "",
-   "text": "A figure in rusted watchman's plate rises from the flagstones, a dead lantern chained to its wrist."
-  },
-  {
-   "who": "Hollow Warden",
-   "text": "...nobody... passes... the Bell..."
-  }
- ],
  "warden_defeated": [
   {
    "who": "",
@@ -374,16 +364,6 @@
    "text": "Girl, I've outlived worse. Lead on."
   }
  ],
- "revenant_intro": [
-  {
-   "who": "",
-   "text": "The Clockwork Revenant unfolds itself from the great gear, bone and brass grinding in perfect time."
-  },
-  {
-   "who": "Corvin",
-   "text": "That's it. Every blow I take from it is a second off my life. Strike when it winds up — the gears jam on the cooldown!"
-  }
- ],
  "revenant_defeated": [
   {
    "who": "",
@@ -396,6 +376,92 @@
   {
    "who": "Corvin",
    "text": "He was never here, lass. The Revenant was a trap — a lure for those who'd mend the Bells. Your brother's been taken further east."
+  },
+  {
+   "who": "Isolde",
+   "text": "Then this is where I turn back, Mu. Tomas lies in Edinburgh, and my mother has no one to light the lamp for her. I need to be there when the thaw comes."
+  },
+  {
+   "who": "Mu",
+   "text": "Isolde... you saved me more than once in the vaults."
+  },
+  {
+   "who": "Isolde",
+   "text": "And you gave me a reason to look up from the ground. Go. Ring the next Bell. I'll keep the lamp lit."
+  },
+  {
+   "who": "",
+   "text": "Isolde leaves the party. The second Silent Bell is mended, and a portal of pale light opens.",
+   "set": "prague_done"
+  }
+ ],
+ "kelpie_intro": [
+  {
+   "who": "",
+   "text": "The cistern floods without a sound. A shape of black water and weed rises on a horse's neck, a lantern swinging from its bridle."
+  },
+  {
+   "who": "Isolde",
+   "text": "The Kelpie. Every Scots child is told it: the pale horse at the water's edge that lets you climb on, then never lets you off. It drowned the Nor' Loch's lost for centuries."
+  },
+  {
+   "who": "Kelpie",
+   "text": "...come... the water is warm... ride..."
+  }
+ ],
+ "golem_intro": [
+  {
+   "who": "",
+   "text": "Dust sifts from the rafters. Rabbi Loew's clay giant stands from its long sleep, a scratched word glowing on its brow."
+  },
+  {
+   "who": "Corvin",
+   "text": "The Golem of Prague. Made to guard the ghetto, laid to rest in this very attic. Something woke it wrong. It isn't wicked, lass, only confused. Still, it'll flatten us."
+  },
+  {
+   "who": "Wren",
+   "text": "The word on its forehead! Remember the old story: take away the first letter and it falls still."
+  }
+ ],
+ "kelpie_defeated": [
+  {
+   "who": "",
+   "text": "The Kelpie shatters into a hundred falling waves. The cistern drains, and the lantern drifts to the stones, still lit."
+  },
+  {
+   "who": "Isolde",
+   "text": "...Mu. Look at the lantern. The handle's wrapped in my mother's blue thread. That's Tomas's."
+  },
+  {
+   "who": "Isolde",
+   "text": "He followed that light into the Loch to pull someone out. The Kelpie used him as bait. Even after, he held on to the lantern. Stubborn. Just like me."
+  },
+  {
+   "who": "Mu",
+   "text": "I'm sorry, Isolde."
+  },
+  {
+   "who": "Isolde",
+   "text": "Don't be. He's resting now, and the city above has one less ghost in its walls. I'm coming to the next Bell. I want to know what's driving this."
+  },
+  {
+   "who": "",
+   "text": "The first Silent Bell is mended. A portal of pale light opens in the cistern.",
+   "set": "edinburgh_done"
+  }
+ ],
+ "golem_defeated": [
+  {
+   "who": "",
+   "text": "Wren leaps and scrapes the first letter from the Golem's brow. EMET becomes MET: truth becomes death. The giant crumbles into soft clay."
+  },
+  {
+   "who": "Wren",
+   "text": "Pavel! ...No. It's only his scarf, caught in the clay. He's not here."
+  },
+  {
+   "who": "Corvin",
+   "text": "He was never here, lass. Someone woke the Golem to lure those who'd mend the Bells. Your brother's been taken further east."
   },
   {
    "who": "Isolde",

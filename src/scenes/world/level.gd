@@ -182,7 +182,7 @@ func _make_object(c: Vector2i, d: Dictionary) -> void:
 
 func spawn_enemy(kind: String, pos: Vector2) -> void:
 	var e := CharacterBody2D.new()
-	e.set_script(GiantScript if kind in ["bell_giant", "clock_giant"] else EnemyScript)
+	e.set_script(GiantScript if kind in ["kelpie_giant", "golem_giant"] else EnemyScript)
 	e.setup(kind, self)
 	e.position = pos
 	entities.add_child(e)
@@ -1280,7 +1280,7 @@ func _run_events(id: String) -> void:
 
 
 func boss_awake() -> void:
-	_run_events(meta.get("boss", {}).get("intro", "warden_intro"))
+	_run_events(meta.get("boss", {}).get("intro", "kelpie_intro"))
 
 
 func enemy_died(e: Node2D) -> void:
@@ -1312,7 +1312,7 @@ func _boss_defeated(pos: Vector2) -> void:
 	await get_tree().create_timer(0.8).timeout
 	Audio.play_music(meta.get("music", "crypt"))
 	var bi: Dictionary = meta.get("boss", {})
-	await Dialogue.play(bi.get("defeated", "warden_defeated"))
+	await Dialogue.play(bi.get("defeated", "kelpie_defeated"))
 	if bi.has("leave") and bi.leave in GameState.party:
 		GameState.party.erase(bi.leave)
 		GameState.set_flag(bi.leave + "_left")

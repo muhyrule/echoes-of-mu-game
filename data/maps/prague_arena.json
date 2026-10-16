@@ -1,7 +1,7 @@
 {
  "theme": "prague",
- "title": "The Great Gear of the Orloj",
- "subtitle": "Every hour here is counted in bone",
+ "title": "The Attic of the Old-New Synagogue",
+ "subtitle": "Clay, ash, and a word written on a brow",
  "music": "clock",
  "spawns": {
   "start": "@"
@@ -15,10 +15,10 @@
  },
  "prefix": "prague_arena",
  "boss": {
-  "kind": "clock_giant",
+  "kind": "golem_giant",
   "done_flag": "prague_done",
-  "intro": "revenant_intro",
-  "defeated": "revenant_defeated",
+  "intro": "golem_intro",
+  "defeated": "golem_defeated",
   "leave": "isolde"
  },
  "final_exit": {

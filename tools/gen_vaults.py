@@ -54,7 +54,7 @@ def build():
     p(73, 38, "4")
     p(73, 41, "B")
     p(73, 42, "B")
-    m.door(78, 70, "vault_arena", "The Belfry Stair", "gate")
+    m.door(78, 70, "vault_arena", "The Drowned Cistern Stair", "gate")
 
     def many(ch, pts):
         for x, y in pts:

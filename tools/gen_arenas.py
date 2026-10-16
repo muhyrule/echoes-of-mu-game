@@ -48,6 +48,9 @@ def patch_dungeon(name, ch_old, label, target):
     ch = "\u03a9"
     doors = d.setdefault("doors", {})
     if ch in doors:
+        doors[ch]["label"] = label
+        json.dump(d, open(path, "w"), indent=1)
+        open(path, "a").write("\n")
         return
     for y, r in enumerate(rows):
         for x, c in enumerate(r):
@@ -64,13 +67,13 @@ def patch_dungeon(name, ch_old, label, target):
 
 
 def main():
-    arena("vault_arena", "vault", "The Belfry of the Cracked Bell", "Something enormous waits above the ropes", "crypt",
-          {"kind": "bell_giant", "done_flag": "edinburgh_done", "intro": "warden_intro", "defeated": "warden_defeated"},
+    arena("vault_arena", "vault", "The Drowned Cistern of the Nor' Loch", "Black water, and something that remembers every drowning", "crypt",
+          {"kind": "kelpie_giant", "done_flag": "edinburgh_done", "intro": "kelpie_intro", "defeated": "kelpie_defeated"},
           {"map": "chapel", "spawn": "from_vaults"}, "Back down to the Vaults", 10, 14)
-    arena("prague_arena", "prague", "The Great Gear of the Orloj", "Every hour here is counted in bone", "clock",
-          {"kind": "clock_giant", "done_flag": "prague_done", "intro": "revenant_intro", "defeated": "revenant_defeated", "leave": "isolde"},
+    arena("prague_arena", "prague", "The Attic of the Old-New Synagogue", "Clay, ash, and a word written on a brow", "clock",
+          {"kind": "golem_giant", "done_flag": "prague_done", "intro": "golem_intro", "defeated": "golem_defeated", "leave": "isolde"},
           {"map": "chapel", "spawn": "from_prague"}, "Back to the Ossuary Clock", 12, 16)
-    patch_dungeon("prague", "G", "The Great Gear", "prague_arena")
+    patch_dungeon("prague", "G", "The Altneuschul Attic", "prague_arena")
 
 
 if __name__ == "__main__":

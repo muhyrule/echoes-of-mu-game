@@ -130,8 +130,8 @@ func run() -> void:
 			stair = e
 	check(stair != null, "vaults end in a stair to the belfry arena")
 
-	for kind in ["bell_giant", "clock_giant"]:
-		var arena_name := "vault_arena" if kind == "bell_giant" else "prague_arena"
+	for kind in ["kelpie_giant", "golem_giant"]:
+		var arena_name := "vault_arena" if kind == "kelpie_giant" else "prague_arena"
 		lv = await load_level(arena_name)
 		await frames(5)
 		check(lv.entries.size() == 1, kind + " arena has a retreat door")
@@ -147,7 +147,7 @@ func run() -> void:
 		check(boss.state != "dormant", kind + " wakes")
 		var seen := {}
 		for i in 2:
-			for a in (["toll", "lash", "drop", "rush", "summon"] if kind == "bell_giant" else ["cogs", "hands", "vents", "rush", "rift"]):
+			for a in (["toll", "lash", "drop", "rush", "summon"] if kind == "kelpie_giant" else ["cogs", "hands", "vents", "rush", "rift"]):
 				if boss.has_method("_a_" + a):
 					boss.phase = 3
 					boss.state = "idle"
