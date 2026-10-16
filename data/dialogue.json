@@ -1,0 +1,84 @@
+{
+ "intro": [
+  {"who": "", "text": "Dusk over the Wayfarer's Chapel. The great bell is tolling — though no rope has been pulled in three nights."},
+  {"who": "Mu", "text": "Again. Nobody in the belfry, nobody on the rope, and still it rings. Father Aldous, you can't keep telling me it's the wind."},
+  {"who": "Father Aldous", "text": "I stopped telling you that on the second night, Mu. Come here. It is time you heard what your bell-ringing was truly for."},
+  {"who": "Father Aldous", "text": "Seven Silent Bells lie buried across the old world. Their echoes hold back the Long Silence — a hush that swallows names, then memories, then the living."},
+  {"who": "Father Aldous", "text": "The first Bell has begun to crack, beneath the Old Town of Edinburgh. Take the Tolling Blade — the iron clapper of this very chapel's bell, reforged. It answers to you alone."},
+  {"who": "Mu", "text": "Alone? I've never been farther than the river."},
+  {"who": "Father Aldous", "text": "Then it is well you will not be alone. A stonemason named Isolde waits by the north pews. She knows those vaults better than any map.", "set": "intro_done"}
+ ],
+ "aldous_pre": [
+  {"who": "Father Aldous", "text": "Speak with Isolde, near the pews. The vaults of Edinburgh are no place to walk blind."},
+  {"who": "Father Aldous", "text": "Move with WASD or arrows. Space strikes with the Tolling Blade, E speaks and opens, Q shifts form once the chapel's relics answer you."}
+ ],
+ "isolde_meet": [
+  {"who": "Isolde", "text": "So you're the bell-boy. Isolde Marsh. I cut stone for the Old Town — and for three months I've been trying to cut my way into those vaults."},
+  {"who": "Mu", "text": "Why the vaults?"},
+  {"who": "Isolde", "text": "My brother Tomas went down with a lantern and a chisel to mend a collapsed arch. The arch got mended. He didn't come back up."},
+  {"who": "Isolde", "text": "Your bells ring and the walls under my city hum back. If that's connected, then I'm coming with you. Don't argue — I'm very stubborn and I carry a hammer."},
+  {"who": "Mu", "text": "I wasn't going to argue. I was going to ask you to stay behind me when the rats come."},
+  {"who": "Isolde", "text": "Rats. Wonderful. Lead on, Mu.", "set": "isolde_joined"}
+ ],
+ "aldous_ready": [
+  {"who": "Father Aldous", "text": "The archway to the east leads north, to the Old Town. Go with God, and with Isolde."}
+ ],
+ "aldous_after": [
+  {"who": "Father Aldous", "text": "The first Bell is mended. I felt it from here — the silence drew back a step."},
+  {"who": "Father Aldous", "text": "A scholar named Corvin writes to me from Prague. He says the second Bell lies in the ossuary under an astronomical clock. The road there is not yet lit... but it will be."}
+ ],
+ "portal_alone": [
+  {"who": "Mu", "text": "I shouldn't go down there alone. Isolde was waiting by the north pews."}
+ ],
+ "portal_done": [
+  {"who": "", "text": "The Edinburgh road lies quiet behind you. The way to Prague is not yet lit."},
+  {"who": "", "text": "— To be continued in Chapter II: Prague, the Ossuary Clock —"}
+ ],
+ "worldmap": [
+  {"who": "", "text": "A map of the Silent Bells, inked in Aldous's careful hand."},
+  {"who": "", "text": "I. Edinburgh — the South Bridge Vaults.  II. Prague — the Ossuary Clock.  III. Transylvania — the Hollow Keep."},
+  {"who": "", "text": "IV. Paris — the Catacombs.  V. Whitby — the Drowned Abbey.  VI. Venice — the Sunken Palazzo.  VII. Rome — the Last Crypt."}
+ ],
+ "vault_enter": [
+  {"who": "Isolde", "text": "Smell that? Damp lime and old iron. These vaults were sealed up and forgotten two hundred years ago."},
+  {"who": "Mu", "text": "Something down here is ringing in time with my bell."},
+  {"who": "Isolde", "text": "Then follow the sound, and watch your feet. There'll be a key somewhere — the old merchants locked everything."}
+ ],
+ "vault_key": [
+  {"who": "", "text": "You found an old iron key. Locked doors (E) will yield to it."}
+ ],
+ "vault_locked": [
+  {"who": "Mu", "text": "Locked tight. There must be a key somewhere in these vaults."}
+ ],
+ "vault_puzzle": [
+  {"who": "Isolde", "text": "A floor plate, and a dressed stone block. Push the block onto the plate and the old gate should lift."},
+  {"who": "Isolde", "text": "Wedge it in a corner and you'll have to press R to reset the stones."}
+ ],
+ "vault_shrine_hint": [
+  {"who": "Mu", "text": "There's a shrine at the back of the chamber. It's... humming."}
+ ],
+ "shrine": [
+  {"who": "", "text": "A cracked bell-shaped shrine. As Mu's hand touches it, a cold voice, like a bell heard through water, whispers a name that isn't his."},
+  {"who": "Echo", "text": "You are not the first to be called, ringer. Take the Wraith's Echo. Wear the shade, and iron will not hold you."},
+  {"who": "", "text": "Wraith Form unlocked! Press Q to shift. In this form you are swift and can slip through iron bars — but your strikes are weak.", "set": "wraith_unlocked"}
+ ],
+ "shrine_after": [
+  {"who": "", "text": "The shrine's cold light mends your wounds."}
+ ],
+ "vault_bars": [
+  {"who": "Isolde", "text": "Iron bars, and the sound is coming from just beyond them. I can't squeeze through those."},
+  {"who": "Mu", "text": "No. But I think the shade can. Q to shift form, then walk through — and shift back before the fight."}
+ ],
+ "warden_intro": [
+  {"who": "", "text": "A figure in rusted watchman's plate rises from the flagstones, a dead lantern chained to its wrist."},
+  {"who": "Hollow Warden", "text": "...nobody... passes... the Bell..."}
+ ],
+ "warden_defeated": [
+  {"who": "", "text": "The Hollow Warden collapses into dust. The cracked Bell above falls silent, its echo mended."},
+  {"who": "Isolde", "text": "...Mu. Look at the lantern. The handle's wrapped in my mother's blue thread. That's Tomas's."},
+  {"who": "Isolde", "text": "He stayed to guard it. Even after he was gone, he guarded it. Stubborn. Just like me."},
+  {"who": "Mu", "text": "I'm sorry, Isolde."},
+  {"who": "Isolde", "text": "Don't be. He's resting now. And the city above has one less ghost in its walls. I'm coming to the next Bell — I want to know what's driving this."},
+  {"who": "", "text": "The first Silent Bell is mended. A portal of pale light opens in the hall.", "set": "edinburgh_done"}
+ ]
+}

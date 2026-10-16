@@ -2,27 +2,26 @@
 
 config_version=5
 
-_meta={
-"class_max_size": 0,
-"class_name_max_length": 100,
-"custom_features": ["res://"],
-"scripts": [],
-"version": "5.0"
-}
-
 [application]
 
 config/name="Echoes of Mu"
 config/version="0.1.0"
 run/main_scene="res://src/scenes/menu/MainMenu.tscn"
-config/features=PackedStringArray("4.0", "Forward Plus")
-config/icon="res://assets/ui/icon.png"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+
+[autoload]
+
+GameState="*res://src/autoload/game_state.gd"
+Audio="*res://src/autoload/audio.gd"
+Dialogue="*res://src/autoload/dialogue.gd"
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=720
-window/stretch/mode="canvas_items"
+window/size/viewport_width=640
+window/size/viewport_height=360
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="viewport"
 window/stretch/aspect="keep"
 
 [debug]
@@ -30,14 +29,9 @@ window/stretch/aspect="keep"
 gdscript/warnings/unused_variable=1
 gdscript/warnings/unused_argument=1
 
-[physics]
-
-2d/physics_engine="GodotPhysics2D"
-2d/default_gravity=980.0
-
 [rendering]
 
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
 textures/canvas_textures/default_texture_filter=0
-textures/vram_compression/import_etc2_astc=true
-lights_and_shadows/directional_shadow/size=4096
-anti_aliasing/screen_space_antialiasing/enabled=true
+environment/defaults/default_clear_color=Color(0.04, 0.03, 0.06, 1)
