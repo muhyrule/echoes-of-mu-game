@@ -159,4 +159,7 @@ func _draw() -> void:
 			var dormant := state == "dormant"
 			if dormant:
 				draw_set_transform(Vector2(0, 4), 0.0, Vector2.ONE)
-			Art.warden(self, facing, t, flash, state == "windup", kind == "revenant")
+			if kind == "revenant":
+				Art.colossus(self, facing, t, flash, state == "windup")
+			else:
+				Art.warden(self, facing, t, flash, state == "windup")

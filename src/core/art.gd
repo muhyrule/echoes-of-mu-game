@@ -79,6 +79,14 @@ static func _b(parts: Array, sh: Array, x: float, y: float, w: float, h: float, 
 		sh.append([Rect2(x, y, 1.0, h), Color(col.lightened(0.14), col.a)])
 		sh.append([Rect2(x + w - 1.0, y + 1.0, 1.0, h - 1.0), Color(col.darkened(0.3), col.a)])
 		sh.append([Rect2(x, y + h - 1.0, w, 1.0), Color(col.darkened(0.25), col.a)])
+		if w >= 5.0 and h >= 5.0:
+			var dk := Color(col.darkened(0.18), col.a)
+			for i in int(h - 2.0):
+				if i % 2 == 0:
+					sh.append([Rect2(x + w - 2.0, y + 1.0 + i, 1.0, 1.0), dk])
+			for i in int(w - 3.0):
+				if i % 2 == 1:
+					sh.append([Rect2(x + 1.0 + i, y + h - 2.0, 1.0, 1.0), dk])
 
 
 static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving := false, alpha := 1.0, atk := 0.0, yoff := 0.0) -> void:
@@ -417,3 +425,30 @@ static func _look_extras(parts: Array, sh: Array, pal: Dictionary, side: bool, u
 				_b(parts, sh, -9.0, -10.0 + bob, 5.0, 5.0, coat.lightened(0.1))
 				_b(parts, sh, 4.0, -10.0 + bob, 5.0, 5.0, coat.darkened(0.1))
 			parts.insert(0, ["p", PackedVector2Array([Vector2(-2.0, 4.0), Vector2(2.0, 4.0), Vector2(sway * 3.0 + 6.0, 9.0), Vector2(sway * 3.0 + 4.0, 10.0)]), coat_d])
+
+
+# Multi-part boss: oversized armored body, floating horned crown and two detached claws.
+static func colossus(c: CanvasItem, f: Vector2, t: float, flash: float, winding: bool) -> void:
+	c.draw_set_transform(Vector2(0, -6), 0.0, Vector2(1.7, 1.7))
+	warden(c, f, t, flash, winding, true)
+	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var col := Color("a07c3c") if flash <= 0.0 else Color.WHITE
+	if winding and int(t * 20.0) % 2 == 0:
+		col = Color("c05555")
+	var glow := Color(1.0, 0.6, 0.25, 0.6 + 0.3 * sin(t * 5.0))
+	for sg in [-1.0, 1.0]:
+		var o := Vector2(sg * (38.0 + sin(t * 2.0 + sg) * 3.0), -22.0 + cos(t * 2.5 + sg) * 4.0)
+		var parts: Array = []
+		var sh: Array = []
+		_b(parts, sh, o.x - 6.0, o.y - 5.0, 12.0, 10.0, col)
+		for i in 3:
+			parts.append(["p", PackedVector2Array([Vector2(o.x - 5.0 + i * 4.5, o.y + 5.0), Vector2(o.x - 3.0 + i * 4.5, o.y + 5.0), Vector2(o.x - 4.0 + i * 4.5, o.y + 13.0)]), col.darkened(0.15)])
+		_paint(c, parts)
+		for q in sh:
+			c.draw_rect(q[0], q[1])
+		c.draw_circle(o, 2.0, glow)
+		c.draw_line(Vector2(sg * 20.0, -30.0), o - Vector2(sg * 6.0, 0), Color(glow, 0.25), 1.0)
+	for sg in [-1.0, 1.0]:
+		var hp := PackedVector2Array([Vector2(sg * 9.0, -50.0), Vector2(sg * 17.0, -66.0 + sin(t * 3.0) * 1.5), Vector2(sg * 13.0, -48.0)])
+		c.draw_colored_polygon(hp, Color(OUT))
+		c.draw_colored_polygon(PackedVector2Array([hp[0] + Vector2(-sg, -1), hp[1] + Vector2(-sg * 1.5, 2), hp[2] + Vector2(-sg * 2, -1)]), col.lightened(0.1))

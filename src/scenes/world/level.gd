@@ -425,11 +425,24 @@ func _draw() -> void:
 					draw_rect(r, wall_top)
 				else:
 					draw_rect(r, wall_face)
-					draw_rect(Rect2(r.position.x, r.position.y + 7, TILE, 1), mortar)
-					draw_rect(Rect2(r.position.x + (4 if (x + y) % 2 == 0 else 11), r.position.y, 1, 7), mortar)
-					draw_rect(Rect2(r.position.x + (11 if (x + y) % 2 == 0 else 4), r.position.y + 8, 1, 8), mortar)
-					draw_rect(Rect2(r.position.x, r.position.y, TILE, 2), wall_face.lightened(0.12))
-					draw_rect(Rect2(r.position.x, r.position.y + 12, TILE, 4), Color(0, 0, 0, 0.28))
+					var hh := (x * 928371 + y * 364479) % 5
+					var shade := Color(0, 0, 0, 0.12)
+					draw_rect(Rect2(r.position.x, r.position.y + 5, TILE, 1), mortar)
+					draw_rect(Rect2(r.position.x, r.position.y + 11, TILE, 1), mortar)
+					var o1 := 3 + hh
+					var o2 := 9 - hh
+					draw_rect(Rect2(r.position.x + o1, r.position.y, 1, 5), mortar)
+					draw_rect(Rect2(r.position.x + o2, r.position.y + 6, 1, 5), mortar)
+					draw_rect(Rect2(r.position.x + o1 + 4, r.position.y + 12, 1, 4), mortar)
+					draw_rect(Rect2(r.position.x, r.position.y, TILE, 1), wall_face.lightened(0.18))
+					draw_rect(Rect2(r.position.x, r.position.y + 6, o2, 1), wall_face.lightened(0.1))
+					draw_rect(Rect2(r.position.x + o2 + 1, r.position.y + 12, 8, 1), wall_face.lightened(0.1))
+					for i in 8:
+						var dx := (i * 2 + (i % 2)) + (hh % 2)
+						draw_rect(Rect2(r.position.x + dx, r.position.y + 2 + (i % 4) * 3 + (i % 2), 1, 1), shade)
+					draw_rect(Rect2(r.position.x, r.position.y + 13, TILE, 3), Color(0, 0, 0, 0.26))
+					for i in 8:
+						draw_rect(Rect2(r.position.x + i * 2 + (i + y) % 2, r.position.y + 13 + (i % 2), 1, 1), Color(0, 0, 0, 0.2))
 					for wd in windows:
 						if wd[0] == c:
 							var wc: Color = wd[1]
@@ -451,6 +464,11 @@ func _draw() -> void:
 			draw_rect(Rect2(r.position.x, r.position.y, TILE, 1), Color(0, 0, 0, 0.22))
 			draw_rect(Rect2(r.position.x, r.position.y, 1, TILE), Color(0, 0, 0, 0.22))
 			draw_rect(Rect2(r.position.x + 1, r.position.y + 1, TILE - 1, 1), Color(1, 1, 1, 0.04))
+			draw_rect(Rect2(r.position.x + 8, r.position.y + 8, 1, 8), Color(0, 0, 0, 0.12))
+			draw_rect(Rect2(r.position.x, r.position.y + 8, 16, 1), Color(0, 0, 0, 0.1))
+			for i in 6:
+				var dp := (x * 7 + y * 13 + i * 5) % 16
+				draw_rect(Rect2(r.position.x + dp, r.position.y + (dp * 3 + i * 5) % 16, 1, 1), Color(1, 1, 1, 0.05) if i % 2 == 0 else Color(0, 0, 0, 0.14))
 			if y > 0 and grid[y - 1][x] == "#":
 				draw_rect(Rect2(r.position.x, r.position.y, TILE, 5), Color(0, 0, 0, 0.35))
 				draw_rect(Rect2(r.position.x, r.position.y + 5, TILE, 3), Color(0, 0, 0, 0.15))
