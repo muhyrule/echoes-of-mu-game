@@ -64,16 +64,65 @@ func _txt(pos: Vector2, s: String, size: int, col: Color, center := false) -> vo
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(3, 3))
 
 
+const GOLD := Color("d9b45a")
+const GOLD_D := Color("7a5a24")
+const GOLD_L := Color("fff0b0")
+
+
+func _frame(r: Rect2) -> void:
+	draw_rect(r.grow(1.5), Color(Art.OUT))
+	draw_rect(r, Color(0.05, 0.04, 0.09, 0.82))
+	draw_rect(r.grow(-1.0), Color(0.12, 0.09, 0.2, 0.6), false, 1.0)
+	draw_rect(r, GOLD_D, false, 1.4)
+	draw_rect(r.grow(-1.5), GOLD, false, 0.7)
+	for corner in [r.position, Vector2(r.end.x, r.position.y), Vector2(r.position.x, r.end.y), r.end]:
+		var dx := -1.0 if corner.x > r.get_center().x else 1.0
+		var dy := -1.0 if corner.y > r.get_center().y else 1.0
+		draw_arc(corner + Vector2(dx * 4.0, dy * 4.0), 3.4, 0.0, TAU, 10, GOLD, 0.9)
+		draw_circle(corner + Vector2(dx * 4.0, dy * 4.0), 1.1, GOLD_L)
+		draw_line(corner + Vector2(dx * 7.5, dy * 4.0), corner + Vector2(dx * 16.0, dy * 4.0), GOLD, 0.7)
+
+
+func _orb(pos: Vector2, filled: bool, col: Color) -> void:
+	draw_circle(pos, 5.0, Color(Art.OUT))
+	draw_circle(pos, 4.2, col if filled else Color("2a2234"))
+	if filled:
+		draw_circle(pos + Vector2(0.6, 0.8), 3.0, col.darkened(0.25))
+		draw_circle(pos + Vector2(-0.4, -0.4), 2.4, col.lightened(0.1))
+		draw_circle(pos + Vector2(-1.3, -1.5), 1.0, Color(1, 1, 1, 0.8))
+	else:
+		draw_arc(pos, 3.4, 0.0, TAU, 10, Color("4a3a58"), 0.6)
+
+
 func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(3, 3))
+	var pw := maxf(60.0, GameState.max_hp * 12.0 + 22.0)
+	_frame(Rect2(8, 8, pw, 24))
+	_txt(Vector2(20, 17), "VITALITY", 6, GOLD)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(3, 3))
 	for i in GameState.max_hp:
-		var col := Color("d6455d") if i < GameState.hp else Color("3a2a36")
-		Art.heart(self, Vector2(18 + i * 18, 18), 5.0, col)
-	draw_rect(Rect2(10, 32, 90, 18), Color(0, 0, 0, 0.0))
-	_txt(Vector2(12, 52), "Key x%d" % GameState.keys, 12, Color("e6c15a"))
+		_orb(Vector2(19 + i * 12, 25), i < GameState.hp, Color("c0334f"))
+	var boss: Node = null
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if e.is_boss and e.state != "dormant":
+			boss = e
+	if boss != null:
+		var bx := 640.0 - 128.0
+		_frame(Rect2(bx, 8, 120, 24))
+		_txt(Vector2(bx + 12, 17), "FOE", 6, GOLD)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(3, 3))
+		var segs := 16
+		var fill := int(ceil(float(boss.hp) / float(boss.max_hp) * segs))
+		for i in segs:
+			var r := Rect2(bx + 8 + i * 6.6, 20, 5.6, 8)
+			draw_rect(r.grow(0.8), Color(Art.OUT))
+			draw_rect(r, Color("a8283c") if i < fill else Color("2a2234"))
+			if i < fill:
+				draw_rect(Rect2(r.position, Vector2(r.size.x, 2)), Color("e0687a"))
+	_txt(Vector2(12, 46), "Key x%d" % GameState.keys, 12, Color("e6c15a"))
 	var fname: String = {"wraith": "Wraith", "gargoyle": "Gargoyle"}.get(GameState.form, "Mu")
 	var hint_q := "  [Q]" if GameState.forms.size() > 1 else ""
-	_txt(Vector2(12, 68), "Form: %s%s" % [fname, hint_q], 12, {"wraith": Color("9fd0ff"), "gargoyle": Color("c2cad8")}.get(GameState.form, Color("d9c9ff")))
+	_txt(Vector2(12, 62), "Form: %s%s" % [fname, hint_q], 12, {"wraith": Color("9fd0ff"), "gargoyle": Color("c2cad8")}.get(GameState.form, Color("d9c9ff")))
 	if banner_t > 0.0:
 		var a := minf(1.0, banner_t)
 		_txt(Vector2(320, 120), banner_title, 22, Color(0.95, 0.88, 1.0, a), true)
