@@ -214,6 +214,58 @@ static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving 
 			c.draw_rect(Rect2(sx * 2.0 - 0.5, -13.0 + bob, 1.0, 1.0), Color(1, 1, 1, 0.8 * a))
 			c.draw_rect(Rect2(sx * 1.5 - 1.0, -14.0 + bob, 2.5, 1.0), Color(hair.darkened(0.3), a))
 		c.draw_rect(Rect2(-1.0, -2.0, 2.0, 1.0), Color("b89c52", a))
+	_fine(c, pal, side, up, sx, bob, swing, a, coat, acc, skin, hair, boots)
+
+
+# Half-unit detail pass so figures hold up at 2K: folds, stitching, rivets, rim light, face and hair strands.
+static func _fine(c: CanvasItem, pal: Dictionary, side: bool, up: bool, sx: float, bob: float, swing: float, a: float, coat: Color, acc: Color, skin: Color, hair: Color, boots: Color) -> void:
+	var fold := Color(coat.darkened(0.55), 0.55 * a)
+	var lit := Color(coat.lightened(0.4), 0.5 * a)
+	var thread := Color(acc.lightened(0.2), 0.7 * a)
+	var rim := Color(0.75, 0.82, 1.0, 0.28 * a)
+	var hood: bool = pal.get("hood", false)
+	if up:
+		for i in 4:
+			c.draw_line(Vector2(-3.0 + i * 2.0, -6.0 + bob), Vector2(-3.6 + i * 2.0, 3.0), fold, 0.5)
+		c.draw_rect(Rect2(-4.5, -16.5 + bob, 1.0, 5.0), rim)
+		c.draw_rect(Rect2(-1.0, -7.0 + bob, 2.0, 1.0), thread)
+		return
+	if side:
+		c.draw_line(Vector2(-2.0, -5.0 + bob), Vector2(-3.0, 3.0), fold, 0.5)
+		c.draw_line(Vector2(0.0, -6.0 + bob), Vector2(-0.5, 2.0), fold, 0.5)
+		c.draw_rect(Rect2(-3.5, -1.0, 7.0, 0.5), Color(boots.lightened(0.5), 0.5 * a))
+		c.draw_rect(Rect2(-0.5, -2.5, 1.5, 1.5), Color("8a6a3a", a))
+		c.draw_rect(Rect2(-0.5, -2.5, 1.5, 0.5), Color("d6b25a", a))
+		c.draw_rect(Rect2(-sx * 4.0 - 0.5, -16.0 + bob, 0.5, 8.0), rim)
+		c.draw_rect(Rect2(sx * 2.5, -11.5 + bob, 1.0, 0.5), Color(skin.darkened(0.35), a))
+		for i in 3:
+			c.draw_line(Vector2(-3.0 + i * 1.5, -17.0 + bob), Vector2(-3.6 + i * 1.5, -11.0 + bob), Color(hair.lightened(0.25), 0.55 * a), 0.4)
+		return
+	for i in 3:
+		c.draw_line(Vector2(-3.0 + i * 3.0, -6.0 + bob), Vector2(-3.5 + i * 3.2, -1.0), fold, 0.5)
+	for i in 6:
+		c.draw_rect(Rect2(-3.5 + i * 1.4, 4.0, 0.7, 0.5), thread)
+	c.draw_rect(Rect2(-5.0, -7.0 + bob, 0.5, 5.0), lit)
+	c.draw_rect(Rect2(-5.5, -7.5 + bob, 1.2, 1.2), Color("c8b070", a))
+	c.draw_rect(Rect2(4.3, -7.5 + bob, 1.2, 1.2), Color("c8b070", a))
+	c.draw_rect(Rect2(-1.5, -2.5, 3.0, 2.0), Color("8a6a3a", a))
+	c.draw_rect(Rect2(-1.0, -2.0, 2.0, 1.0), Color("e0c27a", a))
+	c.draw_rect(Rect2(3.0, -1.0, 2.0, 2.5), Color("4a3422", a))
+	c.draw_rect(Rect2(3.0, -1.0, 2.0, 0.5), Color("7a5a3a", a))
+	c.draw_rect(Rect2(-4.0, 3.5, 3.5, 0.5), Color(boots.lightened(0.5), 0.6 * a))
+	c.draw_rect(Rect2(0.5, 3.5, 3.5, 0.5), Color(boots.lightened(0.5), 0.6 * a))
+	c.draw_rect(Rect2(-5.0, -16.5 + bob, 0.5, 6.0), rim)
+	if not hood:
+		c.draw_rect(Rect2(-0.5, -12.0 + bob, 1.0, 1.5), Color(skin.lightened(0.25), a))
+		c.draw_rect(Rect2(-2.0, -9.5 + bob, 4.0, 0.5), Color(skin.darkened(0.45), a))
+		c.draw_rect(Rect2(-4.0, -11.0 + bob, 1.5, 1.0), Color(0.8, 0.3, 0.3, 0.18 * a))
+		c.draw_rect(Rect2(2.5, -11.0 + bob, 1.5, 1.0), Color(0.8, 0.3, 0.3, 0.18 * a))
+		for i in 4:
+			c.draw_line(Vector2(-4.5 + i * 2.8, -18.0 + bob), Vector2(-4.8 + i * 2.8, -14.0 + bob), Color(hair.lightened(0.25), 0.55 * a), 0.4)
+	else:
+		c.draw_rect(Rect2(-4.5, -15.5 + bob, 9.0, 0.5), Color(coat.lightened(0.3), 0.5 * a))
+		c.draw_line(Vector2(-4.0, -16.0 + bob), Vector2(-5.0, -9.0 + bob), fold, 0.5)
+		c.draw_line(Vector2(4.0, -16.0 + bob), Vector2(5.0, -9.0 + bob), fold, 0.5)
 
 
 static func rat(c: CanvasItem, f: Vector2, t: float, flash: float) -> void:

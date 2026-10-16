@@ -40,6 +40,14 @@ func cell_pos(lv: Node, c: Vector2i) -> Vector2:
 	return lv._cell_center(c)
 
 
+func char_pos(lv: Node, ch: String) -> Vector2:
+	for y in lv.h:
+		var x: int = lv.grid[y].find(ch)
+		if x >= 0:
+			return lv._cell_center(Vector2i(x, y))
+	return Vector2.ZERO
+
+
 func _initialize() -> void:
 	GS = root.get_node("GameState")
 	Dlg = root.get_node("Dialogue")
@@ -70,11 +78,11 @@ func run() -> void:
 	check(lv.blocks.size() == 1 and lv.gates.size() == 1, "puzzle objects spawned")
 	GS.max_hp = 999
 	GS.hp = 999
-	lv.player.global_position = cell_pos(lv, Vector2i(5, 20))
+	lv.player.global_position = char_pos(lv, "1")
 	await frames(500)
 	check(GS.flag("seen_vault_enter"), "vault entry trigger fires")
 
-	lv.player.global_position = cell_pos(lv, Vector2i(22, 18))
+	lv.player.global_position = char_pos(lv, "K")
 	await frames(5)
 	check(GS.keys == 1, "key picked up")
 	await frames(300)
@@ -108,11 +116,11 @@ func run() -> void:
 
 	lv.player.cycle_form()
 	check(GS.form == "wraith" and lv.player.collision_mask == 1, "wraith form ignores bars mask")
-	lv.player.global_position = cell_pos(lv, Vector2i(33, 14)) + Vector2(0, 4)
+	lv.player.global_position = char_pos(lv, "B") - Vector2(0, 12)
 	Input.action_press("move_down")
 	await frames(90)
 	Input.action_release("move_down")
-	check(lv.player.global_position.y > 17 * 16, "wraith walks through iron bars")
+	check(lv.player.global_position.y > char_pos(lv, "B").y + 16, "wraith walks through iron bars")
 	lv.player.cycle_form()
 	check(GS.form == "mu", "can shift back to Mu")
 

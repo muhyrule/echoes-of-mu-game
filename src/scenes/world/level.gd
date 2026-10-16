@@ -265,7 +265,7 @@ func _setup_atmosphere() -> void:
 	var tint := CanvasModulate.new()
 	tint.color = {"vault": Color(0.38, 0.4, 0.56), "prague": Color(0.46, 0.46, 0.52), "chapel": Color(0.55, 0.5, 0.62)}[theme]
 	add_child(tint)
-	var lamp := Art.make_light(Color("ffd9a0"), 1.6, 0.9)
+	var lamp := Art.make_light(Color("ffd9a0"), 2.0, 1.0)
 	player.add_child(lamp)
 	var g := Gradient.new()
 	g.offsets = PackedFloat32Array([0.6, 1.0])
@@ -352,9 +352,9 @@ func _setup_fx() -> void:
 	for x in range(3, w - 2, 5):
 		for y in range(0, h - 1):
 			if grid[y][x] == "#" and not _is_solid_char(Vector2i(x, y + 1)):
-				if theme == "chapel":
-					windows.append([Vector2i(x, y), cols[n % 4]])
-				elif n % 2 == 0:
+				if theme == "chapel" or n % 2 == 1:
+					windows.append([Vector2i(x, y), cols[(n + (2 if theme == "prague" else 0)) % 4] if theme != "vault" else Color("4a7be0")])
+				if theme != "chapel" and n % 2 == 0:
 					var tp := _make_prop("torch", Vector2i(x, y))
 					tp.position.y += 2
 				n += 1
@@ -368,10 +368,34 @@ func _draw_overlay() -> void:
 		var o := Vector2(c) * TILE
 		var pulse := 0.8 + 0.2 * sin(gt * 0.7 + c.x)
 		var top := o + Vector2(8, 14)
-		var shaft := PackedVector2Array([top + Vector2(-5, 0), top + Vector2(5, 0), top + Vector2(34, 120), top + Vector2(10, 120)])
-		var cs := PackedColorArray([Color(col.r, col.g, col.b, 0.22 * pulse), Color(col.r, col.g, col.b, 0.22 * pulse), Color(col.r, col.g, col.b, 0.0), Color(col.r, col.g, col.b, 0.0)])
-		overlay.draw_polygon(shaft, cs)
-		overlay.draw_circle(o + Vector2(8, 8), 14.0, Color(col.r, col.g, col.b, 0.05 * pulse))
+		for k in 3:
+			var off := (k - 1) * 7.0
+			var sway := sin(gt * 0.4 + c.x + k) * 3.0
+			var shaft := PackedVector2Array([top + Vector2(off - 2.5, 0), top + Vector2(off + 2.5, 0), top + Vector2(off + 30.0 + sway + k * 6.0, 130), top + Vector2(off + 12.0 + sway + k * 6.0, 130)])
+			var al := (0.2 if k == 1 else 0.1) * pulse
+			overlay.draw_polygon(shaft, PackedColorArray([Color(col, al), Color(col, al), Color(col, 0.0), Color(col, 0.0)]))
+		overlay.draw_circle(o + Vector2(8, 8), 16.0, Color(col, 0.05 * pulse))
+		overlay.draw_set_transform(top + Vector2(24, 128), 0.0, Vector2(1.0, 0.45))
+		overlay.draw_circle(Vector2.ZERO, 26.0, Color(col, 0.05 * pulse))
+		overlay.draw_circle(Vector2.ZERO, 15.0, Color(col, 0.07 * pulse))
+		overlay.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	for e in entities.get_children():
+		if not ("kind" in e):
+			continue
+		var bc := Color.TRANSPARENT
+		var br := 0.0
+		match e.kind:
+			"torch":
+				bc = Color(1.0, 0.55, 0.2)
+				br = 22.0
+			"candle":
+				bc = Color(1.0, 0.8, 0.45)
+				br = 11.0
+		if br > 0.0:
+			var fl := 0.8 + 0.2 * sin(gt * 9.0 + e.position.x)
+			overlay.draw_circle(e.position + Vector2(0, -6), br, Color(bc, 0.05 * fl))
+			overlay.draw_circle(e.position + Vector2(0, -6), br * 0.55, Color(bc, 0.07 * fl))
+			overlay.draw_circle(e.position + Vector2(0, -6), br * 0.2, Color(bc, 0.16 * fl))
 
 
 const FOLLOW_PAL := {"isolde": Art.PAL_ISOLDE, "wren": Art.PAL_WREN, "corvin": Art.PAL_CORVIN}
@@ -405,6 +429,24 @@ func _spawn_followers() -> void:
 	for id in GameState.party:
 		if FOLLOW_PAL.has(id):
 			_spawn_follower(id)
+
+
+func _has_window(c: Vector2i) -> bool:
+	for wd in windows:
+		if wd[0] == c:
+			return true
+	return false
+
+
+func _banner(p: Vector2, vault: bool, prague: bool) -> void:
+	var cl := Color("2c4a7a") if vault else (Color("6a5420") if prague else Color("6a1e30"))
+	draw_rect(Rect2(p + Vector2(3, 1), Vector2(10, 1)), Color("c8a050"))
+	draw_rect(Rect2(p + Vector2(4, 2), Vector2(8, 10)), cl.darkened(0.3))
+	draw_polygon(PackedVector2Array([p + Vector2(4, 12), p + Vector2(12, 12), p + Vector2(8, 15)]), PackedColorArray([cl.darkened(0.3)]))
+	draw_rect(Rect2(p + Vector2(5, 2), Vector2(2, 10)), cl)
+	draw_rect(Rect2(p + Vector2(7.5, 5), Vector2(1, 4)), Color("d8b860"))
+	draw_rect(Rect2(p + Vector2(6, 6.5), Vector2(4, 1)), Color("d8b860"))
+	draw_rect(Rect2(p + Vector2(4, 2), Vector2(8, 1)), Color(0, 0, 0, 0.3))
 
 
 func _draw() -> void:
@@ -452,6 +494,8 @@ func _draw() -> void:
 							draw_rect(Rect2(r.position + Vector2(4, 8), Vector2(8, 1)), Color(Art.OUT))
 							draw_rect(Rect2(r.position + Vector2(5, 9), Vector2(2, 3)), wc.lightened(0.4))
 					draw_rect(Rect2(r.position.x + 8, r.position.y + 8, 1, 1), wall_face.lightened(0.08))
+					if (x * 5 + y * 3) % 7 == 0 and not _has_window(c):
+						_banner(r.position, vault, prague)
 					if prague and (x + y) % 3 == 0:
 						draw_rect(Rect2(r.position.x + 3, r.position.y + 5, 2, 2), Color("b58f4a"))
 						draw_rect(Rect2(r.position.x + 3, r.position.y + 5, 2, 1), Color("e0c27a"))
