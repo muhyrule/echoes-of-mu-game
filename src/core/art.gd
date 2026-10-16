@@ -71,254 +71,131 @@ static func _paint(c: CanvasItem, parts: Array, outline := true) -> void:
 				c.draw_circle(p[1][0], p[1][1], p[2])
 
 
+# SNES-style chunky sprite: big head, bold outline, three-tone pixel shading.
+static func _b(parts: Array, sh: Array, x: float, y: float, w: float, h: float, col: Color, shade := true) -> void:
+	parts.append(["r", Rect2(x, y, w, h), col])
+	if shade and w >= 2.0 and h >= 2.0:
+		sh.append([Rect2(x, y, w, 1.0), Color(col.lightened(0.28), col.a)])
+		sh.append([Rect2(x, y, 1.0, h), Color(col.lightened(0.14), col.a)])
+		sh.append([Rect2(x + w - 1.0, y + 1.0, 1.0, h - 1.0), Color(col.darkened(0.3), col.a)])
+		sh.append([Rect2(x, y + h - 1.0, w, 1.0), Color(col.darkened(0.25), col.a)])
+
+
 static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving := false, alpha := 1.0) -> void:
-	shadow(c)
+	shadow(c, 6.0)
 	var a := alpha
 	var coat := Color(pal.coat, a)
-	var coat_d := coat.darkened(0.35)
-	var coat_l := coat.lightened(0.18)
+	var coat_d := coat.darkened(0.4)
 	var acc := Color(pal.accent, a)
 	var skin := Color(pal.skin, a)
 	var hair := Color(pal.hair, a)
 	var boots := Color(pal.boots, a)
 	var style: String = pal.style
+	var hood: bool = pal.get("hood", false)
 	var side := absf(f.x) > absf(f.y)
 	var up := (not side) and f.y < 0.0
 	var sx := 1.0 if f.x >= 0.0 else -1.0
 	var ph := t * 11.0
-	var swing := sin(ph) * 1.6 if moving else 0.0
-	var bob := -absf(sin(ph)) * 0.8 if moving else 0.0
-	var back: Array = []
-	var mid: Array = []
-	var front: Array = []
-
-	var cape_pts := PackedVector2Array([Vector2(-4.6, -4 + bob), Vector2(4.6, -4 + bob), Vector2(6.0 + swing * 0.3, 6.5), Vector2(-6.0 - swing * 0.3, 6.5)])
-	if side:
-		cape_pts = PackedVector2Array([Vector2(-sx * 3.0, -4 + bob), Vector2(-sx * 4.5, -4 + bob), Vector2(-sx * (7.0 + absf(swing) * 0.5), 6.0), Vector2(-sx * 3.0, 6.0)])
-	var cape := ["p", cape_pts, coat_d]
-	if up:
-		front.append(cape)
-	else:
-		back.append(cape)
+	var swing := roundf(sin(ph) * 1.6) if moving else 0.0
+	var bob := -1.0 if moving and sin(ph * 2.0) > 0.2 else 0.0
+	var parts: Array = []
+	var sh: Array = []
+	var eye := Color(0.06, 0.04, 0.1, a)
+	var head_col := coat.darkened(0.55) if hood else hair
+	var ink := Color(OUT, a)
 
 	if side:
-		mid.append(["r", Rect2(-1.8 + swing * 0.8, 2.5, 3.2, 3.6), boots])
-		mid.append(["r", Rect2(-1.8 - swing * 0.8, 2.5, 3.2, 3.6 - absf(swing) * 0.2), boots.lightened(0.1)])
-	else:
-		mid.append(["r", Rect2(-3.6, 2.5, 3.0, 3.6 - maxf(0.0, swing) * 0.5), boots])
-		mid.append(["r", Rect2(0.6, 2.5, 3.0, 3.6 + minf(0.0, swing) * 0.5), boots.lightened(0.1)])
-
-	var torso := PackedVector2Array([Vector2(-4.2, -5.5 + bob), Vector2(4.2, -5.5 + bob), Vector2(5.0, 3.5), Vector2(-5.0, 3.5)])
-	if side:
-		torso = PackedVector2Array([Vector2(-3.4, -5.5 + bob), Vector2(3.4, -5.5 + bob), Vector2(4.0, 3.5), Vector2(-4.0, 3.5)])
-	mid.append(["p", torso, coat])
-	if not side:
-		var shade := PackedVector2Array([Vector2(1.2, -5.5 + bob), Vector2(4.2, -5.5 + bob), Vector2(5.0, 3.5), Vector2(1.6, 3.5)])
-		mid.append(["p", shade, Color(coat_d, 0.55 * a)])
-	mid.append(["r", Rect2(-4.6, 0.2, 9.2, 1.4), Color("3a2a22", a)])
-	mid.append(["r", Rect2(-0.8, 0.0, 1.6, 1.8), Color("d6b25a", a)])
-
-	if side:
-		mid.append(["r", Rect2(-1.0 - swing * 0.6, -4.2 + bob, 2.4, 6.5), coat_l])
-		mid.append(["c", [Vector2(0.2 - swing * 0.6, 2.4 + bob), 1.3], skin])
-	else:
-		mid.append(["r", Rect2(-6.6, -4.2 + bob, 2.4, 6.2), coat_l])
-		mid.append(["r", Rect2(4.2, -4.2 + bob, 2.4, 6.2), coat_d])
-		mid.append(["c", [Vector2(-5.4, 2.2 + bob + swing * 0.2), 1.3], skin])
-		mid.append(["c", [Vector2(5.4, 2.2 + bob - swing * 0.2), 1.3], skin])
-
-	mid.append(["r", Rect2(-4.8 if not side else -3.8, -6.8 + bob, 9.6 if not side else 7.6, 2.6), acc])
-	if style != "beard":
-		var tail := PackedVector2Array([Vector2(-sx * 3.0, -5.0 + bob), Vector2(-sx * 5.0, -5.0 + bob), Vector2(-sx * (7.5 + swing * 0.3), -1.0 + bob), Vector2(-sx * 5.0, 0.5 + bob)])
-		if not side:
-			tail = PackedVector2Array([Vector2(2.5, -5.0 + bob), Vector2(5.0, -5.0 + bob), Vector2(5.5, 2.0 + bob), Vector2(3.5, 1.0 + bob)])
-		mid.append(["p", tail, acc.darkened(0.2)])
-
-	match pal.item:
-		"hammer":
-			var hx := -sx * 4.4 if side else -4.6
-			mid.append(["r", Rect2(hx - 0.5, 0.0, 1.0, 5.0), Color("6a4a30", a)])
-			mid.append(["r", Rect2(hx - 1.6, -0.6, 3.2, 2.0), Color("9aa0ae", a)])
-		"sheath":
-			var sp := PackedVector2Array([Vector2(-5.5, -6.0 + bob), Vector2(-4.5, -6.5 + bob), Vector2(5.0, 3.0), Vector2(4.0, 3.6)])
-			if up:
-				front.append(["p", sp, Color("8b93a8", a)])
-			else:
-				back.append(["p", sp, Color("8b93a8", a)])
-
-	var hc := Vector2(0, -10.2 + bob)
-	var head: Array = []
-	head.append(["c", [hc, 4.3], skin])
-	if up:
-		head.append(["c", [hc + Vector2(0, 0.2), 4.6], hair])
+		_b(parts, sh, -sx * 5.0 - 1.0, -7.0 + bob, 2.0, 11.0, coat_d)
+		_b(parts, sh, -3.0 + swing, 3.0, 3.0, 3.0, boots)
+		_b(parts, sh, 0.0 - swing, 3.0, 3.0, 3.0, boots.lightened(0.1))
+		_b(parts, sh, -3.5, -1.0, 7.0, 5.0, coat)
+		_b(parts, sh, -3.0, -7.0 + bob, 6.0, 6.0, coat)
+		_b(parts, sh, -3.5, -2.0, 7.0, 1.0, acc, false)
+		_b(parts, sh, -2.0 - sx * swing * 0.5, -6.0 + bob, 3.0, 5.0, coat.lightened(0.1))
+		_b(parts, sh, -1.5 - sx * swing * 0.5, -1.0 + bob, 2.0, 2.0, skin, false)
+		_b(parts, sh, -3.5, -8.0 + bob, 7.0, 2.0, acc)
+		_b(parts, sh, -4.0 + sx * 0.5, -17.0 + bob, 8.0, 9.0, skin)
+		_b(parts, sh, -4.5 - sx * 0.5 - (sx - 1.0) * 0.0, -17.0 + bob, 5.0, 9.0, head_col)
+		_b(parts, sh, -4.5, -18.0 + bob, 9.0, 3.0, head_col)
 		if style == "braid":
-			head.append(["r", Rect2(-1.2, -9.0 + bob, 2.4, 9.0), hair.darkened(0.15)])
-	elif side:
-		head.append(["c", [hc + Vector2(-sx * 1.4, -0.4), 4.0], hair])
-		head.append(["r", Rect2(hc.x - 3.5 if sx > 0 else hc.x - 1.0, hc.y - 4.8, 4.5, 3.0), hair])
-		if style == "braid":
-			head.append(["r", Rect2(-sx * 4.6 - 1.0, -9.0 + bob, 2.2, 8.5), hair.darkened(0.15)])
-		head.append(["r", Rect2(sx * 2.4 - 0.6, -10.8 + bob, 1.2, 1.7), Color(0.08, 0.06, 0.12, a)])
+			_b(parts, sh, -sx * 5.5 - 1.0, -14.0 + bob, 2.0, 11.0, hair.darkened(0.1))
 		if style == "beard":
-			head.append(["r", Rect2(sx * 0.5 - 2.0, -8.0 + bob, 4.0, 4.0), hair])
-	else:
-		var fringe := PackedVector2Array([Vector2(-4.6, -10.4 + bob), Vector2(-4.2, -13.2 + bob), Vector2(0, -14.8 + bob), Vector2(4.2, -13.2 + bob), Vector2(4.6, -10.4 + bob), Vector2(2.4, -11.6 + bob), Vector2(0, -10.8 + bob), Vector2(-2.4, -11.8 + bob)])
-		head.append(["p", fringe, hair])
-		head.append(["r", Rect2(-2.5, -10.4 + bob, 1.2, 1.7), Color(0.08, 0.06, 0.12, a)])
-		head.append(["r", Rect2(1.3, -10.4 + bob, 1.2, 1.7), Color(0.08, 0.06, 0.12, a)])
+			_b(parts, sh, sx * 0.5 - 1.5, -10.0 + bob, 4.0, 3.0, hair)
+	elif up:
+		_b(parts, sh, -4.0 + swing, 3.0, 3.5, 3.0, boots)
+		_b(parts, sh, 0.5 - swing, 3.0, 3.5, 3.0, boots.lightened(0.1))
+		_b(parts, sh, -4.0, -1.0, 8.0, 5.0, coat)
+		_b(parts, sh, -4.0, -7.0 + bob, 8.0, 6.0, coat)
+		_b(parts, sh, -6.0, -6.0 + bob, 2.0, 6.0, coat.lightened(0.1))
+		_b(parts, sh, 4.0, -6.0 + bob, 2.0, 6.0, coat_d)
+		_b(parts, sh, -5.5, -8.0 + bob, 11.0, 2.0, acc)
+		_b(parts, sh, -5.0, -17.0 + bob, 10.0, 9.0, head_col)
+		_b(parts, sh, -5.0, -18.0 + bob, 10.0, 2.0, head_col)
+		_b(parts, sh, -5.5, -7.0 + bob, 11.0, 12.0, coat_d.lightened(0.05))
 		if style == "braid":
-			head.append(["r", Rect2(-6.0, -11.0 + bob, 2.0, 6.0), hair.darkened(0.1)])
-		if style == "beard":
-			head.append(["p", PackedVector2Array([Vector2(-3.8, -8.4 + bob), Vector2(3.8, -8.4 + bob), Vector2(2.0, -3.0 + bob), Vector2(0, -2.0 + bob), Vector2(-2.0, -3.0 + bob)]), hair])
-	if style == "beard" and not up:
-		head.append(["r", Rect2(-3.6, -14.0 + bob, 7.2, 2.2), Color("2e2c3a", a)])
-
-	if up:
-		_paint(c, back + mid + head + front)
+			_b(parts, sh, -1.0, -10.0 + bob, 2.0, 9.0, hair.darkened(0.1))
 	else:
-		_paint(c, back + mid + head)
-	_person_detail(c, pal, side, up, sx, bob, swing, a)
-	_person_grit(c, pal, side, up, sx, bob, swing, a)
+		_b(parts, sh, -5.5, -7.0 + bob, 11.0, 12.0, coat_d)
+		_b(parts, sh, -4.0, 3.0 + maxf(0.0, -swing) * 0.5, 3.5, 3.0, boots)
+		_b(parts, sh, 0.5, 3.0 + maxf(0.0, swing) * 0.5, 3.5, 3.0, boots.lightened(0.1))
+		_b(parts, sh, -5.0, -1.0, 10.0, 5.0, coat)
+		_b(parts, sh, -4.0, -7.0 + bob, 8.0, 6.0, coat)
+		_b(parts, sh, -6.0, -6.0 + bob, 2.0, 6.0, coat.lightened(0.1))
+		_b(parts, sh, 4.0, -6.0 + bob, 2.0, 6.0, coat_d)
+		_b(parts, sh, -6.0, 0.0 + bob + swing * 0.3, 2.0, 2.0, skin, false)
+		_b(parts, sh, 4.0, 0.0 + bob - swing * 0.3, 2.0, 2.0, skin, false)
+		_b(parts, sh, -4.0, -2.0, 8.0, 1.0, acc, false)
+		_b(parts, sh, -5.5, -8.0 + bob, 11.0, 2.0, acc)
+		_b(parts, sh, -1.0, -6.0 + bob, 2.0, 2.0, skin.darkened(0.15), false)
+		_b(parts, sh, -5.0, -17.0 + bob, 10.0, 9.0, skin)
+		_b(parts, sh, -5.5, -18.0 + bob, 11.0, 4.0, head_col)
+		_b(parts, sh, -5.5, -15.0 + bob, 2.0, 6.0, head_col)
+		_b(parts, sh, 3.5, -15.0 + bob, 2.0, 6.0, head_col)
+		if style == "braid":
+			_b(parts, sh, -7.0, -14.0 + bob, 2.0, 11.0, hair.darkened(0.1))
+		if style == "beard":
+			_b(parts, sh, -3.5, -10.0 + bob, 7.0, 4.0, hair)
+		if style == "short" and not hood:
+			for sxp in [-3.5, -0.5, 2.5]:
+				_b(parts, sh, sxp, -20.5 + bob, 2.0, 3.0, hair, false)
 
+	if pal.item == "sheath" and not side:
+		parts.append(["p", PackedVector2Array([Vector2(-6.0, -8.0 + bob), Vector2(-4.5, -9.0 + bob), Vector2(5.5, 3.0), Vector2(4.5, 4.0)]), Color("5a5f70", a)])
+	elif pal.item == "hammer":
+		var hx := -sx * 6.0 if side else -8.0
+		_b(parts, sh, hx, -1.0, 1.0, 8.0, Color("6a4a30", a), false)
+		_b(parts, sh, hx - 1.5, -3.0, 4.0, 3.0, Color("8d93a2", a))
 
-# Medieval grit pass: mail, hood, face shadow, grime, scars, tattered hem.
-static func _person_grit(c: CanvasItem, pal: Dictionary, side: bool, up: bool, sx: float, bob: float, swing: float, a: float) -> void:
-	var coat := Color(pal.coat, a)
-	var dark := Color(OUT, 0.55 * a)
-	var skin := Color(pal.skin, a)
-	var steel := Color("8a8e9a", 0.55 * a)
-	var hc := Vector2(0, -10.2 + bob)
-	# mail hauberk texture across torso and shoulders
-	if pal.get("mail", false) and not up:
-		var w := 3.4 if side else 4.2
-		for row in 6:
-			var y := -4.4 + bob + row * 1.3
-			for col in 5:
-				var x := -w + 0.8 + col * (w * 2.0 / 5.0) + (0.7 if row % 2 == 1 else 0.0)
-				c.draw_arc(Vector2(x, y), 0.55, 0.0, PI, 4, steel, 0.35)
-	# tattered hem with jagged notches
-	for i in 7:
-		var x := -4.6 + i * 1.55
-		c.draw_colored_polygon(PackedVector2Array([Vector2(x, 3.6), Vector2(x + 0.8, 3.6), Vector2(x + 0.4, 2.2 + (i % 3) * 0.5)]), Color(OUT, 0.85 * a))
-	# grime streaks and dried blood
-	for i in 4:
-		c.draw_line(Vector2(-3.6 + i * 2.4, 3.0), Vector2(-3.8 + i * 2.4, 0.6 + (i % 2) * 1.0), Color(0.05, 0.03, 0.02, 0.35 * a), 0.9)
-	c.draw_rect(Rect2(-3.6, 4.8, 7.2, 1.3), Color(0.1, 0.07, 0.04, 0.5 * a))
+	_paint(c, parts)
+	for s in sh:
+		c.draw_rect(s[0], s[1])
+	# face details and gothic touches
 	if not up and not side:
-		c.draw_circle(Vector2(-2.0, -1.0), 0.8, Color(0.3, 0.04, 0.04, 0.5 * a))
-	# leather baldric strap
-	c.draw_line(Vector2(-4.2, -5.0 + bob), Vector2(4.4, 2.6), Color("2a1c12", a), 1.3)
-	c.draw_line(Vector2(-4.2, -5.0 + bob), Vector2(4.4, 2.6), Color(1, 0.8, 0.5, 0.18 * a), 0.4)
-	# hood or bare head
-	if pal.get("hood", false):
-		var hood := coat.darkened(0.45)
-		if up:
-			c.draw_circle(hc + Vector2(0, -0.5), 5.4, Color(OUT, a))
-			c.draw_circle(hc + Vector2(0, -0.5), 4.8, hood)
-			c.draw_line(hc + Vector2(0, -5), hc + Vector2(0, 3), Color(OUT, 0.6 * a), 0.5)
-		elif side:
-			c.draw_circle(hc + Vector2(-sx * 1.0, -0.6), 5.2, Color(OUT, a))
-			c.draw_circle(hc + Vector2(-sx * 1.0, -0.6), 4.6, hood)
-			c.draw_circle(hc + Vector2(sx * 1.6, 0.4), 2.9, Color(OUT, a))
-			c.draw_circle(hc + Vector2(sx * 1.6, 0.4), 2.5, skin.darkened(0.25))
-			c.draw_rect(Rect2(hc.x + sx * 1.8 - 0.5, hc.y - 0.6, 1.0, 0.6), Color(0.02, 0.02, 0.03, a))
-			c.draw_line(hc + Vector2(sx * 1.2, -2.8), hc + Vector2(sx * 3.4, -1.6), hood.lightened(0.1), 1.2)
+		if hood:
+			c.draw_rect(Rect2(-4.0, -15.0 + bob, 8.0, 5.0), Color(0.03, 0.02, 0.06, a))
+			c.draw_rect(Rect2(-3.0, -13.0 + bob, 2.0, 1.0), Color(0.75, 0.9, 1.0, a))
+			c.draw_rect(Rect2(1.0, -13.0 + bob, 2.0, 1.0), Color(0.75, 0.9, 1.0, a))
 		else:
-			var h := PackedVector2Array([hc + Vector2(-5.4, 4.6), hc + Vector2(-5.6, -1.0), hc + Vector2(-4.0, -5.4), hc + Vector2(0, -6.6), hc + Vector2(4.0, -5.4), hc + Vector2(5.6, -1.0), hc + Vector2(5.4, 4.6), hc + Vector2(3.2, 2.0), hc + Vector2(3.2, -1.2), hc + Vector2(1.8, -3.6), hc + Vector2(-1.8, -3.6), hc + Vector2(-3.2, -1.2), hc + Vector2(-3.2, 2.0)])
-			var ho := h.duplicate()
-			ho.append(h[0])
-			c.draw_polyline(ho, Color(OUT, a), 1.4)
-			c.draw_colored_polygon(h, hood)
-			c.draw_line(hc + Vector2(-3.2, -1.2), hc + Vector2(-3.2, 2.0), hood.lightened(0.15), 0.6)
-			c.draw_circle(hc + Vector2(0, 0.6), 3.0, Color(OUT, 0.55 * a))
-			c.draw_rect(Rect2(hc.x - 3.0, hc.y - 1.6, 6.0, 1.6), Color(0.02, 0.02, 0.04, 0.85 * a))
-			c.draw_rect(Rect2(hc.x - 1.9, hc.y - 1.2, 0.9, 0.5), Color(0.8, 0.75, 0.55, 0.9 * a))
-			c.draw_rect(Rect2(hc.x + 1.0, hc.y - 1.2, 0.9, 0.5), Color(0.8, 0.75, 0.55, 0.9 * a))
-	elif not up and not side:
-		# bare head: hollow shadowed eyes, heavy brow, stubble, scar
-		c.draw_rect(Rect2(hc.x - 3.0, hc.y - 1.0, 6.0, 1.6), Color(0.04, 0.02, 0.04, 0.55 * a))
-		c.draw_rect(Rect2(hc.x - 2.4, hc.y - 0.7, 1.0, 0.6), Color(0.02, 0.02, 0.03, a))
-		c.draw_rect(Rect2(hc.x + 1.4, hc.y - 0.7, 1.0, 0.6), Color(0.02, 0.02, 0.03, a))
-		c.draw_rect(Rect2(hc.x - 3.4, hc.y + 1.8, 6.8, 2.0), Color(0.05, 0.04, 0.05, 0.28 * a))
-		c.draw_line(hc + Vector2(2.2, -2.4), hc + Vector2(3.4, 2.8), Color(0.55, 0.3, 0.3, 0.8 * a), 0.5)
-	# gorget and rim-lit pauldron plate
-	if not up and not side and pal.get("mail", false):
-		c.draw_arc(Vector2(0, -5.6 + bob), 3.8, 0.1, PI - 0.1, 10, Color("8a8e9a", 0.8 * a), 1.2)
-		c.draw_arc(Vector2(-5.4, -4.6 + bob), 2.3, PI, TAU, 8, Color("1a1820", 0.7 * a), 1.2)
-		c.draw_arc(Vector2(5.4, -4.6 + bob), 2.3, PI, TAU, 8, Color("1a1820", 0.7 * a), 1.2)
-	# overall desaturating dusk wash for a bleak palette
-	c.draw_rect(Rect2(-7, -15.5 + bob, 14, 22), Color(0.08, 0.07, 0.1, 0.12 * a))
-
-
-
-static func _person_detail(c: CanvasItem, pal: Dictionary, side: bool, up: bool, sx: float, bob: float, swing: float, a: float) -> void:
-	var coat := Color(pal.coat, a)
-	var hl := Color(coat.lightened(0.45), 0.55 * a)
-	var sh := Color(coat.darkened(0.55), 0.6 * a)
-	var acc := Color(pal.accent, a)
-	var hair := Color(pal.hair, a)
-	var skin := Color(pal.skin, a)
-	var boots := Color(pal.boots, a)
-	var ink := Color(OUT, 0.8 * a)
-	var gold := Color("a08a50", a)
-	# boot highlights and soles
-	if side:
-		c.draw_rect(Rect2(-1.8 + swing * 0.8, 5.4, 3.2, 0.7), ink)
-		c.draw_rect(Rect2(sx * 0.6 + swing * 0.8 - 0.8, 3.0, 1.6, 0.5), Color(boots.lightened(0.5), 0.6 * a))
-	else:
-		c.draw_rect(Rect2(-3.6, 5.4, 3.0, 0.7), ink)
-		c.draw_rect(Rect2(0.6, 5.4, 3.0, 0.7), ink)
-		c.draw_rect(Rect2(-3.0, 3.0, 1.2, 0.5), Color(boots.lightened(0.5), 0.6 * a))
-		c.draw_rect(Rect2(1.2, 3.0, 1.2, 0.5), Color(boots.lightened(0.5), 0.6 * a))
-		c.draw_line(Vector2(-3.4, 4.2), Vector2(-0.8, 4.2), ink, 0.35)
-		c.draw_line(Vector2(0.8, 4.2), Vector2(3.4, 4.2), ink, 0.35)
-	# hem trim and coat folds
-	c.draw_line(Vector2(-4.8, 3.1), Vector2(4.8, 3.1), Color(acc, 0.9 * a), 0.7)
-	if not side:
-		c.draw_line(Vector2(-2.4, 1.8), Vector2(-2.8, 3.2), sh, 0.5)
-		c.draw_line(Vector2(2.6, 1.8), Vector2(3.0, 3.2), sh, 0.5)
-		c.draw_line(Vector2(-3.6, -5.0 + bob), Vector2(-4.2, 0.0), hl, 0.6)
-	else:
-		c.draw_line(Vector2(-sx * 2.0, -4.6 + bob), Vector2(-sx * 2.6, 3.0), sh, 0.5)
-		c.draw_line(Vector2(sx * 2.2, -4.6 + bob), Vector2(sx * 2.8, 0.0), hl, 0.6)
-	if not up and not side:
-		# buttons, collar points, stitching
-		for i in 3:
-			c.draw_rect(Rect2(-0.3, -4.6 + bob + i * 1.7, 0.7, 0.7), Color("5a5448", a))
-		c.draw_colored_polygon(PackedVector2Array([Vector2(-1.4, -5.6 + bob), Vector2(0, -3.6 + bob), Vector2(-3.0, -4.6 + bob)]), Color(acc.lightened(0.2), a))
-		c.draw_colored_polygon(PackedVector2Array([Vector2(1.4, -5.6 + bob), Vector2(0, -3.6 + bob), Vector2(3.0, -4.6 + bob)]), Color(acc.lightened(0.2), a))
-		# eyebrows, nose, mouth, cheeks
-		c.draw_line(Vector2(-2.7, -11.0 + bob), Vector2(-1.0, -10.8 + bob), Color(hair.darkened(0.3), a), 0.5)
-		c.draw_line(Vector2(1.0, -10.8 + bob), Vector2(2.7, -11.0 + bob), Color(hair.darkened(0.3), a), 0.5)
-		c.draw_rect(Rect2(-0.25, -9.2 + bob, 0.5, 0.6), Color(skin.darkened(0.2), a))
-		c.draw_line(Vector2(-0.8, -7.9 + bob), Vector2(0.8, -7.9 + bob), Color(skin.darkened(0.45), a), 0.4)
-		# hair strands and sheen
-		c.draw_line(Vector2(-1.5, -14.4 + bob), Vector2(-2.6, -11.8 + bob), Color(hair.lightened(0.4), 0.8 * a), 0.4)
-		c.draw_line(Vector2(0.6, -14.6 + bob), Vector2(0.9, -11.6 + bob), Color(hair.lightened(0.4), 0.8 * a), 0.4)
-		c.draw_line(Vector2(2.4, -13.8 + bob), Vector2(3.4, -11.6 + bob), Color(hair.darkened(0.3), 0.8 * a), 0.4)
-		# shoulder pauldrons with rivets, cuffs
-		c.draw_arc(Vector2(-5.4, -4.4 + bob), 2.0, PI, TAU, 8, Color(acc.lightened(0.15), a), 1.0)
-		c.draw_arc(Vector2(5.4, -4.4 + bob), 2.0, PI, TAU, 8, Color(acc.darkened(0.1), a), 1.0)
-		c.draw_rect(Rect2(-6.6, 1.0 + bob, 2.4, 0.7), Color(acc, a))
-		c.draw_rect(Rect2(4.2, 1.0 + bob, 2.4, 0.7), Color(acc, a))
-		# belt pouch and buckle highlight
-		c.draw_rect(Rect2(2.2, 0.6, 2.0, 2.2), Color("5a3f2a", a))
-		c.draw_rect(Rect2(2.2, 0.6, 2.0, 0.5), Color("8a6a4a", a))
-		c.draw_rect(Rect2(-0.4, 0.3, 0.8, 0.8), Color("9a8a60", a))
+			c.draw_rect(Rect2(-3.5, -13.0 + bob, 1.0, 2.0), eye)
+			c.draw_rect(Rect2(2.5, -13.0 + bob, 1.0, 2.0), eye)
+			c.draw_rect(Rect2(-3.5, -13.0 + bob, 1.0, 1.0), Color(1, 1, 1, 0.8 * a))
+			c.draw_rect(Rect2(2.5, -13.0 + bob, 1.0, 1.0), Color(1, 1, 1, 0.8 * a))
+			c.draw_rect(Rect2(-4.0, -14.0 + bob, 3.0, 1.0), Color(hair.darkened(0.3), a))
+			c.draw_rect(Rect2(1.0, -14.0 + bob, 3.0, 1.0), Color(hair.darkened(0.3), a))
+			if style != "beard":
+				c.draw_rect(Rect2(-1.0, -10.0 + bob, 2.0, 1.0), Color(skin.darkened(0.4), a))
+		c.draw_rect(Rect2(-0.5, -4.0 + bob, 1.0, 5.0), Color(coat.darkened(0.5), 0.8 * a))
+		c.draw_rect(Rect2(-1.0, -2.0, 2.0, 1.0), Color("b89c52", a))
+		c.draw_rect(Rect2(-4.0, 4.0, 8.0, 1.0), Color(ink, 0.35 * a))
 	elif side:
-		c.draw_rect(Rect2(sx * 2.4 - 0.5, -9.2 + bob, 0.9, 0.5), Color(skin.darkened(0.25), a))
-		c.draw_line(Vector2(sx * 1.4, -8.0 + bob), Vector2(sx * 2.8, -8.0 + bob), Color(skin.darkened(0.45), a), 0.4)
-		c.draw_line(Vector2(sx * 0.8, -11.5 + bob), Vector2(sx * 2.8, -11.3 + bob), Color(hair.darkened(0.3), a), 0.4)
-		c.draw_line(Vector2(-sx * 2.0, -13.4 + bob), Vector2(-sx * 3.6, -9.4 + bob), Color(hair.lightened(0.4), 0.8 * a), 0.4)
-		c.draw_circle(Vector2(-sx * 0.6, -9.6 + bob), 0.7, Color(skin.darkened(0.2), a))
-		c.draw_rect(Rect2(-0.4, 0.3, 0.8, 0.8), Color("9a8a60", a))
-		c.draw_rect(Rect2(-sx * 1.0, 0.5, 2.0, 2.0), Color("5a3f2a", a))
-	else:
-		c.draw_line(Vector2(-2.0, -13.6 + bob), Vector2(-2.4, -8.6 + bob), Color(hair.lightened(0.35), 0.7 * a), 0.4)
-		c.draw_line(Vector2(0.4, -14.0 + bob), Vector2(0.6, -8.2 + bob), Color(hair.darkened(0.3), 0.7 * a), 0.4)
-		c.draw_line(Vector2(2.4, -13.4 + bob), Vector2(2.8, -8.8 + bob), Color(hair.lightened(0.35), 0.7 * a), 0.4)
-		c.draw_line(Vector2(-3.0, -4.6 + bob), Vector2(3.0, -4.6 + bob), Color(acc.lightened(0.2), a), 0.6)
-		c.draw_line(Vector2(0, -3.8 + bob), Vector2(0, 2.0), sh, 0.5)
+		if hood:
+			c.draw_rect(Rect2(sx * 1.0 - 1.5, -14.0 + bob, 3.5, 4.0), Color(0.03, 0.02, 0.06, a))
+			c.draw_rect(Rect2(sx * 2.0 - 0.5, -13.0 + bob, 1.0, 1.0), Color(0.75, 0.9, 1.0, a))
+		else:
+			c.draw_rect(Rect2(sx * 2.0 - 0.5, -13.0 + bob, 1.0, 2.0), eye)
+			c.draw_rect(Rect2(sx * 2.0 - 0.5, -13.0 + bob, 1.0, 1.0), Color(1, 1, 1, 0.8 * a))
+			c.draw_rect(Rect2(sx * 1.5 - 1.0, -14.0 + bob, 2.5, 1.0), Color(hair.darkened(0.3), a))
+		c.draw_rect(Rect2(-1.0, -2.0, 2.0, 1.0), Color("b89c52", a))
 
 
 static func rat(c: CanvasItem, f: Vector2, t: float, flash: float) -> void:
