@@ -27,3 +27,8 @@ Prague (Ossuary Clock) → Transylvania → Paris Catacombs → Whitby Abbey →
 - **Party**: Wren (Prague) and Corvin (cell chamber) join; Isolde leaves after the Revenant boss.
 - **Chapter II – Prague, The Ossuary Clock**: gear orrery, bars/key puzzle, cracked-wall passage, Revenant boss.
 - **Scrolling chapel**: 64x42 hub with nave, transepts, vestry and chapter house; portal leads to Edinburgh, then Prague.
+
+## Title screen & music
+- Premise-themed title screen: lightning sky, echo rings, Edinburgh crag, Prague spires, a cathedral rose window, and Mu and Isolde on a ledge.
+- Music is synthesized at runtime from simplified arrangements of public-domain classical themes (not exact transcriptions): Bach (Toccata), Beethoven (Moonlight, Fifth), Chopin (Funeral March), Vivaldi (Winter), Brahms (Hungarian Dance No. 5).
+- The window override is 3840x2160 (see `project.godot`); lower it on smaller displays.

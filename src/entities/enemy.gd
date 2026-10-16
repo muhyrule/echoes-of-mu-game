@@ -101,7 +101,7 @@ func _warden_ai(_delta: float, to: Vector2, dist: float) -> Vector2:
 				state = "chase"
 				st = 0.0
 				Audio.sfx("roar")
-				Audio.play_music("boss")
+				Audio.play_music("boss2" if kind == "revenant" else "boss")
 				level.boss_awake()
 			return Vector2.ZERO
 		"chase":
