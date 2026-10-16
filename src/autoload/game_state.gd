@@ -37,6 +37,8 @@ func _setup_input() -> void:
 		"interact": [KEY_E, KEY_ENTER],
 		"form": [KEY_Q, KEY_K],
 		"swap": [KEY_C, KEY_L],
+		"dodge": [KEY_SHIFT, KEY_U],
+		"guard": [KEY_V, KEY_O],
 		"reset_puzzle": [KEY_R],
 		"pause": [KEY_ESCAPE],
 		"status": [KEY_TAB, KEY_I],

@@ -475,15 +475,34 @@ static func kelpie(c: CanvasItem, t: float, ph: int, flash: float, winding: bool
 	# overlapping fish-scale mail across barrel and haunch
 	_scales(c, Vector2(-44, -50 - rear * 0.2), 5, 4, 8.0, Color(body_l, 0.55))
 	_scales(c, Vector2(-8, -64 - rear * 0.4), 4, 4, 8.0, Color(body_l, 0.5))
-	# barnacle clusters and studded harness straps
+	# barnacle clusters
 	_barnacles(c, Vector2(20, -46), 6)
 	_barnacles(c, Vector2(-34, -30), 5)
 	_barnacles(c, Vector2(30, -96 - rear * 0.7), 4)
+	# sea-life clinging to the flank: starfish, a nautilus shell and swaying anemone fronds
 	for k in 2:
-		var a := Vector2(-4 + k * 18, -80 - k * 4 - rear * 0.5)
-		c.draw_line(a, a + Vector2(8, 46), OUT, 5.0)
-		c.draw_line(a, a + Vector2(8, 46), Color("4a3828"), 3.0)
-		_rivets(c, a + Vector2(1, 6), a + Vector2(7, 42), 5, gold)
+		var sc := Vector2(2 + k * 20, -78 - k * 8 - rear * 0.5)
+		var star := PackedVector2Array()
+		for q in 10:
+			star.append(sc + Vector2.from_angle(-PI / 2 + TAU * q / 10.0 + k) * (6.0 if q % 2 == 0 else 2.6))
+		c.draw_colored_polygon(star, OUT)
+		var star2 := PackedVector2Array()
+		for q in 10:
+			star2.append(sc + Vector2.from_angle(-PI / 2 + TAU * q / 10.0 + k) * (4.8 if q % 2 == 0 else 2.0))
+		c.draw_colored_polygon(star2, Color("d8806a") if k == 0 else Color("e8a07a"))
+		c.draw_circle(sc, 1.0, Color("fff0d0"))
+	var nc := Vector2(14, -52 - rear * 0.3)
+	c.draw_circle(nc, 9.0, OUT)
+	c.draw_circle(nc, 7.6, Color("e8d8b8"))
+	for q in 3:
+		c.draw_arc(nc + Vector2(1, 0), 6.0 - q * 1.8, q * 0.6, q * 0.6 + 4.6, 14, Color("b8845a"), 1.0)
+	c.draw_circle(nc + Vector2(2, 0), 1.0, Color("8a5a3a"))
+	for k in 4:
+		var ab := Vector2(-20 + k * 4, -34 - rear * 0.2)
+		var at := ab + Vector2(sin(t * 2.0 + k) * 3.0, -9.0 - k % 2 * 3.0)
+		c.draw_line(ab, at, OUT, 2.4)
+		c.draw_line(ab, at, Color("e07a9a"), 1.2)
+		c.draw_circle(at, 1.2, Color("ffc0d0"))
 	# gill slits, frilled fins and whisker tendrils on the head
 	for k in 3:
 		c.draw_line(Vector2(hx - 10 + k * 3, hy + 8), Vector2(hx - 13 + k * 3, hy + 17), Color(OUT, 0.8), 1.2)

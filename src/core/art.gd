@@ -89,10 +89,15 @@ static func _b(parts: Array, sh: Array, x: float, y: float, w: float, h: float, 
 					sh.append([Rect2(x + 1.0 + i, y + h - 2.0, 1.0, 1.0), dk])
 
 
-static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving := false, alpha := 1.0, atk := 0.0, yoff := 0.0) -> void:
-	shadow(c, 6.0)
+static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving := false, alpha := 1.0, atk := 0.0, yoff := 0.0, roll := 0.0) -> void:
+	shadow(c, 6.0 * (0.8 if roll != 0.0 else 1.0))
 	var lunge := f * (1.5 if atk > 0.0 else 0.0)
-	c.draw_set_transform(Vector2(0, yoff) + lunge, 0.0, Vector2.ONE)
+	if roll != 0.0:
+		# tumble about the body centre, tucked in
+		var ctr := Vector2(0, -6)
+		c.draw_set_transform(ctr - ctr.rotated(roll) * 0.8 + Vector2(0, yoff + 2.0), roll, Vector2(0.8, 0.8))
+	else:
+		c.draw_set_transform(Vector2(0, yoff) + lunge, 0.0, Vector2.ONE)
 	var a := alpha
 	var coat := Color(pal.coat, a)
 	var coat_d := coat.darkened(0.4)

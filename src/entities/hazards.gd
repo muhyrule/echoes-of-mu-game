@@ -9,6 +9,7 @@ var time := 0.0
 
 func _ready() -> void:
 	top_level = true
+	add_to_group("hazards")
 	z_index = 3
 
 
@@ -26,6 +27,19 @@ func add(h: Dictionary) -> Dictionary:
 
 func clear() -> void:
 	items.clear()
+
+
+func cancel_near(pos: Vector2, r: float) -> void:
+	for h in items.duplicate():
+		if h.kind == "shot" and h.pos.distance_to(pos) < r:
+			level.spark(h.pos, h.col, 6)
+			items.erase(h)
+		elif h.kind == "ring" and absf(pos.distance_to(h.pos) - h.speed * h.t) < r * 0.6:
+			h.hit = true
+			h.speed = 0.0
+			h.life = 0.0
+			h.warn = 0.0
+			h.t = 99.0
 
 
 func count_kind(k: String) -> int:

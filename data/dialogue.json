@@ -226,11 +226,11 @@
  "portal_done2": [
   {
    "who": "",
-   "text": "The portal hums, but the next road is not yet lit. Chapter III will begin where the Hollow Keep waits."
+   "text": "The portal hums, and along the chapel's north wall five Echo Gates glimmer — each a door into the place where a legend still walks."
   },
   {
    "who": "",
-   "text": "— To be continued in Chapter III: Transylvania, the Hollow Keep —"
+   "text": "Chapter III's roads are not yet lit, but the Echoes can be faced now. Walk the northern gates in order."
   }
  ],
  "isolde_gone": [
@@ -479,6 +479,193 @@
    "who": "",
    "text": "Isolde leaves the party. The second Silent Bell is mended, and a portal of pale light opens.",
    "set": "prague_done"
+  }
+ ],
+ "echo_gate_locked": [
+  {
+   "who": "",
+   "text": "The Echo Gate is sealed. It answers only to a Bell already mended — the last giant must fall first."
+  }
+ ],
+ "strigoi_intro": [
+  {
+   "who": "Corvin",
+   "text": "Poenari. They say the prince's wife leapt from these walls rather than be taken. The stones remember more than that."
+  },
+  {
+   "who": "Wren",
+   "text": "Those poles... they're all around the hall. Hundreds of them."
+  },
+  {
+   "who": "",
+   "text": "A shape unfolds from the throne — tall, gaunt, wings of black velvet. The Strigoi of Poenari lifts its crowned head."
+  },
+  {
+   "who": "Strigoi",
+   "text": "Another warm pulse in my hall. Come. Be a stake, be a story, be nothing."
+  }
+ ],
+ "strigoi_defeated": [
+  {
+   "who": "",
+   "text": "The Strigoi shudders. Its iron crown rings on the flagstones and the stakes crumble to ash."
+  },
+  {
+   "who": "Mu",
+   "text": "It was only hunger, wearing a lord's coat."
+  },
+  {
+   "who": "Corvin",
+   "text": "Hunger's the oldest tyrant, lad. Walk on — the road to Paris is open."
+  },
+  {
+   "who": "",
+   "text": "The Echo Gate of Poenari goes quiet. Another glimmers in the chapel.",
+   "set": "strigoi_done"
+  }
+ ],
+ "ankou_intro": [
+  {
+   "who": "Wren",
+   "text": "Bones in the walls, bones in the floor. And someone is counting them."
+  },
+  {
+   "who": "",
+   "text": "A cart creaks without a horse. The Ankou, reaper of the Breton dead, turns its hatted skull."
+  },
+  {
+   "who": "Ankou",
+   "text": "The last to die in the parish drives my cart for a year. Who will take the reins from me, I wonder?"
+  },
+  {
+   "who": "Mu",
+   "text": "Not us."
+  }
+ ],
+ "ankou_defeated": [
+  {
+   "who": "",
+   "text": "The scythe clatters to the floor. The cart's wheel stops, and a thousand skulls fall quiet at once."
+  },
+  {
+   "who": "Corvin",
+   "text": "Death isn't beaten, lad — only reminded to wait."
+  },
+  {
+   "who": "Wren",
+   "text": "Then let it wait a long while."
+  },
+  {
+   "who": "",
+   "text": "The Ossuary's Echo Gate dims. A gale rises from the north-east.",
+   "set": "ankou_done"
+  }
+ ],
+ "barghest_intro": [
+  {
+   "who": "Corvin",
+   "text": "Whitby. The Black Dog of the cliffs — a Barghest. Sailors swore it presaged a drowning."
+  },
+  {
+   "who": "Mu",
+   "text": "Eyes like coals. And it's fast."
+  },
+  {
+   "who": "",
+   "text": "Thunder breaks over the ruined abbey. The Barghest rises from the shadows between the arches, hackles smoking with pale fire."
+  }
+ ],
+ "barghest_defeated": [
+  {
+   "who": "",
+   "text": "The Black Dog dissolves into storm-mist, its howl rolling out over the sea."
+  },
+  {
+   "who": "Wren",
+   "text": "It sounded almost relieved."
+  },
+  {
+   "who": "Corvin",
+   "text": "Wandering omens often are. Come — Venice waits, and she is not as kind as she looks."
+  },
+  {
+   "who": "",
+   "text": "The Whitby gate falls silent.",
+   "set": "barghest_done"
+  }
+ ],
+ "plague_intro": [
+  {
+   "who": "Corvin",
+   "text": "Il Medico della Peste. The doctors of 1630 wore that mask to keep the miasma out. Venice shut her sick up on islands like this."
+  },
+  {
+   "who": "Wren",
+   "text": "It smells of herbs and... something worse."
+  },
+  {
+   "who": "",
+   "text": "A beaked giant straightens among the cots, censer swinging. A raven on its shoulder watches you."
+  },
+  {
+   "who": "Medico",
+   "text": "Fever is a debt, children. I come to collect."
+  }
+ ],
+ "plague_defeated": [
+  {
+   "who": "",
+   "text": "The Doctor's censer falls, and green smoke thins over the lagoon. The mask cracks — behind it is nothing but herbs and dust."
+  },
+  {
+   "who": "Mu",
+   "text": "All that fear, and an empty mask."
+  },
+  {
+   "who": "Corvin",
+   "text": "Fear fills any mask you hand it, lad. One more road — Rome."
+  },
+  {
+   "who": "",
+   "text": "The Lazzaretto gate sleeps.",
+   "set": "plague_done"
+  }
+ ],
+ "cacus_intro": [
+  {
+   "who": "Corvin",
+   "text": "The Aventine. Cacus the fire-breather stole the cattle of Hercules and hid them in his cave, dragging them backward by the tails."
+  },
+  {
+   "who": "Wren",
+   "text": "Skulls hang on the cave mouth. Of course they do."
+  },
+  {
+   "who": "",
+   "text": "The mountain breathes. A hulking, soot-black giant rises from the smoke, bull horns lashed to his shoulders."
+  },
+  {
+   "who": "Cacus",
+   "text": "Cattle! Cattle are mine. And so, now, are you."
+  }
+ ],
+ "cacus_defeated": [
+  {
+   "who": "",
+   "text": "Cacus crashes down in a cloud of smoke, the cave shuddering around him. The stolen herd lows somewhere far away."
+  },
+  {
+   "who": "Mu",
+   "text": "Five echoes silenced. Five stories finished."
+  },
+  {
+   "who": "Corvin",
+   "text": "Stories don't finish, lad. They wait for the next teller. Tonight, we'll be it."
+  },
+  {
+   "who": "",
+   "text": "The last Echo Gate dims. The road home — and the road onward — is quiet.",
+   "set": "cacus_done"
   }
  ]
 }
