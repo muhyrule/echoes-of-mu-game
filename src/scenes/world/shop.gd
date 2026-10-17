@@ -7,7 +7,7 @@ signal closed
 
 const GOLD := Color("d9b45a")
 const GOLD_D := Color("7a5a24")
-const DIM := Color("8a8498")
+const DIM := Color("987a7d")
 const GOOD := Color("8adf8a")
 const BAD := Color("e07a7a")
 
@@ -174,7 +174,7 @@ func _draw() -> void:
 	if kind in ["weapons", "armor"]:
 		for i in heroes.size():
 			var r := Rect2(60 + i * 96, 54, 90, 16)
-			draw_rect(r, Color("3a2a52") if i == tab else Color("1a1426"))
+			draw_rect(r, Color("323b52") if i == tab else Color("1a1426"))
 			draw_rect(r, GOLD if i == tab else GOLD_D, false, 0.8)
 			var cls: String = Gear.WEAPON_CLASS[heroes[i]] if kind == "weapons" else Gear.ARMOR_CLASS[heroes[i]]
 			_txt(Vector2(66 + i * 96, 66), "%s: %s" % [Gear.HERO_NAMES[heroes[i]], cls], 8, Color.WHITE if i == tab else DIM)
@@ -185,7 +185,7 @@ func _draw() -> void:
 		var y := top + i * 24.0
 		var r2 := Rect2(60, y, 270, 21)
 		if i == sel:
-			draw_rect(r2, Color("2e2248"))
+			draw_rect(r2, Color("2a3248"))
 			draw_rect(r2, GOLD, false, 0.8)
 			_txt(Vector2(64, y + 14), ">", 10, GOLD)
 		var col := Color.WHITE

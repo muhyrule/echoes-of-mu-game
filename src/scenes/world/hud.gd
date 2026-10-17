@@ -87,13 +87,13 @@ func _frame(r: Rect2) -> void:
 
 func _orb(pos: Vector2, filled: bool, col: Color) -> void:
 	draw_circle(pos, 5.0, Color(Art.OUT))
-	draw_circle(pos, 4.2, col if filled else Color("2a2234"))
+	draw_circle(pos, 4.2, col if filled else Color("262a34"))
 	if filled:
 		draw_circle(pos + Vector2(0.6, 0.8), 3.0, col.darkened(0.25))
 		draw_circle(pos + Vector2(-0.4, -0.4), 2.4, col.lightened(0.1))
 		draw_circle(pos + Vector2(-1.3, -1.5), 1.0, Color(1, 1, 1, 0.8))
 	else:
-		draw_arc(pos, 3.4, 0.0, TAU, 10, Color("4a3a58"), 0.6)
+		draw_arc(pos, 3.4, 0.0, TAU, 10, Color("404758"), 0.6)
 
 
 func _draw() -> void:
@@ -121,16 +121,16 @@ func _draw() -> void:
 		for i in segs:
 			var r := Rect2(bx + 8 + i * 6.6, 20, 5.6, 8)
 			draw_rect(r.grow(0.8), Color(Art.OUT))
-			draw_rect(r, Color("a8283c") if i < fill else Color("2a2234"))
+			draw_rect(r, Color("a8283c") if i < fill else Color("262a34"))
 			if i < fill:
 				draw_rect(Rect2(r.position, Vector2(r.size.x, 2)), Color("e0687a"))
 	_txt(Vector2(12, 46), "Key x%d" % GameState.keys, 12, Color("e6c15a"))
 	var lead: String = GameState.lead
-	var lead_cols := {"mu": Color("d9c9ff"), "isolde": Color("ffd890"), "wren": Color("b8a0e8"), "corvin": Color("e0b860")}
+	var lead_cols := {"mu": Color("ffb7bd"), "isolde": Color("ffd890"), "wren": Color("e88d95"), "corvin": Color("e0b860")}
 	if GameState.party.is_empty():
 		var fname: String = {"wraith": "Wraith", "gargoyle": "Gargoyle"}.get(GameState.form, "Mu")
 		var hint_q := "  [Q]" if GameState.forms.size() > 1 else ""
-		_txt(Vector2(12, 62), "Form: %s%s" % [fname, hint_q], 12, {"wraith": Color("9fd0ff"), "gargoyle": Color("c2cad8")}.get(GameState.form, Color("d9c9ff")))
+		_txt(Vector2(12, 62), "Form: %s%s" % [fname, hint_q], 12, {"wraith": Color("9fd0ff"), "gargoyle": Color("c2cad8")}.get(GameState.form, Color("ffb7bd")))
 	else:
 		var fm := ""
 		if lead == "mu":
@@ -139,7 +139,7 @@ func _draw() -> void:
 	_txt(Vector2(12, 78), "Gold %d" % GameState.gold, 12, Color("f0d070"))
 	var pl: Node2D = level.player
 	var gname: String = pl.GUARD_NAME.get(lead, "Guard")
-	_txt(Vector2(12, 108), "[Shift] Roll %s   [V] %s" % ["" if pl.roll_cd <= 0.0 else "%.1fs" % pl.roll_cd, gname], 9, Color("b8b0d0"))
+	_txt(Vector2(12, 108), "[Shift] Roll %s   [V] %s" % ["" if pl.roll_cd <= 0.0 else "%.1fs" % pl.roll_cd, gname], 9, Color("d0a2a7"))
 	var sk_y := 128
 	for fid in ["mu", "isolde", "wren", "corvin"]:
 		var fo: Node2D = null
@@ -152,7 +152,7 @@ func _draw() -> void:
 			var rdy: bool = fo.skill_cd <= 0.0
 			var mark := "> " if fid == lead else "  "
 			var lab := "%s%s [%s] %s %s" % [mark, fid.capitalize(), OS.get_keycode_string(kk), fo.KIT[fid].skill, "READY" if rdy else "%ds" % ceili(fo.skill_cd)]
-			_txt(Vector2(12, sk_y), lab, 9, (Color("f0d070") if rdy else Color("7a748c")) if fid != lead else (Color("fff0a0") if rdy else Color("a89cc8")))
+			_txt(Vector2(12, sk_y), lab, 9, (Color("f0d070") if rdy else Color("8c6b6e")) if fid != lead else (Color("fff0a0") if rdy else Color("c88e93")))
 			sk_y += 16
 	if level.weather != null:
 		_txt(Vector2(12, sk_y), "Weather: %s" % level.weather.label(), 9, Color("a8c0e0"))
@@ -160,7 +160,7 @@ func _draw() -> void:
 	if banner_t > 0.0:
 		var a := minf(1.0, banner_t)
 		_txt(Vector2(320, 120), banner_title, 22, Color(0.95, 0.88, 1.0, a), true)
-		_txt(Vector2(320, 144), banner_sub, 13, Color(0.75, 0.7, 0.85, a), true)
+		_txt(Vector2(320, 144), banner_sub, 13, Color(0.85, 0.64, 0.66, a), true)
 	if hint != "" and not Dialogue.blocking():
 		_txt(Vector2(320, 238), hint, 13, Color(1, 0.95, 0.7), true)
 	if notice_t > 0.0:
@@ -168,7 +168,7 @@ func _draw() -> void:
 	if fade > 0.0:
 		draw_rect(Rect2(Vector2.ZERO, size / 3.0), Color(0, 0, 0, fade))
 		if death_text:
-			_txt(Vector2(320, 180), "The echoes fade...", 22, Color(0.8, 0.7, 0.9, fade), true)
+			_txt(Vector2(320, 180), "The echoes fade...", 22, Color(0.90, 0.64, 0.66, fade), true)
 	if paused:
 		draw_rect(Rect2(Vector2.ZERO, size / 3.0), Color(0, 0, 0, 0.6))
 		_txt(Vector2(320, 150), "PAUSED", 24, Color.WHITE, true)

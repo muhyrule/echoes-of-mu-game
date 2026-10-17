@@ -134,7 +134,7 @@ func _draw() -> void:
 				draw_rect(Rect2(-1, 0, 0.8, 1.5), Color("c8a050"))
 				draw_rect(Rect2(1, 0, 0.8, 1.5), Color("c8a050"))
 		"rat":
-			var rc := Color("4a4048")
+			var rc := Color("4a3b3d")
 			draw_rect(Rect2(-3, -3, 6, 3), O)
 			draw_rect(Rect2(-2.4, -2.4, 4.8, 1.8), rc)
 			draw_rect(Rect2(2.6, -3, 2.4, 2.2), rc)

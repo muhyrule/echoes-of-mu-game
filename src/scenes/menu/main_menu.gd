@@ -139,15 +139,15 @@ func _draw() -> void:
 	for r in 6:
 		draw_circle(moon, 70.0 - r * 8.0, Color(0.6, 0.55, 0.95, 0.04))
 	draw_circle(moon, 32.0, Color("e8e2f5"))
-	draw_circle(moon + Vector2(-8, 6), 5.0, Color("cfc8e6"))
-	draw_circle(moon + Vector2(9, -7), 3.5, Color("cfc8e6"))
+	draw_circle(moon + Vector2(-8, 6), 5.0, Color("e6babe"))
+	draw_circle(moon + Vector2(9, -7), 3.5, Color("e6babe"))
 	for i in 4:
 		var ph := fmod(t * 0.18 + i * 0.25, 1.0)
-		draw_arc(Vector2(320, 120), 20.0 + ph * 340.0, 0.0, TAU, 96, Color(0.7, 0.6, 1.0, 0.16 * (1.0 - ph) * intro), 1.2)
+		draw_arc(Vector2(320, 120), 20.0 + ph * 340.0, 0.0, TAU, 96, Color(1.00, 0.51, 0.55, 0.16 * (1.0 - ph) * intro), 1.2)
 	for cx in [90.0, 300.0, 520.0]:
 		var drift := fmod(t * 4.0 + cx, 760.0) - 60.0
-		draw_rect(Rect2(drift, 40 + fmod(cx, 90.0), 140, 10), Color(0.25, 0.2, 0.4, 0.5))
-		draw_rect(Rect2(drift + 25, 34 + fmod(cx, 90.0), 90, 8), Color(0.25, 0.2, 0.4, 0.45))
+		draw_rect(Rect2(drift, 40 + fmod(cx, 90.0), 140, 10), Color(0.24, 0.28, 0.40, 0.5))
+		draw_rect(Rect2(drift + 25, 34 + fmod(cx, 90.0), 90, 8), Color(0.24, 0.28, 0.40, 0.45))
 	# far layer: Edinburgh crag and castle
 	var far := Color(0.1 + fl * 0.12, 0.07 + fl * 0.1, 0.18 + fl * 0.14)
 	draw_colored_polygon(PackedVector2Array([Vector2(0, 270), Vector2(0, 175), Vector2(30, 168), Vector2(50, 150), Vector2(95, 146), Vector2(130, 182), Vector2(175, 215), Vector2(230, 270)]), far)
@@ -183,7 +183,7 @@ func _draw() -> void:
 		draw_rect(Rect2(drift, 252 + i * 7, 200, 12), Color(0.5, 0.45, 0.75, 0.06 + 0.02 * (i % 2)))
 	# ledge with the travellers
 	draw_rect(Rect2(60, 306, 130, 54), Color("14101c"))
-	draw_rect(Rect2(60, 306, 130, 2), Color("3a3048"))
+	draw_rect(Rect2(60, 306, 130, 2), Color("353a48"))
 	for bx in range(64, 190, 14):
 		draw_rect(Rect2(bx, 312, 1, 48), Color("07040d"))
 	draw_circle(Vector2(141, 296), 16.0, Color(1.0, 0.72, 0.35, 0.07))
@@ -200,16 +200,16 @@ func _draw() -> void:
 	draw_rect(Rect2(0, 0, 640, 14), Color(0, 0, 0, 0.35))
 	draw_rect(Rect2(0, 346, 640, 14), Color(0, 0, 0, 0.35))
 	# title
-	_glow_text(Vector2(320, 70 + 4.0 * (1.0 - intro)), "ECHOES OF MU", 46, Color("eadfff"), Color("8a6af0"))
+	_glow_text(Vector2(320, 70 + 4.0 * (1.0 - intro)), "ECHOES OF MU", 46, Color("ffcfd3"), Color("f0515f"))
 	var sh := fmod(t * 0.5, 2.4)
-	_text(Vector2(320, 98), "A Gothic Journey Through the Old World", 13, Color("b7a5d9", intro))
-	_text(Vector2(320, 114), "EDINBURGH   ·   PRAGUE   ·   and beyond", 9, Color("8a7ab0", intro * (0.6 + 0.3 * sin(t * 1.5))))
+	_text(Vector2(320, 98), "A Gothic Journey Through the Old World", 13, Color("d9959b", intro))
+	_text(Vector2(320, 114), "EDINBURGH   ·   PRAGUE   ·   and beyond", 9, Color("b06c72", intro * (0.6 + 0.3 * sin(t * 1.5))))
 	draw_rect(Rect2(250, 154 + 0, 140, 8 + items.size() * 24 - 4), Color(0.02, 0.01, 0.05, 0.55))
 	for i in items.size():
-		var sc := Color("ffd166") if i == sel else Color("9a90b5")
+		var sc := Color("ffd166") if i == sel else Color("b58388")
 		_text(Vector2(320, 176 + i * 24), ("✦ " if i == sel else "") + items[i] + (" ✦" if i == sel else ""), 18, sc)
 	var li := int(t / 6.0) % LINES.size()
 	var la := clampf(minf(fmod(t, 6.0), 6.0 - fmod(t, 6.0)) * 1.2, 0.0, 1.0)
-	_text(Vector2(320, 330), LINES[li], 11, Color(0.82, 0.76, 0.95, la))
-	_text(Vector2(320, 346), "WASD / Arrows · Space attack · E interact · Q shift form", 8, Color("6f6788"))
+	_text(Vector2(320, 330), LINES[li], 11, Color(0.95, 0.69, 0.72, la))
+	_text(Vector2(320, 346), "WASD / Arrows · Space attack · E interact · Q shift form", 8, Color("885d61"))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(3, 3))

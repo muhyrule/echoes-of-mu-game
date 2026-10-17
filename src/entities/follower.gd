@@ -270,7 +270,7 @@ func _draw() -> void:
 				draw_arc(Vector2(0, -4), 8.0 + u * 44.0, 0, TAU, 28, Color(1.0, 0.85, 0.4, 0.8 * (1.0 - u)), 3.0)
 				draw_arc(Vector2(0, -4), 4.0 + u * 30.0, 0, TAU, 24, Color(1.0, 1.0, 0.8, 0.5 * (1.0 - u)), 1.5)
 			"wren":
-				draw_arc(Vector2(0, -4), 6.0 + u * 16.0, 0, TAU, 16, Color(0.5, 0.4, 0.8, 0.7 * (1.0 - u)), 2.0)
+				draw_arc(Vector2(0, -4), 6.0 + u * 16.0, 0, TAU, 16, Color(0.80, 0.32, 0.36, 0.7 * (1.0 - u)), 2.0)
 			"corvin":
 				for i in 8:
 					var ang := t * 6.0 + i * TAU / 8.0

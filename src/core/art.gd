@@ -3,7 +3,7 @@ extends RefCounted
 ## Drawn in world units (1 tile = 16); the camera zoom makes every stroke crisp at 1080p.
 
 const OUT := Color("100d17")
-const PAL_MU := {"coat": Color("3a3048"), "accent": Color("7a2a2e"), "skin": Color("c4a083"), "hair": Color("a8a6ae"), "boots": Color("1c1620"), "style": "short", "item": "sheath", "hood": true, "mail": true, "look": "mu"}
+const PAL_MU := {"coat": Color("353a48"), "accent": Color("7a2a2e"), "skin": Color("c4a083"), "hair": Color("a8a6ae"), "boots": Color("1c1620"), "style": "short", "item": "sheath", "hood": true, "mail": true, "look": "mu"}
 const PAL_WRAITH := {"coat": Color("3a5670"), "accent": Color("9fc4d8"), "skin": Color("a9c0cc"), "hair": Color("7f9fb8"), "boots": Color("1e2e40"), "style": "short", "item": "none", "hood": true, "look": "wraith"}
 const PAL_ISOLDE := {"coat": Color("3e4a38"), "accent": Color("6e4a2e"), "skin": Color("c8a287"), "hair": Color("7a3a24"), "boots": Color("261c16"), "style": "braid", "item": "hammer", "mail": true, "look": "isolde"}
 const PAL_GARGOYLE := {"coat": Color("565d6a"), "accent": Color("8a3a2e"), "skin": Color("6f7886"), "hair": Color("3e4550"), "boots": Color("2a303a"), "style": "short", "item": "none", "mail": true, "look": "gargoyle"}
@@ -376,7 +376,7 @@ static func rat(c: CanvasItem, f: Vector2, t: float, flash: float) -> void:
 
 static func bat(c: CanvasItem, t: float, flash: float) -> void:
 	var hit := flash > 0.0
-	var col := Color.WHITE if hit else Color("4a3a68")
+	var col := Color.WHITE if hit else Color("434e68")
 	c.draw_set_transform(Vector2(0, 11), 0.0, Vector2(1.0, 0.35))
 	c.draw_circle(Vector2.ZERO, 4.5, Color(0, 0, 0, 0.3))
 	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -399,7 +399,7 @@ static func bat(c: CanvasItem, t: float, flash: float) -> void:
 		var root := Vector2(sgn * 3.0, -3.0)
 		for tp in [Vector2(sgn * 7.0, -9.0 - fl * 4.0), Vector2(sgn * 12.0, -6.0 - fl * 5.0), Vector2(sgn * 9.0, -3.0 - fl * 3.0)]:
 			c.draw_line(root, tp, col.lightened(0.3), 0.5)
-		c.draw_rect(Rect2(sgn * 1.5 - 0.5, -10.0, 1.0, 1.0), Color("c87aa0"))
+		c.draw_rect(Rect2(sgn * 1.5 - 0.5, -10.0, 1.0, 1.0), Color("c86871"))
 	c.draw_rect(Rect2(-2.0, -6.0, 1.0, 1.0), Color("ffd040"))
 	c.draw_rect(Rect2(1.0, -6.0, 1.0, 1.0), Color("ffd040"))
 	c.draw_rect(Rect2(-1.0, -3.5, 1.0, 1.5), Color.WHITE)
@@ -419,7 +419,7 @@ static func warden(c: CanvasItem, f: Vector2, t: float, flash: float, winding: b
 	var parts: Array = []
 	var sh: Array = []
 	var sway := roundf(sin(t * 3.0))
-	parts.append(["p", PackedVector2Array([Vector2(-13, -18), Vector2(13, -18), Vector2(17, 10), Vector2(11, 7 + sway), Vector2(6, 12), Vector2(0, 8), Vector2(-6, 12), Vector2(-11, 7 - sway), Vector2(-17, 10)]), Color("2a2036")])
+	parts.append(["p", PackedVector2Array([Vector2(-13, -18), Vector2(13, -18), Vector2(17, 10), Vector2(11, 7 + sway), Vector2(6, 12), Vector2(0, 8), Vector2(-6, 12), Vector2(-11, 7 - sway), Vector2(-17, 10)]), Color("242936")])
 	_b(parts, sh, -9.0, 5.0, 7.0, 8.0, dark)
 	_b(parts, sh, 2.0, 5.0, 7.0, 8.0, dark)
 	_b(parts, sh, -10.0, 11.0, 9.0, 4.0, steel.darkened(0.15))

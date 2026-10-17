@@ -98,7 +98,7 @@
   "t": {
    "id": "pra_tereza",
    "pal": {
-    "coat": "#6a4a6a",
+    "coat": "#6a4245",
     "accent": "#c0a070",
     "hair": "#c08a4a",
     "skin": "#c4a083",
@@ -217,7 +217,7 @@
   "!": {
    "id": "pra_matyas",
    "pal": {
-    "coat": "#5a2a4a",
+    "coat": "#5a2126",
     "accent": "#c0a070",
     "hair": "#2a1a1a",
     "skin": "#c4a083",
