@@ -4,13 +4,13 @@ extends Node2D
 ## glowing havens around the gates survive; weathering it leaves the boss exposed.
 
 const CFG := {
-	"loch": {"col": Color(0.4, 0.9, 1.0), "gates": 3, "name": "Whirlpool Gate", "cata": "The Loch floods", "line": "The Loch is rising \u2014 reach a whirlpool gate!"},
-	"keep": {"col": Color(0.85, 0.1, 0.2), "gates": 2, "name": "Blood Mirror", "cata": "Blood Moon", "line": "A blood moon rises \u2014 step through a blood mirror!"},
-	"ossuary": {"col": Color(0.55, 1.0, 0.9), "gates": 3, "name": "Lantern Door", "cata": "Judgement Toll", "line": "The Ankou tolls judgement \u2014 shelter at a lantern door!"},
+	"loch": {"col": Color(0.4, 0.9, 1.0), "gates": 3, "twist": "pull", "name": "Whirlpool Gate", "cata": "The Loch floods", "line": "The Loch is rising \u2014 reach a whirlpool gate!"},
+	"keep": {"col": Color(0.85, 0.1, 0.2), "gates": 2, "twist": "orbit", "name": "Blood Mirror", "cata": "Blood Moon", "line": "A blood moon rises \u2014 step through a blood mirror!"},
+	"ossuary": {"col": Color(0.55, 1.0, 0.9), "gates": 3, "twist": "blink", "name": "Lantern Door", "cata": "Judgement Toll", "line": "The Ankou tolls judgement \u2014 shelter at a lantern door!"},
 	"cliff": {"col": Color(0.7, 0.85, 1.0), "gates": 2, "name": "Updraft", "cata": "Great Storm", "line": "The storm breaks \u2014 ride an updraft to the calm!", "gust": true, "bob": 3.5, "clouds": true},
-	"lazaretto": {"col": Color(0.55, 0.9, 0.3), "gates": 2, "name": "Bell Door", "cata": "Pyre of the Plague", "line": "The pyres ignite \u2014 duck through a bell door!"},
-	"cave": {"col": Color(1.0, 0.5, 0.15), "gates": 3, "name": "Fissure", "cata": "Eruption", "line": "The mountain erupts \u2014 leap into a fissure!"},
-	"attic": {"col": Color(0.95, 0.75, 0.35), "gates": 2, "name": "Gear Gate", "cata": "Midnight Chime", "line": "The clock strikes \u2014 cross a gear gate!"},
+	"lazaretto": {"col": Color(0.55, 0.9, 0.3), "gates": 3, "twist": "random", "name": "Bell Door", "cata": "Pyre of the Plague", "line": "The pyres ignite \u2014 duck through a bell door!"},
+	"cave": {"col": Color(1.0, 0.5, 0.15), "gates": 3, "twist": "collapse", "name": "Fissure", "cata": "Eruption", "line": "The mountain erupts \u2014 leap into a fissure!"},
+	"attic": {"col": Color(0.95, 0.75, 0.35), "gates": 3, "twist": "shuffle", "name": "Gear Gate", "cata": "Midnight Chime", "line": "The clock strikes \u2014 cross a gear gate!"},
 }
 const HAVEN := 58.0
 const WARN := 4.2
@@ -23,6 +23,9 @@ var boss: Node2D = null
 var center := Vector2.ZERO
 var half := Vector2(300, 200)
 var pads: Array = []
+var base: Array = []
+var shut: Array = []
+var link := 1
 var tp_cd := 0.0
 var cata_t := -1.0
 var cata_wait := 6.0
@@ -62,6 +65,8 @@ func _ready() -> void:
 				break
 			pos = pos.lerp(center, 0.12)
 		pads.append(pos)
+		shut.append(0.0)
+	base = pads.duplicate()
 
 
 func _find_boss() -> Node2D:
@@ -101,9 +106,21 @@ func _process(delta: float) -> void:
 func _step(delta: float) -> void:
 	var P: Node2D = level.player
 	var pp := P.global_position
+	for i in shut.size():
+		shut[i] = maxf(0.0, shut[i] - delta)
+	var tw: String = cfg.get("twist", "")
+	if tw == "orbit":
+		for i in pads.size():
+			pads[i] = center + (base[i] - center).rotated(sin(t * 0.35) * 0.7)
+	if tw == "pull":
+		for q in pads:
+			var d: Vector2 = q - pp
+			if d.length() < 48.0 and d.length() > 12.0:
+				P.knock += d.normalized() * 700.0 * delta
+				P.knock = P.knock.limit_length(90.0)
 	if tp_cd <= 0.0 and P.rolling <= 0.0:
 		for i in pads.size():
-			if pp.distance_to(pads[i]) < 15.0:
+			if _open(i) and pp.distance_to(pads[i]) < 15.0:
 				_teleport(P, i)
 				break
 	_cataclysm(delta, P)
@@ -123,8 +140,22 @@ func _step(delta: float) -> void:
 				P.knock = P.knock.limit_length(95.0)
 
 
+func _open(i: int) -> bool:
+	if shut[i] > 0.0:
+		return false
+	if cfg.get("twist", "") == "blink":
+		return fmod(t + i * 2.7, 8.0) < 5.5
+	return true
+
+
 func _teleport(P: Node2D, i: int) -> void:
-	var dest: Vector2 = pads[(i + 1) % pads.size()]
+	var j := (i + link) % pads.size()
+	if cfg.get("twist", "") == "random":
+		j = (i + 1 + randi() % (pads.size() - 1)) % pads.size()
+	var dest: Vector2 = pads[j]
+	if cfg.get("twist", "") == "collapse":
+		shut[i] = 8.0
+		shut[j] = 8.0
 	var out := (center - dest).normalized() * 26.0
 	P.global_position = dest + out
 	P.knock = Vector2.ZERO
@@ -147,6 +178,8 @@ func _cataclysm(delta: float, P: Node2D) -> void:
 		if cata_wait <= 0.0 and boss.state == "idle":
 			cata_t = 0.0
 			cata_count += 1
+			if cfg.get("twist", "") == "shuffle":
+				link = 1 + (cata_count % (pads.size() - 1))
 			boss.state = "attack"
 			boss.st = 0.0
 			boss.winding = true
@@ -177,8 +210,8 @@ func _cataclysm(delta: float, P: Node2D) -> void:
 
 
 func _in_haven(p: Vector2) -> bool:
-	for q in pads:
-		if p.distance_to(q) < HAVEN:
+	for i in pads.size():
+		if _open(i) and p.distance_to(pads[i]) < HAVEN:
 			return true
 	return false
 
@@ -192,8 +225,12 @@ func _draw() -> void:
 	var warn := cata_t >= 0.0
 	if warn:
 		_draw_cataclysm(col)
-	for q in pads:
-		_draw_gate(q, col, warn)
+	for i in pads.size():
+		_draw_gate(pads[i], col, warn, _open(i))
+		if cfg.get("twist", "") == "shuffle":
+			var j := (i + link) % pads.size()
+			draw_line(pads[i], pads[i].lerp(pads[j], 0.35), Color(col, 0.5), 1.5)
+			draw_circle(pads[i].lerp(pads[j], 0.35), 3.0, col)
 	for b in bursts:
 		if b.t >= 0.0:
 			draw_arc(b.p, 10.0 + b.t * 80.0, 0, TAU, 24, Color(col, 0.8 * (1.0 - b.t / 0.6)), 2.0)
@@ -225,7 +262,10 @@ func _draw_cataclysm(col: Color) -> void:
 				draw_line(Vector2(x, y), Vector2(x - 26, y + 18), Color(col, 0.5), 1.5)
 			_:
 				draw_circle(Vector2(x, y), 2.0 + 2.0 * f, Color(col.lightened(0.3), 0.6))
-	for q in pads:
+	for i in pads.size():
+		if not _open(i):
+			continue
+		var q: Vector2 = pads[i]
 		draw_circle(q, HAVEN, Color(0.9, 1.0, 1.0, 0.10 + 0.08 * sin(t * 8.0)))
 		draw_arc(q, HAVEN, 0, TAU, 36, Color(1, 1, 1, 0.9), 2.5)
 		draw_arc(q, HAVEN * (1.0 - fmod(t * 1.2, 1.0)), 0, TAU, 24, Color(col, 0.6), 1.5)
@@ -236,7 +276,13 @@ func _boss_pos() -> Vector2:
 	return boss.global_position if boss else center
 
 
-func _draw_gate(p: Vector2, col: Color, warn: bool) -> void:
+func _draw_gate(p: Vector2, col: Color, warn: bool, open := true) -> void:
+	if not open:
+		draw_set_transform(p, 0, Vector2(1, 0.6))
+		draw_circle(Vector2.ZERO, 20.0, Color(0.05, 0.05, 0.06, 0.7))
+		draw_arc(Vector2.ZERO, 22.0, 0, TAU, 28, Color(col, 0.25), 1.5)
+		draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
+		return
 	var glow := 0.25 + 0.15 * sin(t * 3.0 + p.x)
 	if warn:
 		glow += 0.35
