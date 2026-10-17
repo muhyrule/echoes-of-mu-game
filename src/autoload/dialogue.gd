@@ -37,10 +37,11 @@ func _build_ui() -> void:
 	_panel.position = Vector2(72, 786)
 	_panel.size = Vector2(1776, 246)
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.08, 0.06, 0.12, 0.94)
-	sb.border_color = Color(0.78, 0.43, 0.46)
-	sb.set_border_width_all(2)
-	sb.set_corner_radius_all(3)
+	sb.bg_color = Color(0.055, 0.07, 0.09, 0.97)
+	sb.border_color = Color("b79a62")
+	sb.set_border_width_all(3)
+	sb.shadow_color = Color(0, 0, 0, 0.6)
+	sb.shadow_size = 9
 	_panel.add_theme_stylebox_override("panel", sb)
 	add_child(_panel)
 
@@ -55,7 +56,7 @@ func _build_ui() -> void:
 	_text.size = Vector2(1704, 156)
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text.add_theme_font_size_override("font_size", 42)
-	_text.add_theme_color_override("font_color", Color(0.92, 0.9, 0.96))
+	_text.add_theme_color_override("font_color", Color("e4dcc7"))
 	_panel.add_child(_text)
 
 	_prompt = Label.new()
@@ -93,7 +94,7 @@ func _show_line() -> void:
 	var who: String = line.get("who", "")
 	_name_label.text = who
 	_text.text = Voice.speak(line.get("text", ""), who, _ctx)
-	_text.add_theme_color_override("font_color", Color(0.7, 0.72, 0.85) if who == "" else Color(0.92, 0.9, 0.96))
+	_text.add_theme_color_override("font_color", Color("adb9bd") if who == "" else Color("e4dcc7"))
 	_text.visible_characters = 0
 	_chars = 0.0
 	if line.has("set"):

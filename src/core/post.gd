@@ -1,5 +1,5 @@
 extends CanvasLayer
-## Full-screen gritty gothic grade applied beneath the HUD.
+## Crisp gothic colour grade applied beneath the HUD.
 
 var mat: ShaderMaterial
 var t := 0.0

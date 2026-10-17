@@ -3,15 +3,28 @@ extends Control
 
 var art := "age"
 var t := 0.0
+var duration := 30.0
 var zoom := 1.0
 var pan := Vector2.ZERO
 var stars: Array = []
+var glow_texture: GradientTexture2D
 
 
 func _ready() -> void:
-	seed(77)
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.2, 0.55, 1.0])
+	gradient.colors = PackedColorArray([Color(1, 1, 1, 0.5), Color(1, 1, 1, 0.24), Color(1, 1, 1, 0.06), Color(1, 1, 1, 0)])
+	glow_texture = GradientTexture2D.new()
+	glow_texture.gradient = gradient
+	glow_texture.width = 256
+	glow_texture.height = 256
+	glow_texture.fill = GradientTexture2D.FILL_RADIAL
+	glow_texture.fill_from = Vector2(0.5, 0.5)
+	glow_texture.fill_to = Vector2(1.0, 0.5)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
 	for i in 120:
-		stars.append(Vector3(randf(), randf() * 0.6, randf()))
+		stars.append(Vector3(rng.randf(), rng.randf() * 0.6, rng.randf()))
 
 
 const OFF := Vector2(0, -110)
@@ -19,20 +32,22 @@ const CEN := Vector2(960, 420)
 const FOCUS := {"farewell": Vector2(1300, 640), "listener": Vector2(650, 640), "belfry": Vector2(560, 640), "foundling": Vector2(800, 700), "price": Vector2(700, 640), "gift": Vector2(960, 620), "echo": Vector2(960, 600), "cloister": Vector2(960, 560), "binding": Vector2(960, 620), "crack": Vector2(960, 520), "carts": Vector2(1200, 660), "kirkyard": Vector2(1100, 640), "snowchapel": Vector2(1100, 660), "edin": Vector2(1240, 660), "praha": Vector2(1240, 660)}
 const GRADE := {"rift": Color(0.6, 0.0, 0.0, 0.1), "abom": Color(0.5, 0.0, 0.0, 0.1), "crack": Color(0.5, 0.02, 0.0, 0.08), "toll": Color(0.5, 0.1, 0.0, 0.07), "foundry": Color(0.7, 0.3, 0.0, 0.09), "snowchapel": Color(0.5, 0.6, 0.9, 0.07), "foundling": Color(0.3, 0.4, 0.8, 0.07), "gift": Color(0.7, 0.1, 0.0, 0.07), "price": Color(0.5, 0.0, 0.0, 0.08), "cloister": Color(0.2, 0.3, 0.4, 0.06)}
 const FLASH := ["rift", "abom", "foundling", "toll", "crack", "price"]
+const INTERIORS := ["echo", "cloister", "kinds", "foundry", "binding", "belfry", "price", "gift", "gates"]
 var cen := CEN
 var shake := Vector2.ZERO
 
 
 func _draw() -> void:
-	var u := clampf(t / 24.0, 0.0, 1.0)
+	var u := clampf(t / duration, 0.0, 1.0)
 	var e := u * u * (3.0 - 2.0 * u)
 	cen = FOCUS.get(art, CEN)
-	zoom = 1.0 + 0.14 * e
-	pan = Vector2(-(u - 0.5) * 70.0 + sin(t * 0.9) * 5.0, cos(t * 0.7) * 3.5)
+	var closeup := art in ["listener", "belfry", "price", "farewell", "foundling"]
+	zoom = 1.0 + (0.36 if closeup else 0.12) * e
+	pan = Vector2(-(u - 0.5) * 60.0, sin(t * 0.35) * 1.5)
 	var pulse := 0.0
-	if art in ["crack", "toll", "binding", "rift", "abom"]:
-		pulse = pow(maxf(0.0, sin(t * 2.1)), 14.0)
-	shake = Vector2(sin(t * 91.0), cos(t * 77.0)) * pulse * 9.0
+	if art in ["crack", "toll", "rift", "abom"]:
+		pulse = exp(-absf(t - duration * 0.36) * 3.0)
+	shake = Vector2(sin(t * 51.0), cos(t * 43.0)) * pulse * 4.0
 	pan += shake
 	plate(u)
 	_cine()
@@ -43,24 +58,39 @@ func _tf(p := Vector2.ZERO, r := 0.0, sc := Vector2.ONE) -> void:
 	draw_set_transform(OFF + pan + cen * (1.0 - zoom) + p * zoom, r, sc * zoom)
 
 
+func _beat(start: float, end: float) -> float:
+	return smoothstep(duration * start, duration * end, t)
+
+
 func _sky(a: Color, b: Color) -> void:
 	for i in 27:
 		draw_rect(Rect2(0, i * 40, 1920, 41), a.lerp(b, float(i) / 26.0))
-	for s in stars:
-		var tw := 0.5 + 0.5 * sin(t * 2.0 + s.z * 20.0)
-		draw_circle(Vector2(s.x * 1920.0, s.y * 1080.0), 1.0 + s.z, Color(1, 1, 1, 0.2 + 0.5 * tw))
+	if art not in INTERIORS:
+		for s in stars:
+			var tw := 0.5 + 0.5 * sin(t * 0.6 + s.z * 20.0)
+			draw_circle(Vector2(s.x * 1920.0, s.y * 1080.0), 1.0 + s.z, Color(1, 1, 1, 0.12 + 0.25 * tw))
+		for band in 5:
+			var cy := 270.0 + band * 65.0
+			for cloud in 6:
+				var cx := fposmod(cloud * 430.0 + band * 110.0 - t * (3.0 + band), 2600.0) - 350.0
+				_tf(Vector2(cx, cy), 0, Vector2(2.5, 0.19))
+				draw_circle(Vector2.ZERO, 100.0, Color(0.5, 0.55, 0.65, 0.035))
+		_tf()
+	else:
+		_vaulted_hall()
 
 
 func _moon(p: Vector2, r: float, col: Color) -> void:
-	for k in 5:
-		draw_circle(p, r + 30.0 + k * 22.0, Color(col, 0.05))
+	_glow(p, r * 2.8, col, 0.45)
 	draw_circle(p, r, col)
+	for i in 18:
+		var a := i * 2.39996
+		var d := sqrt((i + 1.0) / 20.0) * r * 0.78
+		draw_circle(p + Vector2(cos(a), sin(a)) * d, r * (0.025 + (i % 4) * 0.02), Color(0.28, 0.3, 0.36, 0.1))
 
 
 func _glow(p: Vector2, r: float, col: Color, a := 0.5) -> void:
-	for k in 10:
-		var u := 1.0 - k / 10.0
-		draw_circle(p, r * (0.15 + 0.85 * u), Color(col, a * 0.09 * (1.0 - u * 0.4)))
+	draw_texture_rect(glow_texture, Rect2(p - Vector2.ONE * r, Vector2.ONE * r * 2), false, Color(col, a))
 
 
 func _brick(x: float, y: float, w: float, h: float, col: Color) -> void:
@@ -159,7 +189,116 @@ func _hero(p: Vector2, s: float, lamp: bool, kid := false) -> void:
 
 
 func _ground(y: float, col: Color) -> void:
-	draw_rect(Rect2(0, y, 1920, 1080 - y), col)
+	draw_rect(Rect2(-300, y, 2520, 1200 - y), col)
+	if art == "snowchapel":
+		for i in 28:
+			draw_arc(Vector2(i * 80, y + 20 + (i % 3) * 12), 90, PI * 1.1, PI * 1.9, 16, Color(1, 1, 1, 0.12), 3.0)
+		return
+	var mortar := col.lightened(0.08)
+	for row in 7:
+		var near := row / 6.0
+		var fy := y + near * near * (1200 - y)
+		draw_line(Vector2(-300, fy), Vector2(2220, fy), Color(mortar, 0.65), 1.4)
+	for i in 25:
+		var x := -500.0 + i * 120.0
+		draw_line(Vector2(960 + (x - 960) * 0.18, y), Vector2(x, 1200), Color(mortar, 0.5), 1.2)
+	if art in ["foundling", "road", "edin", "praha", "carts", "toll"]:
+		for i in 32:
+			var px := 60.0 + fposmod(i * 173.0, 1800)
+			var py := y + 12 + (i % 4) * 12.0
+			var rw := 8.0 + (i % 7) * 4.0
+			draw_line(Vector2(px - rw, py), Vector2(px + rw, py), Color(0.6, 0.65, 0.75, 0.08 + sin(t + i) * 0.025), 1.8)
+
+
+func _arch_curve(c: Vector2, w: float, h: float) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for side in 2:
+		for k in 17:
+			var u := k / 16.0 if side == 0 else 1.0 - k / 16.0
+			var x := -w * 0.5 * (1.0 - u) if side == 0 else w * 0.5 * (1.0 - u)
+			pts.append(c + Vector2(x, -h * (0.65 + 0.35 * sqrt(u))))
+	return pts
+
+
+func _vaulted_hall() -> void:
+	var warm := art in ["foundry", "binding", "gift"]
+	var stone := Color("242b34") if not warm else Color("302a25")
+	draw_rect(Rect2(-250, 120, 2420, 780), stone.darkened(0.35))
+	_brick(-250, 160, 2420, 650, stone)
+	for bay in 5:
+		var x := 160.0 + bay * 400.0
+		var c := Vector2(x, 850)
+		var arch := _arch_curve(c, 300, 610)
+		var niche := PackedVector2Array(arch)
+		niche.append(c + Vector2(150, 0))
+		niche.append(c - Vector2(150, 0))
+		draw_colored_polygon(niche, Color("090d14"))
+		draw_polyline(arch, stone.lightened(0.12), 15.0)
+		draw_polyline(_arch_curve(c, 270, 588), Color("111720"), 5.0)
+		for side in [-1.0, 1.0]:
+			var px: float = x + side * 150
+			draw_rect(Rect2(px - 10, 454, 20, 400), stone)
+			draw_line(Vector2(px - 7, 454), Vector2(px - 7, 850), stone.lightened(0.12), 2.0)
+			draw_rect(Rect2(px - 20, 462, 40, 12), stone.lightened(0.06))
+			draw_rect(Rect2(px - 18, 825, 36, 24), stone.darkened(0.2))
+		if bay % 2 == 0:
+			_window(Vector2(x, 520), 78, 180, Color("a87b45") if warm else Color("49657a"), bay)
+			_rose(Vector2(x, 360), 24, Color("c5a873"))
+	for side in [-1.0, 1.0]:
+		var rib := PackedVector2Array()
+		for k in 25:
+			var u := k / 24.0
+			rib.append(Vector2(960 + side * 1150 * (1.0 - u), 210 + 210 * pow(1.0 - u, 2.0)))
+		draw_polyline(rib, stone.lightened(0.1), 8.0)
+		draw_polyline(rib, Color(0, 0, 0, 0.4), 2.0)
+	for i in 6:
+		_candle(Vector2(110 + i * 345, 810), 0.8 + (i % 2) * 0.2, i)
+
+
+func _candle(c: Vector2, s: float, ph: float) -> void:
+	var fl := sin(t * 4.3 + ph) * 2.0
+	draw_rect(Rect2(c.x - 15 * s, c.y - 5 * s, 30 * s, 5 * s), Color("4f3b2a"))
+	draw_rect(Rect2(c.x - 6 * s, c.y - 46 * s, 12 * s, 41 * s), Color("b7a583"))
+	draw_rect(Rect2(c.x + 1 * s, c.y - 46 * s, 5 * s, 41 * s), Color("74664d"))
+	for drip in 3:
+		draw_line(c + Vector2((-4 + drip * 4) * s, -43 * s), c + Vector2((-4 + drip * 4) * s, (-30 + drip * 4) * s), Color("d8c7a5"), 2 * s)
+	var f := c + Vector2(0, -50 * s)
+	_glow(f, 100 * s, Color("ffad50"), 0.6)
+	draw_colored_polygon(PackedVector2Array([f + Vector2(-5 * s, 0), f + Vector2(fl * s, -19 * s), f + Vector2(5 * s, 0), f + Vector2(0, 4 * s)]), Color("e88935"))
+	draw_line(f, f + Vector2(fl * s * 0.5, -10 * s), Color("ffe9ac"), 3 * s)
+
+
+func _reliquary(c: Vector2, s: float, col: Color, kind: int) -> void:
+	_tf(c, 0, Vector2.ONE * s)
+	draw_rect(Rect2(-65, 0, 130, 16), Color("333039"))
+	draw_rect(Rect2(-50, -18, 100, 18), Color("25232c"))
+	var arch := _arch_curve(Vector2.ZERO, 100, 180)
+	draw_polyline(arch, Color("8f7851"), 7.0)
+	draw_line(Vector2(-50, -117), Vector2(-50, 0), Color("8f7851"), 7.0)
+	draw_line(Vector2(50, -117), Vector2(50, 0), Color("8f7851"), 7.0)
+	_glow(Vector2(0, -85), 100, col, 0.8)
+	match kind % 3:
+		0:
+			for i in 3:
+				var wave := PackedVector2Array()
+				for k in 25:
+					wave.append(Vector2(-32 + k * 2.7, -50 - i * 20 + sin(k * 0.3 + t * 1.5) * 7))
+				draw_polyline(wave, col, 2.5)
+		1:
+			draw_circle(Vector2(0, -85), 32, col.darkened(0.3))
+			draw_arc(Vector2(0, -85), 32, 0, TAU, 32, col, 3)
+			for k in 8:
+				var a := k * TAU / 8
+				draw_line(Vector2(0, -85) + Vector2(cos(a), sin(a)) * 25, Vector2(0, -85) + Vector2(cos(a), sin(a)) * 30, col, 2)
+			draw_line(Vector2(0, -85), Vector2(sin(t * 0.2) * 20, -105), col, 3)
+		2:
+			draw_circle(Vector2(0, -91), 22, col.darkened(0.35))
+			for side in [-1.0, 1.0]:
+				draw_circle(Vector2(side * 9, -94), 6, Color("100709"))
+			draw_colored_polygon(PackedVector2Array([Vector2(-8, -78), Vector2(8, -78), Vector2(0, -68)]), col)
+			for tooth in 5:
+				draw_line(Vector2(-12 + tooth * 6, -71), Vector2(-12 + tooth * 6, -64), col, 3)
+	_tf()
 
 
 func _rose(c: Vector2, r: float, col: Color) -> void:
@@ -277,10 +416,8 @@ func _cine() -> void:
 	if GRADE.has(art):
 		draw_rect(Rect2(0, 100, 1920, 670), GRADE[art])
 	if art in FLASH:
-		var fh := fposmod(t, 6.3)
-		var fa := 0.0
-		if fh < 0.5:
-			fa = 0.3 * pow(1.0 - fh / 0.5, 2.0) * (1.0 if sin(t * 40.0) > -0.3 else 0.5)
+		var fh := absf(t - duration * 0.36)
+		var fa := 0.12 * exp(-fh * 5.0)
 		if fa > 0.0:
 			draw_rect(Rect2(0, 100, 1920, 670), Color(1.0, 0.5, 0.45, fa) if art != "foundling" else Color(0.8, 0.85, 1.0, fa))
 	if art == "foundling" or art == "road" or art == "toll":
@@ -288,13 +425,13 @@ func _cine() -> void:
 			var rx := fposmod(i * 67.0 - t * 220.0, 2000.0)
 			var ry := fposmod(i * 53.0 + t * 900.0, 700.0) + 100.0
 			draw_line(Vector2(rx, ry), Vector2(rx - 8, ry + 30), Color(0.7, 0.75, 0.9, 0.22), 1.5)
-	if art in ["foundry", "crack", "toll", "gift", "price", "rift", "abom"]:
+	if art in ["foundry", "crack", "rift", "abom"]:
 		for i in 50:
 			var u := fposmod(t * 0.14 + i * 0.0377, 1.0)
 			var ex := fposmod(i * 211.0 + sin(t + i) * 60.0, 1920.0)
 			draw_circle(Vector2(ex, 770.0 - u * 670.0), 1.6 + (i % 3), Color(1.0, 0.5 + 0.3 * sin(i), 0.2, 0.8 * (1.0 - u)))
 	var fgx := -pan.x * 1.8
-	for side in 2:
+	for side in (0 if art in INTERIORS else 2):
 		var bx := 0.0 if side == 0 else 1920.0
 		var sg := 1.0 if side == 0 else -1.0
 		for i in 16:
@@ -331,11 +468,13 @@ func _poly_outline(pts: PackedVector2Array, col: Color, w: float) -> void:
 
 
 func _hand(h: Vector2, skin: Color, curl: float) -> void:
-	draw_circle(h, 5.5, skin)
+	var palm := PackedVector2Array([h + Vector2(-4, -5), h + Vector2(3, -5), h + Vector2(5, 0), h + Vector2(3, 6), h + Vector2(-3, 5)])
+	draw_colored_polygon(palm, skin)
+	_poly_outline(palm, skin.darkened(0.3), 0.9)
 	for k in 3:
-		var a := -0.5 + k * 0.5 + curl
-		draw_line(h, h + Vector2(cos(a), sin(a) + 0.4) * 7.5, skin, 2.2)
-	draw_arc(h, 5.5, 0, TAU, 10, skin.darkened(0.35), 1.2)
+		var finger := h + Vector2(-2 + k * 2.0, 3)
+		draw_line(finger, finger + Vector2(curl * 2, 4.0 - absf(k - 1.0)), skin.darkened(0.08), 1.7)
+	draw_line(h + Vector2(3, -1), h + Vector2(6, 2 + curl), skin, 2.3)
 
 
 # who: mu, kid, aldous, monk, bellman, echo, keeper. f = facing (+1 right, -1 left). gest 0..1 raises the front arm.
@@ -345,10 +484,10 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 	var kid := who == "kid"
 	var k := 0.62 if kid else 1.0
 	var echo := who == "echo"
-	var cloak := Color("1c2442")
-	var inner := Color("2c3860")
+	var cloak := Color("353a48")
+	var inner := Color("7a2a2e")
 	var skin := Color("d8b090")
-	var hair := Color("20161a")
+	var hair := Color("a8a6ae")
 	var rim := Color(1.0, 0.72, 0.4, 0.55)
 	match who:
 		"aldous":
@@ -359,10 +498,17 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 		"monk":
 			cloak = Color("1a1416")
 			inner = Color("2a2226")
+			hair = Color("20161a")
 		"bellman":
 			cloak = Color("2a1c18")
 			inner = Color("402a20")
 			skin = Color("b89070")
+			hair = Color("20161a")
+		"smith":
+			cloak = Color("33261f")
+			inner = Color("71533a")
+			skin = Color("b78e70")
+			hair = Color("322b27")
 		"echo":
 			cloak = Color(0.45, 0.06, 0.08, 0.6)
 			inner = Color(0.7, 0.12, 0.12, 0.5)
@@ -375,9 +521,9 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 			skin = Color("c0a088")
 			hair = Color("8a8680")
 		"kid":
-			cloak = Color("2a3450")
-			inner = Color("3c4a70")
-			hair = Color("3a2418")
+			cloak = Color("353a48")
+			inner = Color("7a2a2e")
+			hair = Color("a8a6ae")
 	var at := p + Vector2(0, -34)
 	_tf(at, 0, Vector2(s * k * f, s * k))
 	var ell := PackedVector2Array()
@@ -404,9 +550,6 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 	draw_rect(Rect2(-4, -77 + br, 8, 6), Color("b89038"))
 	draw_colored_polygon(PackedVector2Array([Vector2(-28, -128 + br), Vector2(0, -116 + br), Vector2(28, -128 + br), Vector2(22, -134 + br), Vector2(-22, -134 + br)]), inner.lightened(0.12))
 	var back := Vector2(-35, -62 + br)
-	draw_line(Vector2(-26, -126 + br), back, cloak, 14.0)
-	draw_line(Vector2(-26, -126 + br), back, rim, 1.5)
-	_hand(back, skin, 0.3)
 	if who == "aldous" or who == "keeper":
 		var hp := Vector2(-42, -84 + br)
 		draw_line(Vector2(-26, -126 + br), hp, cloak, 12.0)
@@ -414,7 +557,11 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 		draw_line(Vector2(-43, -156), Vector2(-43, 36), Color("7a6444"), 1.5)
 		draw_circle(Vector2(-42, -160), 8.0, Color("8a7a50"))
 		_hand(hp, skin, 0.1)
-	if who == "mu" or who == "kid":
+	else:
+		draw_line(Vector2(-26, -126 + br), back, cloak, 14.0)
+		draw_line(Vector2(-26, -126 + br), back, rim, 1.5)
+		_hand(back, skin, 0.3)
+	if (who == "mu" or who == "kid") and art not in ["farewell", "belfry", "listener", "crack"]:
 		draw_line(Vector2(-4, -126), Vector2(14, -40), Color("6a5030"), 3.0)
 		draw_line(Vector2(30, -60), Vector2(30, 6), Color("c0c4d0"), 4.0)
 		draw_line(Vector2(28.5, -58), Vector2(28.5, 4), Color.WHITE, 1.2)
@@ -422,6 +569,8 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 		draw_circle(Vector2(30, -69), 4.0, Color("a88838"))
 	var shoulder := Vector2(27, -124 + br)
 	var hnd := Vector2(39, -73 + br).lerp(Vector2(78, -126 + br - sin(t * 3.2 + ph) * 4.0), gest)
+	if art == "foundling" and who == "aldous":
+		hnd = Vector2(65, -70).lerp(Vector2(53, -112), _beat(0.25, 0.65))
 	if lamp and gest < 0.2:
 		hnd = Vector2(48, -92 + br)
 	var elbow := shoulder.lerp(hnd, 0.5) + Vector2(8.0 * (1.0 - gest), 14.0 * (1.0 - gest))
@@ -436,22 +585,20 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 		draw_rect(Rect2(lp.x - 5, lp.y + 3, 10, 17), Color(1.0, 0.82, 0.5, 0.9 + 0.1 * sin(t * 9.0 + ph)))
 		_glow(lp + Vector2(0, 12), 220.0, Color(1.0, 0.72, 0.38), 0.7 + 0.2 * sin(t * 5.0 + ph))
 	draw_rect(Rect2(-7, -140 + br, 14, 16), skin.darkened(0.25))
-	var hc := Vector2(0, -152 + br + sin(t * 1.1 + ph) * 0.8)
+	var hc := Vector2(0, -156 + br + sin(t * 1.1 + ph) * 0.8)
 	if who == "monk":
 		draw_colored_polygon(PackedVector2Array([Vector2(-36, -118 + br), Vector2(-28, -170 + br), Vector2(0, -196 + br), Vector2(28, -170 + br), Vector2(36, -118 + br)]), cloak.lightened(0.06))
 		draw_line(Vector2(-28, -170 + br), Vector2(-36, -118 + br), rim, 2.0)
 		draw_circle(hc + Vector2(4, 2), 21.0, Color("070406"))
 		draw_arc(hc + Vector2(4, 2), 22.0, 0, TAU, 20, Color("2a2024"), 3.0)
-		var gl := 0.7 + 0.3 * sin(t * 3.0 + ph)
-		var gc := Color(1.0, 0.35, 0.25, gl)
-		for e in 2:
-			draw_circle(hc + Vector2(-2 + e * 14, 0), 7.0, Color(gc, 0.2))
-			draw_circle(hc + Vector2(-2 + e * 14, 0), 2.8, gc)
+		draw_polyline(PackedVector2Array([hc + Vector2(-8, -4), hc + Vector2(2, 10), hc + Vector2(10, -4)]), Color("695444"), 1.5)
 		_done()
 		return
 	draw_circle(hc + Vector2(-23, 1), 4.5, skin.darkened(0.12))
 	draw_circle(hc + Vector2(23, 1), 4.5, skin.darkened(0.3))
-	draw_circle(hc, 22.0, skin)
+	var jaw := PackedVector2Array([hc + Vector2(-20, -10), hc + Vector2(-16, -21), hc + Vector2(0, -26), hc + Vector2(17, -18), hc + Vector2(22, -3), hc + Vector2(18, 15), hc + Vector2(6, 26), hc + Vector2(-6, 24), hc + Vector2(-18, 13)])
+	draw_colored_polygon(jaw, skin)
+	_poly_outline(jaw, skin.darkened(0.35), 1.1)
 	draw_colored_polygon(PackedVector2Array([hc + Vector2(6, -20), hc + Vector2(20, -8), hc + Vector2(21, 6), hc + Vector2(12, 20), hc + Vector2(2, 26), hc + Vector2(8, 4)]), Color(0, 0, 0, 0.2))
 	draw_arc(hc + Vector2(-2, 1), 21.0, PI * 0.62, PI * 1.12, 10, skin.lightened(0.25), 3.0)
 	draw_arc(hc, 22.0, 0.2, PI * 0.9, 14, skin.darkened(0.35), 2.0)
@@ -463,18 +610,18 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 	var look := Vector2(1.4 * sin(t * 0.5 + ph), 0.4 * sin(t * 0.7 + ph))
 	for e in 2:
 		var ec := hc + Vector2(-8.0 + e * 17.0, -2)
-		draw_circle(ec + Vector2(0, 1), 6.5, Color(0.2, 0.08, 0.1, 0.18))
+		draw_circle(ec + Vector2(0, 1), 5.0, Color(0.2, 0.08, 0.1, 0.12))
 		if blink:
 			draw_line(ec - Vector2(5, 0), ec + Vector2(5, 0), Color("1a1010"), 2.2)
 			continue
-		draw_colored_polygon(PackedVector2Array([ec + Vector2(-6, 0), ec + Vector2(-2, -4), ec + Vector2(3, -4), ec + Vector2(6, 0), ec + Vector2(2, 3.5), ec + Vector2(-3, 3.5)]), Color("f0e8e0"))
+		draw_colored_polygon(PackedVector2Array([ec + Vector2(-5.5, 0), ec + Vector2(-2, -2.5), ec + Vector2(2, -2.5), ec + Vector2(5.5, 0), ec + Vector2(2, 2), ec + Vector2(-3, 2)]), Color("d4cbc0"))
 		var ic := Color("ff4030") if echo else (Color("6a6050") if who == "aldous" else Color("5a7898"))
-		draw_circle(ec + look, 3.0, ic)
-		draw_arc(ec + look, 3.0, 0, TAU, 8, ic.darkened(0.5), 1.0)
-		draw_circle(ec + look, 1.5, Color("0a0808"))
-		draw_circle(ec + look + Vector2(-1.1, -1.3), 1.0, Color.WHITE)
-		draw_line(ec + Vector2(-6, -4), ec + Vector2(6, -4.5), Color("20141a"), 2.0)
-		draw_line(ec + Vector2(-5, 3.6), ec + Vector2(5, 3.6), skin.darkened(0.2), 1.0)
+		draw_circle(ec + look, 2.2, ic)
+		draw_arc(ec + look, 2.2, 0, TAU, 12, ic.darkened(0.5), 0.8)
+		draw_circle(ec + look, 1.2, Color("0a0808"))
+		draw_circle(ec + look + Vector2(-0.8, -0.8), 0.65, Color.WHITE)
+		draw_line(ec + Vector2(-5.5, -2.5), ec + Vector2(5.5, -2.8), Color("20141a"), 1.4)
+		draw_line(ec + Vector2(-5, 3), ec + Vector2(5, 3), skin.darkened(0.2), 0.8)
 		if echo:
 			draw_line(ec + Vector2(0, 4), ec + Vector2(1, 14 + fposmod(t * 12.0 + e * 7.0, 14.0)), Color(1.0, 0.2, 0.15, 0.6), 1.8)
 	var bl := Vector2(-8, -9)
@@ -492,16 +639,15 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 	var bc := hair.darkened(0.1)
 	if who == "aldous" or who == "keeper":
 		bc = Color("d8d4d0")
-	draw_line(hc + bl + Vector2(-6, tilt * -0.5), hc + bl + Vector2(6, tilt * 0.5), bc, 3.2)
-	draw_line(hc + br2 + Vector2(-6, tilt * 0.5), hc + br2 + Vector2(6, tilt * -0.5), bc, 3.2)
+	draw_line(hc + bl + Vector2(-5, tilt * -0.5), hc + bl + Vector2(5, tilt * 0.5), bc, 2.0)
+	draw_line(hc + br2 + Vector2(-5, tilt * 0.5), hc + br2 + Vector2(5, tilt * -0.5), bc, 2.0)
 	var talk := 0.5 + 0.5 * sin(t * 9.0 + ph)
 	var lipc := Color("7a3a38")
 	match mood:
 		"worry":
 			draw_arc(hc + Vector2(3, 20), 5.0, PI * 1.15, PI * 1.85, 8, lipc, 2.4)
 		"awe":
-			draw_circle(hc + Vector2(3, 17), 2.4 + talk * 1.6, Color("3a1418"))
-			draw_arc(hc + Vector2(3, 17), 3.0 + talk * 1.6, 0, TAU, 8, lipc, 1.2)
+			draw_line(hc + Vector2(-2, 16), hc + Vector2(7, 16.8), lipc, 1.8)
 		"stern":
 			draw_line(hc + Vector2(-3, 17), hc + Vector2(9, 17), lipc, 2.6)
 			draw_line(hc + Vector2(-3, 18.5), hc + Vector2(8, 18.5), lipc.lightened(0.2), 1.2)
@@ -517,11 +663,16 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 	if who == "aldous" or who == "keeper":
 		draw_line(hc + Vector2(-9, 2), hc + Vector2(-9, 6), Color(0, 0, 0, 0.2), 1.2)
 		draw_line(hc + Vector2(8, 1), hc + Vector2(12, 4), Color(0, 0, 0, 0.2), 1.2)
-		draw_colored_polygon(PackedVector2Array([hc + Vector2(-19, 8), hc + Vector2(21, 8), hc + Vector2(13, 40 + sw * 2.0), hc + Vector2(2, 56), hc + Vector2(-12, 40)]), Color("d8d4d0"))
+		draw_colored_polygon(PackedVector2Array([hc + Vector2(-19, 8), hc + Vector2(-10, 14), hc + Vector2(1, 20), hc + Vector2(10, 14), hc + Vector2(21, 8), hc + Vector2(13, 32 + sw * 2.0), hc + Vector2(2, 42), hc + Vector2(-12, 32)]), Color("b6b5ae"))
 		for st in 6:
-			draw_line(hc + Vector2(-12 + st * 5, 12), hc + Vector2(-9 + st * 4, 38 + sw * 2.0), Color(0.6, 0.6, 0.62, 0.6), 1.2)
+			draw_line(hc + Vector2(-12 + st * 5, 18), hc + Vector2(-9 + st * 4, 31 + sw * 2.0), Color(0.9, 0.89, 0.85, 0.6), 1.2)
 		draw_arc(hc, 24.0, PI * 0.9, TAU + PI * 0.1, 16, hair, 9.0)
 		draw_line(hc + Vector2(-14, 12), hc + Vector2(3, 10), Color("8a5a50"), 2.0)
+	elif who == "smith":
+		draw_arc(hc, 24, PI * 0.95, TAU + 0.2, 20, Color("514539"), 12)
+		draw_line(hc + Vector2(-26, -5), hc + Vector2(25, -5), Color("77614a"), 4)
+		for st in 8:
+			draw_line(hc + Vector2(-14 + st * 4, 16), hc + Vector2(-12 + st * 3.5, 25), Color("3d3029"), 1)
 	elif who == "bellman":
 		draw_colored_polygon(PackedVector2Array([hc + Vector2(-26, -8), hc + Vector2(-16, -32), hc + Vector2(16, -32), hc + Vector2(26, -8), hc + Vector2(40, -2), hc + Vector2(-40, -2)]), Color("1a1210"))
 		draw_line(hc + Vector2(-40, -2), hc + Vector2(40, -2), Color("3a2a20"), 2.5)
@@ -540,6 +691,93 @@ func _done() -> void:
 	_tf()
 
 
+func _banner(c: Vector2, col: Color, ph: float) -> void:
+	draw_line(c - Vector2(65, 0), c + Vector2(65, 0), Color("736044"), 6)
+	var left := PackedVector2Array()
+	var right := PackedVector2Array()
+	for i in 17:
+		var y := i * 13.0
+		var sway := sin(t * 0.7 + i * 0.13 + ph) * 8.0 * i / 16.0
+		left.append(c + Vector2(-50 + sway, y))
+		right.append(c + Vector2(50 + sway, y))
+	var cloth := PackedVector2Array(left)
+	right.reverse()
+	cloth.append_array(right)
+	draw_colored_polygon(cloth, col)
+	for seam in 5:
+		var pts := PackedVector2Array()
+		for i in 17:
+			pts.append(c + Vector2(-40 + seam * 20 + sin(t * 0.7 + i * 0.13 + ph) * 8.0 * i / 16.0, i * 13))
+		draw_polyline(pts, Color(0, 0, 0, 0.12), 3)
+	draw_circle(c + Vector2(0, 76), 26, Color("9a8055"))
+	draw_circle(c + Vector2(0, 76), 21, col)
+	draw_line(c + Vector2(0, 44), c + Vector2(0, 111), Color("9a8055"), 3)
+	draw_line(c + Vector2(-15, 66), c + Vector2(15, 66), Color("9a8055"), 3)
+
+
+func _chain(a: Vector2, b: Vector2, sag: float) -> void:
+	for i in 33:
+		var u := i / 32.0
+		var c := a.lerp(b, u) + Vector2(0, sin(u * PI) * sag)
+		draw_arc(c, 4.5, 0, TAU, 8, Color("766754"), 1.5)
+
+
+func _memory_face(c: Vector2, s: float, col: Color, ph: float) -> void:
+	var bob := Vector2(sin(t * 0.6 + ph) * 7, cos(t * 0.9 + ph) * 8)
+	_tf(c + bob, sin(t * 0.4 + ph) * 0.05, Vector2.ONE * s)
+	var pts := PackedVector2Array([Vector2(-24, -16), Vector2(-16, -32), Vector2(8, -34), Vector2(25, -14), Vector2(22, 10), Vector2(5, 31), Vector2(-10, 25), Vector2(-23, 8)])
+	draw_colored_polygon(pts, Color(col, 0.14))
+	_poly_outline(pts, Color(col, 0.35), 1.5)
+	for side in [-1.0, 1.0]:
+		var ec := Vector2(side * 9, -5)
+		draw_arc(ec + Vector2(0, -4), 6, 0.2, PI - 0.2, 10, Color(col, 0.7), 1.5)
+		draw_line(ec + Vector2(-5, -9), ec + Vector2(5, -12 * side), Color(col, 0.45), 1.3)
+		var tear := fposmod(t * 9 + ph * 13, 18)
+		draw_line(ec + Vector2(1, 2), ec + Vector2(1, 6 + tear), Color(col, 0.4), 1.2)
+	draw_polyline(PackedVector2Array([Vector2(0, -6), Vector2(4, 8), Vector2(-2, 8)]), Color(col, 0.4), 1.3)
+	draw_arc(Vector2(2, 24), 7, PI * 1.15, PI * 1.85, 10, Color(col, 0.6), 1.5)
+	_tf()
+
+
+func _infant(c: Vector2, s: float) -> void:
+	_tf(c, -0.15, Vector2.ONE * s)
+	draw_colored_polygon(PackedVector2Array([Vector2(-62, 5), Vector2(-48, -25), Vector2(15, -38), Vector2(62, -10), Vector2(56, 26), Vector2(-36, 28)]), Color("4e5666"))
+	for fold in 5:
+		draw_line(Vector2(-36 + fold * 17, -14), Vector2(-17 + fold * 16, 24), Color("818696"), 2)
+	draw_circle(Vector2(-26, -12), 16, Color("d4ae8e"))
+	draw_arc(Vector2(-26, -12), 19, PI * 0.8, TAU + PI * 0.1, 22, Color("9b9b99"), 7)
+	for side in [-1.0, 1.0]:
+		draw_arc(Vector2(-26 + side * 6, -12), 3, 0, PI, 10, Color("493332"), 1.3)
+	draw_line(Vector2(-29, -3), Vector2(-24, -2), Color("81504b"), 1.5)
+	_tf()
+
+
+func _cart(c: Vector2) -> void:
+	draw_rect(Rect2(c.x, c.y - 100, 300, 84), Color("382a24"))
+	for slat in 9:
+		var x := c.x + slat * 34
+		draw_line(Vector2(x, c.y - 98), Vector2(x, c.y - 18), Color("1b1413"), 3)
+		draw_line(Vector2(x + 6, c.y - 88), Vector2(x + 6, c.y - 26), Color("5b4230"), 1)
+	for band in 2:
+		draw_rect(Rect2(c.x, c.y - 90 + band * 56, 300, 7), Color("17191d"))
+		for rivet in 10:
+			draw_circle(Vector2(c.x + 12 + rivet * 30, c.y - 86 + band * 56), 2, Color("807264"))
+	for w in 2:
+		var hub := c + Vector2(58 + w * 185, 0)
+		draw_circle(hub, 44, Color("100f13"))
+		draw_arc(hub, 42, 0, TAU, 36, Color("67503b"), 5)
+		draw_arc(hub, 46, 0, TAU, 36, Color("292a30"), 3)
+		for spoke in 10:
+			var a := spoke * TAU / 10 + t * 0.65
+			draw_line(hub, hub + Vector2(cos(a), sin(a)) * 38, Color("594431"), 3)
+		draw_circle(hub, 7, Color("8d7251"))
+	draw_line(c + Vector2(290, -35), c + Vector2(410, -24), Color("493526"), 8)
+	for bundle in 3:
+		var x := c.x + 45 + bundle * 85
+		draw_colored_polygon(PackedVector2Array([Vector2(x - 35, c.y - 102), Vector2(x - 22, c.y - 128), Vector2(x + 12, c.y - 134), Vector2(x + 43, c.y - 104)]), Color("615b53"))
+		draw_line(Vector2(x - 13, c.y - 126), Vector2(x + 2, c.y - 104), Color("32302f"), 2)
+
+
 
 func plate(p: float) -> void:
 	_tf()
@@ -550,6 +788,10 @@ func plate(p: float) -> void:
 			_moon(Vector2(1400, 260), 70.0, Color("d8d8e8"))
 			_spires(700.0, Color("0b0b16"), -drift)
 			_ground(840.0, Color("08080e"))
+			_chapel(380, 830, 0.85, false)
+			_chain(Vector2(60, 680), Vector2(650, 680), 45)
+			for i in 5:
+				_candle(Vector2(780 + i * 31, 834), 0.55 + (i % 3) * 0.2, i)
 			for i in 40:
 				var gx := fposmod(i * 97.0 + t * 8.0, 1920.0)
 				draw_rect(Rect2(gx, 820 - (i % 5) * 12, 6, 40 + (i % 4) * 14), Color("14141e"))
@@ -573,13 +815,19 @@ func plate(p: float) -> void:
 				draw_circle(q + Vector2(6, -2), 3.5, Color("ff3020"))
 				draw_colored_polygon(PackedVector2Array([q + Vector2(-18, 8), q + Vector2(18, 8), q + Vector2(8, 80 + 12 * sin(t * 3 + i)), q + Vector2(-8, 56)]), Color(0.5, 0.05, 0.05, 0.3))
 			_ground(860.0, Color("060102"))
+			for shard in 18:
+				var a := shard * 2.39996
+				var spread := 150 + shard * 18 + _beat(0.2, 0.7) * 100
+				var debris := c + Vector2(cos(a) * spread, sin(a) * spread * 0.65 + 170)
+				draw_colored_polygon(PackedVector2Array([debris + Vector2(-6, -14), debris + Vector2(12, 0), debris + Vector2(0, 8)]), Color("5a2521"))
 		"echo":
 			_sky(Color("080a14"), Color("26304a"))
 			_ground(860.0, Color("06060c"))
-			draw_rect(Rect2(380, 160, 1160, 700), Color("1c1c28"))
-			for i in 7:
-				for j in 4:
-					draw_rect(Rect2(380 + i * 166 + (j % 2) * 40, 160 + j * 175, 160, 168), Color("22222f"))
+			draw_rect(Rect2(640, 430, 640, 410), Color("20242b"))
+			_brick(640, 430, 640, 410, Color("4c4b4a"))
+			_chain(Vector2(640, 470), Vector2(1280, 470), 100)
+			_reliquary(Vector2(420, 830), 1.5, Color("b36952"), 2)
+			_reliquary(Vector2(1500, 830), 1.5, Color("b36952"), 2)
 			var pulse := 0.5 + 0.5 * sin(t * 1.6)
 			var fig := Vector2(960, 520)
 			for k in 6:
@@ -588,7 +836,7 @@ func plate(p: float) -> void:
 			draw_colored_polygon(PackedVector2Array([fig + Vector2(-70, -100), fig + Vector2(70, -100), fig + Vector2(110, 260), fig + Vector2(-110, 260)]), Color(1.0, 0.4, 0.32, 0.1 + 0.12 * pulse))
 			draw_line(fig + Vector2(-60, -60), fig + Vector2(-130, 40), Color(1.0, 0.4, 0.32, 0.2), 6.0)
 			draw_line(fig + Vector2(60, -60), fig + Vector2(120, -170), Color(1.0, 0.4, 0.32, 0.2), 6.0)
-			_person(Vector2(960, 850), 2.7, "echo", 1.0, "worry", false, 0.5)
+			_person(Vector2(960, 900 - _beat(0.12, 0.6) * 65), 2.7, "echo", 1.0, "worry", false, 0.5, _beat(0.3, 0.6) * 0.7)
 		"bellward":
 			_sky(Color("0a0c1a"), Color("34385a"))
 			_ground(850.0, Color("07070d"))
@@ -614,6 +862,8 @@ func plate(p: float) -> void:
 				draw_circle(Vector2(gx, gy - 10), 40.0, col)
 				draw_rect(Rect2(gx - 40, gy - 10, 80, 100), col)
 				draw_arc(Vector2(gx, gy - 90), 66.0, PI, TAU, 16, Color(0.9, 0.75, 0.4, 0.4), 3.0)
+				_reliquary(Vector2(gx, gy + 130), 0.85, col, i)
+				_chain(Vector2(gx - 64, gy - 45), Vector2(gx + 64, gy - 45), 40)
 		"abom":
 			_sky(Color("100204"), Color("3a0810"))
 			_ground(860.0, Color("050102"))
@@ -626,6 +876,20 @@ func plate(p: float) -> void:
 			for sx in [860.0, 1060.0]:
 				draw_circle(Vector2(sx, ey), 40.0, Color(1.0, 0.1, 0.05, 0.18))
 				draw_colored_polygon(PackedVector2Array([Vector2(sx - 36, ey - 8), Vector2(sx + 4, ey - 24), Vector2(sx + 36, ey + 8), Vector2(sx, ey + 14)]), Color("ff3a20"))
+			for side in [-1.0, 1.0]:
+				var jaw := PackedVector2Array([Vector2(960 + side * 200, 490 + bb), Vector2(960 + side * 130, 560 + bb), Vector2(960 + side * 65, 590 + bb), Vector2(960, 620 + bb)])
+				draw_polyline(jaw, Color("6d2924"), 5)
+				var arm := PackedVector2Array([Vector2(960 + side * 220, 450 + bb), Vector2(960 + side * 340, 590 + bb), Vector2(960 + side * 400, 760 + sin(t * 0.7) * 15)])
+				draw_polyline(arm, Color("120608"), 50)
+				draw_polyline(arm, Color("402023"), 3)
+				for claw in 4:
+					var cp := Vector2(960 + side * (380 + claw * 16), 750)
+					draw_polyline(PackedVector2Array([cp, cp + Vector2(side * 10, 45 + claw * 4), cp + Vector2(-side * 5, 60 + claw * 3)]), Color("817163"), 4)
+			for rib in 6:
+				draw_arc(Vector2(960, 590 + rib * 32 + bb), 65 + rib * 11, PI * 0.05, PI * 0.95, 24, Color(0.55, 0.24, 0.2, 0.28), 3)
+			for tooth in 9:
+				var tx := 890 + tooth * 17.0
+				draw_colored_polygon(PackedVector2Array([Vector2(tx, 560 + bb), Vector2(tx + 10, 560 + bb), Vector2(tx + 5, 575 + bb + tooth % 3 * 6)]), Color("a17c63"))
 			for i in 14:
 				var hx := 90.0 + i * 130.0
 				draw_circle(Vector2(hx, 800.0 + (i % 3) * 20.0), 18.0, Color(0.1, 0.0, 0.0))
@@ -643,6 +907,14 @@ func plate(p: float) -> void:
 					draw_circle(Vector2(960, 640) + Vector2(cos(a0 + u * 5.0), sin(a0 + u * 5.0) * 0.6) * r, 8.0 * (1.0 - u) + 2.0, Color(pc, 0.7))
 			for r in 5:
 				draw_circle(Vector2(960, 700), 90.0 + r * 40.0, Color(1.0, 0.45, 0.3, 0.04))
+			_reliquary(Vector2(420, 820), 1.8, Color("55b4a5"), 0)
+			_reliquary(Vector2(1500, 820), 1.8, Color("c8a050"), 1)
+			for side in [-1.0, 1.0]:
+				var stream := PackedVector2Array()
+				for k in 40:
+					var u := k / 39.0
+					stream.append(Vector2(960 + side * 520 * (1 - u), 670 - sin(u * PI) * 130 + sin(u * 18 - t * 2) * 12))
+				draw_polyline(stream, Color(0.95, 0.62, 0.35, 0.12 + _beat(0.2, 0.6) * 0.3), 4)
 		"farewell":
 			_sky(Color("1a1018"), Color("5a3a48"))
 			_ground(850.0, Color("0a080c"))
@@ -650,25 +922,29 @@ func plate(p: float) -> void:
 			draw_rect(Rect2(640, 520, 130, 330), Color("2a1c10"))
 			draw_circle(Vector2(705, 520), 65.0, Color("2a1c10"))
 			draw_rect(Rect2(660, 540, 90, 310), Color(1.0, 0.7, 0.35, 0.55))
-			_person(Vector2(1080, 890), 2.2, "mu", 1.0, "worry", false, 0.0, smoothstep(9.0, 11.0, t))
-			_person(Vector2(1500, 890), 2.2, "aldous", -1.0, "talk", false, 2.0, smoothstep(2.0, 4.0, t) * (1.0 - smoothstep(8.0, 10.0, t) * 0.8))
-			var bl := Vector2(1380, 660 + sin(t * 1.5) * 6.0).lerp(Vector2(1260, 640), smoothstep(7.0, 10.0, t))
-			draw_line(bl, bl + Vector2(-110, 0), Color("d0d4e0"), 7.0)
-			draw_rect(Rect2(bl.x - 6, bl.y - 28, 10, 56), Color("a88838"))
-			draw_circle(bl + Vector2(-60, 0), 40.0, Color(1.0, 0.3, 0.2, 0.08 + 0.05 * sin(t * 3.0)))
+			_banner(Vector2(860, 300), Color("382226"), 0)
+			var reach := _beat(0.25, 0.45)
+			var accept := _beat(0.5, 0.68)
+			_person(Vector2(1080, 890), 2.2, "mu", 1.0, "worry" if accept < 0.5 else "stern", false, 0.0, accept)
+			_person(Vector2(1500, 890), 2.2, "aldous", -1.0, "talk" if accept < 0.7 else "worry", false, 2.0, reach * (1 - accept))
+			var give_hand := Vector2(1500, 856) + Vector2(-1, 1) * Vector2(39, -73).lerp(Vector2(78, -126), reach) * 2.2
+			var take_hand := Vector2(1080, 856) + Vector2(39, -73).lerp(Vector2(78, -126), accept) * 2.2
+			var hilt := give_hand.lerp(take_hand, accept)
+			var blade_dir := Vector2.LEFT.rotated(-PI * 0.5 * accept)
+			var blade_side := blade_dir.orthogonal()
+			draw_line(hilt + blade_dir * 20, hilt + blade_dir * 155, Color("a7b4be"), 8)
+			draw_line(hilt + blade_dir * 20 + blade_side * 2, hilt + blade_dir * 155 + blade_side * 2, Color("e5e5de"), 2)
+			draw_line(hilt + blade_dir * 20 - blade_side * 24, hilt + blade_dir * 20 + blade_side * 24, Color("b3985c"), 7)
+			draw_line(hilt, hilt + blade_dir * 18, Color("49392c"), 8)
+			draw_circle(hilt - blade_dir * 6, 6, Color("b3985c"))
 		"carts":
 			_sky(Color("0c0a10"), Color("3a2c30"))
 			_moon(Vector2(500, 230), 60.0, Color("c8c0b8"))
 			_skyline(700.0, Color("0b0a10"), false, false)
 			_ground(820.0, Color("07060a"))
 			_fog(790.0, 0.07)
-			var cx := fposmod(t * 40.0, 2400.0) - 300.0
-			draw_rect(Rect2(cx, 700, 300, 90), Color("1a1410"))
-			for w in 2:
-				draw_circle(Vector2(cx + 60 + w * 180, 800), 40.0, Color("0a0806"))
-				draw_arc(Vector2(cx + 60 + w * 180, 800), 40.0, 0, TAU, 16, Color("3a2c20"), 5.0)
-			for k in 5:
-				draw_circle(Vector2(cx + 40 + k * 55, 690), 20.0, Color("2a2420"))
+			var cx := 320 + p * 580
+			_cart(Vector2(cx, 800 + sin(t * 2.7) * 2))
 			_person(Vector2(cx + 400, 830), 1.8, "bellman", 1.0, "stern", true)
 			draw_circle(Vector2(cx + 330, 720), 12.0, Color("e8a040"))
 			for r in 4:
@@ -693,9 +969,11 @@ func plate(p: float) -> void:
 				_pointed(ax, 760.0, 150.0, 400.0, Color("1a1a24"))
 				_pointed(ax, 760.0, 96.0, 360.0, Color("08080c"))
 			_ground(760.0, Color("0c0c12"))
-			var gx := 480.0 + fposmod(t * 30.0, 900.0)
+			var gx := 630.0 + sin(t * 0.15) * 180
 			draw_colored_polygon(PackedVector2Array([Vector2(gx - 40, 740), Vector2(gx + 40, 740), Vector2(gx + 56, 340), Vector2(gx - 56, 340)]), Color(1.0, 0.4, 0.32, 0.14))
-			_person(Vector2(gx, 760), 2.3, "echo", 1.0, "talk", false, 1.0)
+			_person(Vector2(gx, 800), 2.3, "echo", 1.0, "worry", false, 1.0, _beat(0.2, 0.55))
+			_banner(Vector2(1480, 340), Color("2c313c"), 2)
+			_chain(Vector2(1400, 680), Vector2(1560, 680), 50)
 			draw_circle(Vector2(gx, 300), 36.0, Color(1.0, 0.4, 0.32, 0.22))
 			draw_arc(Vector2(gx, 300), 60.0 + sin(t * 3.0) * 8.0, 0, TAU, 24, Color(1.0, 0.3, 0.25, 0.3), 3.0)
 		"kinds":
@@ -710,10 +988,14 @@ func plate(p: float) -> void:
 				for r in 5:
 					draw_circle(Vector2(ax, by), 40.0 + r * 22.0, Color(kc[i], 0.07))
 				draw_circle(Vector2(ax, by), 30.0, kc[i])
+				_reliquary(Vector2(ax, 820), 1.8, kc[i], i)
 		"foundry":
 			_sky(Color("0e0806"), Color("2a1810"))
 			_ground(820.0, Color("08040a"))
+			_chain(Vector2(740, 200), Vector2(960, 280), 20)
+			_chain(Vector2(1180, 200), Vector2(960, 280), 20)
 			draw_rect(Rect2(560, 560, 800, 300), Color("1a0c08"))
+			_brick(560, 560, 800, 300, Color("554035"))
 			var gl := 0.7 + 0.3 * sin(t * 5.0)
 			draw_rect(Rect2(660, 640, 600, 120), Color(1.0, 0.45, 0.1, 0.8 * gl))
 			for r in 6:
@@ -721,8 +1003,20 @@ func plate(p: float) -> void:
 			_bell(Vector2(960, 360), 1.5, Color("a87830"), 0.0)
 			for h in 3:
 				var hx := 360.0 + h * 600.0
-				draw_colored_polygon(PackedVector2Array([Vector2(hx - 40, 830), Vector2(hx - 24, 560), Vector2(hx + 24, 560), Vector2(hx + 40, 830)]), Color("050304"))
-				draw_circle(Vector2(hx, 530), 30.0, Color("050304"))
+				_person(Vector2(hx, 870), 1.9, "smith", 1 if h == 0 else -1, "stern", false, h, 0.5 + sin(t * 0.8 + h) * 0.3)
+				_candle(Vector2(hx - 60, 850), 1.3, h)
+			var pour := _beat(0.18, 0.4) * (1 - _beat(0.7, 0.85))
+			draw_line(Vector2(1000, 230), Vector2(1330, 230), Color("594637"), 14)
+			_chain(Vector2(1030, 230), Vector2(1090, 450), 0)
+			_chain(Vector2(1300, 230), Vector2(1200, 455), 0)
+			_tf(Vector2(1140, 500), -0.6 * pour, Vector2.ONE)
+			draw_colored_polygon(PackedVector2Array([Vector2(-65, -50), Vector2(65, -50), Vector2(45, 45), Vector2(-45, 45)]), Color("4a3d32"))
+			draw_line(Vector2(-60, -46), Vector2(60, -46), Color("ffc569"), 8)
+			draw_arc(Vector2.ZERO, 72, PI, TAU, 24, Color("75624b"), 7)
+			_tf()
+			if pour > 0.05:
+				draw_polyline(PackedVector2Array([Vector2(1070, 490), Vector2(1050, 530), Vector2(1060, 630), Vector2(1060, 680)]), Color(1, 0.55, 0.15, pour), 8)
+				_glow(Vector2(1060, 680), 130, Color("ff9430"), pour)
 		"binding":
 			_sky(Color("0a0a12"), Color("2a2a36"))
 			_ground(860.0, Color("060608"))
@@ -768,6 +1062,14 @@ func plate(p: float) -> void:
 			for i in 7:
 				draw_rect(Rect2(260 + i * 70, 300 - (i % 3) * 30, 52, 120), Color("0e0e16"))
 			_skyline(780.0, Color("0b0b12"), true, false)
+			draw_rect(Rect2(60, 660, 820, 240), Color("292a30"))
+			_brick(60, 660, 820, 240, Color("515056"))
+			for vault in 4:
+				var vx := 160 + vault * 190.0
+				_pointed(vx, 870, 120, 85, Color("090b11"))
+				for bar in 5:
+					draw_line(Vector2(vx - 40 + bar * 20, 755), Vector2(vx - 40 + bar * 20, 875), Color("4b4541"), 3)
+				_chain(Vector2(vx - 45, 800), Vector2(vx + 45, 800), 16)
 			_ground(820.0, Color("060608"))
 			for i in 6:
 				var u := fposmod(t * 0.08 + i * 0.17, 1.0)
@@ -778,6 +1080,13 @@ func plate(p: float) -> void:
 			_sky(Color("140e12"), Color("8a5a40"))
 			_moon(Vector2(400, 230), 52.0, Color("e8d0a8"))
 			_skyline(780.0, Color("0c0808"), true, true)
+			for pillar in 4:
+				var px := 180 + pillar * 260.0
+				draw_rect(Rect2(px - 65, 730, 130, 180), Color("39302a"))
+				_brick(px - 65, 730, 130, 180, Color("6e5949"))
+				_reliquary(Vector2(px, 744), 0.6, Color("bdac83"), 2)
+				if pillar < 3:
+					_chain(Vector2(px + 65, 790), Vector2(px + 195, 790), 22)
 			_ground(820.0, Color("060404"))
 			_person(Vector2(1240, 880), 1.9, "bellman", -1.0, "stern", true, 2.0)
 			_fog(850.0, 0.07)
@@ -789,20 +1098,26 @@ func plate(p: float) -> void:
 			_rose(Vector2(960, 300), 160.0, Color(0.85, 0.6, 0.35, 0.5))
 			_bell(Vector2(1300, 380), 1.6, Color("a87830"), 0.0)
 			_ground(860.0, Color("0a0a10"))
-			_person(Vector2(560, 880), 2.7, "kid", 1.0, "awe")
-			draw_circle(Vector2(560, 770), 18.0 + sin(t * 3.0) * 3.0, Color(1.0, 0.4, 0.3, 0.2))
+			draw_rect(Rect2(710, 460, 300, 400), Color("383a40"))
+			_brick(710, 460, 300, 400, Color("66666a"))
+			for mask in 3:
+				_memory_face(Vector2(780 + mask * 68, 580), 0.7, Color("ad6c5c"), mask)
+			_person(Vector2(560 + _beat(0.1, 0.3) * 35, 880), 2.7, "kid", 1.0, "awe", false, 0, _beat(0.2, 0.45))
+			_chain(Vector2(1300, 520), Vector2(1325, 850), 8)
+			_candle(Vector2(430, 840), 1.2, 1)
 		"price":
 			_sky(Color("0a0408"), Color("2a1018"))
 			_ground(880.0, Color("050204"))
 			_person(Vector2(700, 890), 2.6, "mu", 1.0, "worry")
-			for i in 12:
-				var fx := 1100.0 + (i % 4) * 150.0
-				var fy := 420.0 + (i / 4) * 180.0 + sin(t + i) * 12.0
-				draw_circle(Vector2(fx, fy), 44.0, Color(1.0, 0.3, 0.25, 0.1))
-				draw_circle(Vector2(fx, fy), 28.0, Color(0.9, 0.85, 0.8, 0.18))
-				draw_circle(Vector2(fx - 9, fy - 4), 3.0, Color("1a0000"))
-				draw_circle(Vector2(fx + 9, fy - 4), 3.0, Color("1a0000"))
-				draw_line(Vector2(fx - 8, fy + 10), Vector2(fx + 8, fy + 10), Color("1a0000"), 2.0)
+			for i in 7:
+				var a := i * 0.45 - 1.5
+				var pos := Vector2(1180 + cos(a) * 280, 580 + sin(a) * 230)
+				_memory_face(pos, 1.2 + i * 0.06, Color("d88676"), i)
+				var thread := PackedVector2Array()
+				for k in 25:
+					var u := k / 24.0
+					thread.append(pos.lerp(Vector2(790, 690), u) + Vector2(0, sin(u * PI) * 80 + sin(u * 10 + t) * 5))
+				draw_polyline(thread, Color(0.8, 0.18, 0.13, 0.15 + _beat(0.1, 0.6) * 0.2), 1.5)
 			draw_arc(Vector2(790, 700), 28.0 + sin(t * 4.0) * 3.0, 0, TAU, 16, Color(1.0, 0.25, 0.2, 0.7), 5.0)
 		"foundling":
 			_sky(Color("0a0c18"), Color("3c4060"))
@@ -810,16 +1125,13 @@ func plate(p: float) -> void:
 				var rx := fposmod(i * 61.0 - t * 160.0, 1960.0)
 				var ry := fposmod(i * 97.0 + t * 700.0, 1080.0)
 				draw_line(Vector2(rx, ry), Vector2(rx - 10, ry + 34), Color(0.7, 0.75, 0.9, 0.35), 2.0)
-			if fmod(t, 4.0) < 0.15:
-				draw_rect(Rect2(0, 0, 1920, 1080), Color(0.9, 0.9, 1.0, 0.25))
 			_chapel(700.0, 820.0, 1.6, true)
 			_ground(820.0, Color("08080c"))
-			draw_rect(Rect2(660, 800, 90, 24), Color("1a1a24"))
-			draw_circle(Vector2(705, 790), 15.0, Color("e8d0b8"))
-			draw_rect(Rect2(690, 796, 30, 14), Color("8a6a50"))
+			var rescue := _beat(0.25, 0.65)
 			for r in 4:
 				draw_circle(Vector2(705, 780), 60.0 + r * 30.0, Color(1.0, 0.8, 0.5, 0.05))
-			_person(Vector2(880, 830), 2.0, "aldous", -1.0, "awe", false, 3.0)
+			_person(Vector2(960 - _beat(0.05, 0.25) * 110, 830 + rescue * 30), 2.0, "aldous", -1.0, "worry" if rescue < 0.5 else "calm", false, 3.0, rescue)
+			_infant(Vector2(705, 794).lerp(Vector2(741, 613), rescue), 0.9)
 			_tf(Vector2(1180, 290), sin(t * 3.0) * 0.12, Vector2.ONE)
 			draw_circle(Vector2.ZERO, 36.0, Color("c8a050"))
 			draw_circle(Vector2(0, 10), 14.0, Color("14101c"))
@@ -831,6 +1143,8 @@ func plate(p: float) -> void:
 			_ground(830.0, Color("0c0a10"))
 			_person(Vector2(500, 860), 2.6, "kid", 1.0, "awe")
 			_person(Vector2(800, 860), 2.2, "aldous", -1.0, "talk", false, 1.0, 0.5 + 0.5 * sin(t * 0.8))
+			_candle(Vector2(1050, 820), 1.7, 2)
+			_banner(Vector2(1080, 320), Color("302b3b"), 3)
 			for i in 9:
 				var u := fposmod(t * 0.2 + i * 0.11, 1.0)
 				var q := Vector2(1100 + sin(t + i) * 40.0, 780.0 - u * 460.0)
@@ -863,5 +1177,3 @@ func plate(p: float) -> void:
 				draw_line(Vector2(px, 800), Vector2(px - 260, 806), Color("0a0810"), 5.0)
 			_person(Vector2(960, 900 - wob - p * 40.0), 2.3 - p * 0.8, "mu", 1.0, "stern", true)
 			_chapel(360.0, 830.0, 1.0, true)
-
-

@@ -2,6 +2,7 @@ extends Node2D
 ## Builds a location from data/maps/<name>.json and runs its rules, puzzles and events.
 
 const Art = preload("res://src/core/art.gd")
+const Materials = preload("res://src/core/pixel_materials.gd")
 const PlayerScript = preload("res://src/entities/player.gd")
 const EnemyScript = preload("res://src/entities/enemy.gd")
 const ArenaFxScript = preload("res://src/entities/arena_fx.gd")
@@ -355,6 +356,8 @@ func _setup_camera() -> void:
 	cam.limit_bottom = h * TILE
 	var z := maxf(2.0 if meta.has("boss") else 2.6, maxf(1920.0 / (w * TILE), 1080.0 / (h * TILE)))
 	cam.zoom = Vector2(z, z)
+	# Keep feet and interaction targets above the command bar at the map edge.
+	cam.limit_bottom += ceili(HudScript.BOTTOM_SAFE / z)
 	if theme in TOWN_THEMES:
 		cam.position_smoothing_enabled = true
 		cam.position_smoothing_speed = 7.0
@@ -378,15 +381,14 @@ func _setup_hud() -> void:
 func _setup_atmosphere() -> void:
 	var tint := CanvasModulate.new()
 	tint_node = tint
-	tint.color = {"vault": Color(0.38, 0.4, 0.56), "prague": Color(0.46, 0.46, 0.52), "chapel": Color(0.62, 0.46, 0.47), "town_e": Color(0.5, 0.52, 0.68), "town_p": Color(0.62, 0.56, 0.58), "interior": Color(0.78, 0.68, 0.62)}[theme]
-	tint.color *= Color(1.12, 1.12, 1.1, 1.0)
+	tint.color = {"vault": Color("788d98"), "prague": Color("aaa08c"), "chapel": Color("a99b8c"), "town_e": Color("899eae"), "town_p": Color("b6a18a"), "interior": Color("c2af91")}[theme]
 	tint_base = tint.color
 	add_child(tint)
 	var lamp := Art.make_light(Color("ffd9a0"), 2.0, 1.0)
 	player.add_child(lamp)
 	var g := Gradient.new()
 	g.offsets = PackedFloat32Array([0.6, 1.0])
-	g.colors = PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0.55)])
+	g.colors = PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0.18)])
 	var tex := GradientTexture2D.new()
 	tex.gradient = g
 	tex.fill = GradientTexture2D.FILL_RADIAL
@@ -764,17 +766,9 @@ func _draw() -> void:
 	var vault := theme == "vault"
 	var prague := theme == "prague" or theme == "town_p"
 	var interior := theme == "interior"
-	var floor_a := Color("2c2a33") if vault else (Color("34363f") if prague else Color("35383f"))
-	var floor_b := Color("26242d") if vault else (Color("2a2c35") if prague else Color("2e3138"))
-	if theme == "town_e":
-		floor_a = Color("3c3f4a")
-		floor_b = Color("343742")
-	elif theme == "town_p":
-		floor_a = Color("4a4238")
-		floor_b = Color("40382f")
 	var wall_top := Color("15131b")
 	var wall_face := Color("494d58") if vault else (Color("565a66") if prague else Color("545966"))
-	var mortar := Color("2a2633")
+	var mortar := Color("262c31")
 	for y in h:
 		for x in w:
 			var c := Vector2i(x, y)
@@ -794,7 +788,8 @@ func _draw() -> void:
 				if _is_solid_char(c + Vector2i(0, 1)):
 					draw_rect(r, wall_top)
 				else:
-					draw_rect(r, wall_face)
+					Materials.floor_tile(self, r, theme if theme != "interior" else "wood", x, y)
+					draw_rect(r, Color(wall_face, 0.25))
 					var hh := (x * 928371 + y * 364479) % 5
 					var shade := Color(0, 0, 0, 0.12)
 					draw_rect(Rect2(r.position.x, r.position.y + 5, TILE, 1), mortar)
@@ -835,12 +830,20 @@ func _draw() -> void:
 			if interior:
 				_draw_floor_plank(r, x, y)
 			else:
-				var fa := floor_a
-				var fb := floor_b
-				if (theme == "town_e" or theme == "town_p") and ((x >= 50 and x <= 62) or (x >= 44 and x <= 68 and y >= 19 and y <= 25)):
-					fa = floor_a.lightened(0.12)
-					fb = floor_b.lightened(0.12)
-				draw_rect(r, fa if (x + y) % 2 == 0 else fb)
+				Materials.floor_tile(self, r, theme, x, y)
+				if theme in TOWN_THEMES:
+					var avenue := x >= 50 and x <= 62
+					var square := x >= 44 and x <= 68 and y >= 19 and y <= 25
+					if avenue or square:
+						Materials.floor_tile(self, r, "chapel" if theme == "town_p" else "cliff", x, y)
+					if avenue and (x == 50 or x == 62):
+						draw_rect(Rect2(r.position + Vector2(6, 0), Vector2(4, TILE)), Color("333b3c"))
+						draw_rect(Rect2(r.position + Vector2(6, 0), Vector2(0.5, TILE)), Color("8c8b72"))
+						for grate in 5:
+							draw_rect(Rect2(r.position + Vector2(7, 1 + grate * 3), Vector2(2, 1)), Color("151f26"))
+					if square and (y == 19 or y == 25):
+						draw_rect(Rect2(r.position + Vector2(0, 5), Vector2(TILE, 1)), Color("a9946b"))
+						draw_rect(Rect2(r.position + Vector2(0, 8), Vector2(TILE, 1)), Color("302c28"))
 				if theme in TOWN_THEMES:
 					var ph := (x * 92821 + y * 68917) % 23
 					if ph == 0:
@@ -855,14 +858,6 @@ func _draw() -> void:
 					elif ph == 2:
 						draw_rect(Rect2(r.position.x + 4, r.position.y + 5, 7, 5), Color(0.27, 0.29, 0.32, 0.5))
 						draw_rect(Rect2(r.position.x + 5, r.position.y + 5, 5, 1), Color(1, 1, 1, 0.08))
-				draw_rect(Rect2(r.position.x, r.position.y, TILE, 1), Color(0, 0, 0, 0.22))
-				draw_rect(Rect2(r.position.x, r.position.y, 1, TILE), Color(0, 0, 0, 0.22))
-				draw_rect(Rect2(r.position.x + 1, r.position.y + 1, TILE - 1, 1), Color(1, 1, 1, 0.04))
-				draw_rect(Rect2(r.position.x + 8, r.position.y + 8, 1, 8), Color(0, 0, 0, 0.12))
-				draw_rect(Rect2(r.position.x, r.position.y + 8, 16, 1), Color(0, 0, 0, 0.1))
-				for i in 6:
-					var dp := (x * 7 + y * 13 + i * 5) % 16
-					draw_rect(Rect2(r.position.x + dp, r.position.y + (dp * 3 + i * 5) % 16, 1, 1), Color(1, 1, 1, 0.05) if i % 2 == 0 else Color(0, 0, 0, 0.14))
 			if y > 0 and grid[y - 1][x] in ["#", "H"]:
 				draw_rect(Rect2(r.position.x, r.position.y, TILE, 5), Color(0, 0, 0, 0.35))
 				draw_rect(Rect2(r.position.x, r.position.y + 5, TILE, 3), Color(0, 0, 0, 0.15))
@@ -883,6 +878,11 @@ func _draw() -> void:
 				draw_rect(r, Color("5a2030"))
 				draw_rect(Rect2(r.position.x, r.position.y, 1, TILE), Color("8a6a3a"))
 				draw_rect(Rect2(r.position.x + 15, r.position.y, 1, TILE), Color("8a6a3a"))
+				for stitch in 4:
+					draw_rect(Rect2(r.position + Vector2(2, stitch * 4 + 1), Vector2(1, 2)), Color("c1a471"))
+					draw_rect(Rect2(r.position + Vector2(13, stitch * 4 + 1), Vector2(1, 2)), Color("c1a471"))
+				if y % 2 == 0:
+					draw_polyline(PackedVector2Array([r.position + Vector2(8, 4), r.position + Vector2(11, 8), r.position + Vector2(8, 12), r.position + Vector2(5, 8), r.position + Vector2(8, 4)]), Color("916140"), 0.5)
 			if ch == "o":
 				draw_rect(Rect2(r.position + Vector2(2, 2), Vector2(12, 14)), Color("686c78"))
 				draw_rect(Rect2(r.position + Vector2(2, 2), Vector2(12, 3)), Color("9a7a7d"))
@@ -934,8 +934,7 @@ func _draw_arena_cell(r: Rect2, x: int, y: int, ch: String) -> void:
 		draw_rect(Rect2(o.x, o.y + 13, TILE, 3), Color(0, 0, 0, 0.3))
 		return
 	if loch:
-		var deep := Color("12303a") if (x + y) % 2 == 0 else Color("0f2a34")
-		draw_rect(r, deep)
+		Materials.floor_tile(self, r, "water", x, y)
 		if hv % 4 == 0:
 			draw_rect(Rect2(o.x + 1, o.y + 1, 14, 14), Color(0.22, 0.4, 0.46, 0.35))
 			draw_rect(Rect2(o.x + 1, o.y + 1, 14, 1), Color(0.5, 0.75, 0.8, 0.22))
@@ -1038,7 +1037,7 @@ func _draw_themed_cell(r: Rect2, x: int, y: int, ch: String, hv: int) -> void:
 					draw_line(o + Vector2(2, 14), o + Vector2(8, 10), Color(1.0, 0.45, 0.1, 0.8), 1.0)
 		draw_rect(Rect2(o.x, o.y + 13, TILE, 3), Color(0, 0, 0, 0.3))
 		return
-	draw_rect(r, Color(P.fa) if (x + y) % 2 == 0 else Color(P.fb))
+	Materials.floor_tile(self, r, arena, x, y)
 	match arena:
 		"keep":
 			if hv % 4 == 0:
@@ -1116,13 +1115,7 @@ func _draw_house(r: Rect2, x: int, y: int) -> void:
 	var o := r.position
 	if below_h:
 		var rc: Color = roofs[idx]
-		draw_rect(r, rc)
-		for ry in 4:
-			var off := 0 if (ry + y) % 2 == 0 else 4
-			draw_rect(Rect2(o.x, o.y + ry * 4 + 3, TILE, 1), rc.darkened(0.35))
-			for k in 2:
-				draw_rect(Rect2(o.x + off + k * 8, o.y + ry * 4, 1, 3), rc.darkened(0.3))
-			draw_rect(Rect2(o.x, o.y + ry * 4, TILE, 1), rc.lightened(0.1))
+		Materials.floor_tile(self, r, "roof", x, y, rc.lightened(0.18))
 		if not above_h:
 			draw_rect(Rect2(o.x, o.y, TILE, 3), rc.lightened(0.22))
 			draw_rect(Rect2(o.x, o.y, TILE, 1), rc.darkened(0.5))
@@ -1136,7 +1129,7 @@ func _draw_house(r: Rect2, x: int, y: int) -> void:
 			draw_rect(Rect2(o.x + 4, o.y - 2, 6, 1), Color("96787b"))
 	else:
 		var wc: Color = walls[idx]
-		draw_rect(r, wc)
+		Materials.floor_tile(self, r, "plaster", x, y, wc.lightened(0.18))
 		for ry in 3:
 			draw_rect(Rect2(o.x, o.y + 3 + ry * 4, TILE, 1), wc.darkened(0.16))
 		draw_rect(Rect2(o.x, o.y + 12, TILE, 4), wc.darkened(0.38))
@@ -1179,16 +1172,7 @@ func _char_at(x: int, y: int) -> String:
 
 
 func _draw_floor_plank(r: Rect2, x: int, y: int) -> void:
-	var o := r.position
-	var base := Color("5a4228") if y % 2 == 0 else Color("523a24")
-	draw_rect(r, base)
-	draw_rect(Rect2(o.x, o.y, TILE, 1), Color(0, 0, 0, 0.32))
-	draw_rect(Rect2(o.x, o.y + 8, TILE, 1), Color(0, 0, 0, 0.32))
-	draw_rect(Rect2(o.x + (x * 5 + y * 3) % 12 + 2, o.y, 1, 8), Color(0, 0, 0, 0.26))
-	draw_rect(Rect2(o.x + (x * 7 + y * 11) % 12 + 2, o.y + 8, 1, 8), Color(0, 0, 0, 0.26))
-	draw_rect(Rect2(o.x + 1, o.y + 1, TILE - 2, 1), Color(1, 0.9, 0.7, 0.06))
-	draw_rect(Rect2(o.x + 3, o.y + 4, 6, 1), Color(0, 0, 0, 0.1))
-	draw_rect(Rect2(o.x + 8, o.y + 12, 6, 1), Color(0, 0, 0, 0.1))
+	Materials.floor_tile(self, r, "wood", x, y)
 
 
 func _draw_furniture(r: Rect2, ch: String, x: int, y: int) -> void:

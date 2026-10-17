@@ -2,6 +2,8 @@ extends Control
 ## Journey cutscene between hubs: the party walks a night road toward the destination's skyline.
 
 const DUR := 11.0
+const Art = preload("res://src/core/art.gd")
+const Materials = preload("res://src/core/pixel_materials.gd")
 
 var t := 0.0
 var done := false
@@ -9,11 +11,11 @@ var kind := "road"
 var dest_name := ""
 var lines: Array = []
 var cast: Array = ["mu"]
-const COLORS := {
-	"mu": [Color("2a3a5a"), Color("d0a888"), Color("1a1420")],
-	"isolde": [Color("6a2a3a"), Color("e0b898"), Color("d8c8a0")],
-	"wren": [Color("2a4a3a"), Color("c89878"), Color("3a2410")],
-	"corvin": [Color("3a3a4a"), Color("8a8a96"), Color("14141c")],
+const PALETTES := {
+	"mu": Art.PAL_MU,
+	"isolde": Art.PAL_ISOLDE,
+	"wren": Art.PAL_WREN,
+	"corvin": Art.PAL_CORVIN,
 }
 const NAMES := {"mu": "Mu", "isolde": "Isolde", "wren": "Wren", "corvin": "Corvin"}
 const TALK := {
@@ -52,6 +54,7 @@ var fade := 1.0
 
 
 func _ready() -> void:
+	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	font = ThemeDB.fallback_font
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	var to: String = GameState.journey_to
@@ -59,7 +62,7 @@ func _ready() -> void:
 	var target := to if from == "chapel" else from
 	cast = ["mu"]
 	for h in GameState.party:
-		if COLORS.has(h):
+		if PALETTES.has(h):
 			cast.append(h)
 	var route := "back"
 	if target.ends_with("_arena"):
@@ -106,12 +109,17 @@ func _ridge(base: float, amp: float, sp: float, col: Color, seed_: float, step :
 		pts.append(Vector2(x, y))
 		x += step
 	pts.append(Vector2(1960, 1080))
-	draw_colored_polygon(pts, col)
+	var uv := PackedVector2Array()
+	for p in pts:
+		uv.append((p + Vector2(off, 0)) / 96.0)
+	draw_polygon(pts, PackedColorArray([col]), uv, Materials.texture("plaster", 2))
+	var contour := pts.slice(1, pts.size() - 1)
+	draw_polyline(contour, col.lightened(0.06), 2.0)
 
 
 func _draw() -> void:
-	var sky_a := Color("141830")
-	var sky_b := Color("4a4a78")
+	var sky_a := Color("111e2a")
+	var sky_b := Color("465f6a")
 	var glow := Color("6a4245")
 	match kind:
 		"prague":
@@ -131,10 +139,10 @@ func _draw() -> void:
 	draw_circle(moon, 52.0, Color("d8d8e8") if kind != "echo" else Color("f08c95"))
 	draw_circle(moon + Vector2(14, -8), 44.0, sky_b.lerp(sky_a, 0.2))
 	draw_circle(moon, 52.0, Color(1, 1, 1, 0.0))
-	_ridge(640.0, 160.0, 6.0, sky_b.lerp(Color("26264a"), 0.5), 1.0)
+	_ridge(640.0, 160.0, 6.0, sky_b.lerp(Color("293e48"), 0.5), 1.0)
 	_skyline()
-	_ridge(740.0, 120.0, 18.0, Color("1c1c34"), 4.0)
-	_ridge(840.0, 90.0, 42.0, Color("121220"), 9.0)
+	_ridge(740.0, 120.0, 18.0, Color("1d303a"), 4.0)
+	_ridge(840.0, 90.0, 42.0, Color("14212a"), 9.0)
 	for i in 6:
 		var mx := fposmod(i * 420.0 - t * 30.0, 2200.0) - 150.0
 		draw_set_transform(Vector2(mx + 260, 785 + (i % 3) * 30), 0, Vector2(1, 0.12))
@@ -158,7 +166,7 @@ func _skyline() -> void:
 	var rise := smoothstep(0.35 * DUR, DUR, t)
 	var base := 740.0 + (1.0 - rise) * 90.0
 	var x0 := 1180.0
-	var col := Color("181830")
+	var col := Color("1b2c36")
 	match kind:
 		"edinburgh":
 			draw_rect(Rect2(x0, base - 20, 700, 120), col)
@@ -199,31 +207,19 @@ func _compose(route: String) -> Array:
 
 func _party() -> void:
 	for i in cast.size():
-		var pal: Array = COLORS[cast[i]]
-		var x := 560.0 - i * 78.0
-		var bob := absf(sin(t * 6.0 + i * 0.7)) * 5.0
-		var y := 910.0 + (i % 2) * 14.0 - bob
-		draw_set_transform(Vector2(x, y + 30), 0, Vector2(1, 0.3))
-		draw_circle(Vector2.ZERO, 26.0, Color(0, 0, 0, 0.5))
-		draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
-		var sw := sin(t * 6.0 + i * 0.7) * 9.0
-		draw_line(Vector2(x - 6, y), Vector2(x - 6 + sw, y + 30), Color("0b0b12"), 7.0)
-		draw_line(Vector2(x + 6, y), Vector2(x + 6 - sw, y + 30), Color("0b0b12"), 7.0)
-		draw_colored_polygon(PackedVector2Array([Vector2(x - 16, y - 50), Vector2(x + 16, y - 50), Vector2(x + 20, y + 6), Vector2(x - 20, y + 6)]), pal[0])
-		draw_circle(Vector2(x + 2, y - 64), 13.0, pal[1])
-		draw_arc(Vector2(x + 2, y - 66), 14.0, PI, TAU, 10, pal[2], 7.0)
+		var at := Vector2(560.0 - i * 100.0, 922.0 + (i % 2) * 10.0)
+		Art.person(self, Vector2.RIGHT, t * 0.6 + i * 0.37, PALETTES[cast[i]], true, 1.0, 0.0, 0.0, 0.0, at, 4.5)
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
 	var lp := Vector2(560.0 + 34.0, 880.0 - absf(sin(t * 6.0)) * 5.0)
 	draw_line(lp + Vector2(0, -20), lp + Vector2(0, 20), Color("2a2018"), 3.0)
-	for r in 5:
-		draw_circle(lp + Vector2(0, -22), 150.0 - r * 26.0, Color(1.0, 0.75, 0.4, 0.035))
+	draw_texture_rect(Art.light_texture(), Rect2(lp + Vector2(-150, -172), Vector2(300, 300)), false, Color(1, 0.75, 0.4, 0.16))
 	draw_circle(lp + Vector2(0, -22), 7.0, Color("ffd890"))
 
 
 func _foreground() -> void:
 	for i in 9:
 		var fx := fposmod(i * 300.0 - t * 260.0, 2800.0) - 200.0
-		draw_rect(Rect2(fx, 790, 12, 300), Color("050508"))
-		draw_colored_polygon(PackedVector2Array([Vector2(fx - 60, 840), Vector2(fx + 6, 640 - (i % 3) * 40), Vector2(fx + 72, 840)]), Color("050508"))
+		Art.pine(self, Vector2(fx, 990), 4.6 + (i % 3) * 0.7, sin(t * 0.7 + i) * 0.8, Color("080f15"))
 	for i in 26:
 		var u := fposmod(t * 0.2 + i * 0.137, 1.0)
 		draw_circle(Vector2(fposmod(i * 193.0 + t * 20.0, 1920.0), 300 + u * 600), 1.5, Color(0.8, 0.85, 1.0, 0.35 * (1.0 - u)))
@@ -231,7 +227,7 @@ func _foreground() -> void:
 
 func _caption() -> void:
 	var a := clampf(t / 1.5, 0.0, 1.0) * (1.0 - clampf((t - (DUR - 2.0)) / 1.5, 0.0, 1.0))
-	draw_string(font, Vector2(0, 66), dest_name, HORIZONTAL_ALIGNMENT_CENTER, 1920, 44, Color(0.92, 0.88, 0.98, a))
+	draw_string(font, Vector2(0, 66), dest_name, HORIZONTAL_ALIGNMENT_CENTER, 1920, 44, Color(0.91, 0.86, 0.74, a))
 	if lines.is_empty():
 		return
 	var per := (DUR - 2.0) / lines.size()

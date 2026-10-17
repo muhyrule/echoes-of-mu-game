@@ -1,6 +1,8 @@
 extends Control
 
 const Art = preload("res://src/core/art.gd")
+const UI = preload("res://src/core/pixel_ui.gd")
+const Materials = preload("res://src/core/pixel_materials.gd")
 ## Title screen with an original gothic skyline, drawn procedurally.
 
 var items: Array = []
@@ -26,8 +28,8 @@ func _ready() -> void:
 	font = ThemeDB.fallback_font
 	var post := CanvasLayer.new()
 	post.set_script(PostScript)
-	post.set("grit", 1.7)
-	post.set("scratches", 1.0)
+	post.set("grit", 1.0)
+	post.set("scratches", 0.0)
 	add_child(post)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	items = ["New Game", "Quit"]
@@ -110,6 +112,9 @@ func _tower(x: float, base: float, wd: float, ht: float, col: Color, lit := fals
 	draw_colored_polygon(PackedVector2Array([Vector2(x - wd / 2 - 1.5, base - ht), Vector2(x + wd / 2 + 1.5, base - ht), Vector2(x, base - ht - wd * 2.4)]), col)
 	draw_rect(Rect2(x - 1, base - ht - wd * 2.4 - 6, 1, 6), col)
 	if lit:
+		draw_texture_rect(Materials.texture("vault", 1), Rect2(x - wd / 2, base - ht, wd, ht), true, Color("71818a"))
+		draw_rect(Rect2(x - wd / 2, base - ht, 1, ht), col.lightened(0.16))
+		draw_rect(Rect2(x + wd / 2 - 1, base - ht, 1, ht), col.darkened(0.4))
 		draw_rect(Rect2(x - 1, base - ht + 8, 2, 5), Color("ffd166") if int(t * 1.1 + x) % 5 != 0 else Color("7a5a1a"))
 		draw_rect(Rect2(x - 1, base - ht + 20, 2, 5), Color("ffd166") if int(t * 0.9 + x) % 4 != 0 else Color("7a5a1a"))
 
@@ -131,14 +136,13 @@ func _draw() -> void:
 	for i in 12:
 		var y := i * 30.0
 		var k := float(i) / 12.0
-		draw_rect(Rect2(0, y, 640, 30), Color(0.07 + k * 0.16 + fl * 0.35, 0.04 + k * 0.07 + fl * 0.3, 0.14 + k * 0.2 + fl * 0.45))
+		draw_rect(Rect2(0, y, 640, 30), Color("101a25").lerp(Color("455359"), k).lightened(fl * 0.3))
 	for s in stars:
 		draw_rect(Rect2(s, Vector2(1, 1)), Color(1, 1, 1, (0.35 + 0.35 * sin(t * 2.0 + s.x)) * (1.0 - fl)))
 	# moon and echo rings: the premise, ripples that spread across the world
 	var moon := Vector2(500, 78)
-	for r in 6:
-		draw_circle(moon, 70.0 - r * 8.0, Color(0.6, 0.55, 0.95, 0.04))
-	draw_circle(moon, 32.0, Color("e8e2f5"))
+	draw_texture_rect(Art.light_texture(), Rect2(moon - Vector2(70, 70), Vector2(140, 140)), false, Color(0.7, 0.77, 0.75, 0.16))
+	draw_circle(moon, 32.0, Color("e3dcc4"))
 	draw_circle(moon + Vector2(-8, 6), 5.0, Color("e6babe"))
 	draw_circle(moon + Vector2(9, -7), 3.5, Color("e6babe"))
 	for i in 4:
@@ -149,7 +153,7 @@ func _draw() -> void:
 		draw_rect(Rect2(drift, 40 + fmod(cx, 90.0), 140, 10), Color(0.24, 0.28, 0.40, 0.5))
 		draw_rect(Rect2(drift + 25, 34 + fmod(cx, 90.0), 90, 8), Color(0.24, 0.28, 0.40, 0.45))
 	# far layer: Edinburgh crag and castle
-	var far := Color(0.1 + fl * 0.12, 0.07 + fl * 0.1, 0.18 + fl * 0.14)
+	var far := Color("25343c").lightened(fl * 0.12)
 	draw_colored_polygon(PackedVector2Array([Vector2(0, 270), Vector2(0, 175), Vector2(30, 168), Vector2(50, 150), Vector2(95, 146), Vector2(130, 182), Vector2(175, 215), Vector2(230, 270)]), far)
 	for cx in range(54, 96, 8):
 		draw_rect(Rect2(cx, 140, 5, 7), far)
@@ -162,25 +166,30 @@ func _draw() -> void:
 	draw_rect(Rect2(540, 222, 70, 48), far)
 	_tower(520, 270, 10, 52, far)
 	# mid layer: the cathedral with its rose window
-	var mid := Color(0.06 + fl * 0.1, 0.04 + fl * 0.08, 0.12 + fl * 0.12)
+	var mid := Color("15252e").lightened(fl * 0.1)
 	draw_rect(Rect2(230, 190, 180, 90), mid)
+	draw_texture_rect(Materials.texture("vault", 0), Rect2(230, 190, 180, 90), true, Color("667781"))
 	draw_rect(Rect2(250, 150, 140, 40), mid)
 	for tx in [236.0, 404.0]:
 		_tower(tx, 280, 18, 110, mid, true)
 	draw_colored_polygon(PackedVector2Array([Vector2(250, 150), Vector2(390, 150), Vector2(320, 100)]), mid)
+	for buttress in [246.0, 276.0, 362.0, 392.0]:
+		draw_rect(Rect2(buttress, 195, 4, 85), Color("3e4b50"))
+		draw_rect(Rect2(buttress, 195, 1, 85), Color("657173"))
+		draw_rect(Rect2(buttress - 2, 249, 8, 3), Color("192a32"))
 	var glow_a := 0.7 + 0.2 * sin(t * 1.4)
 	for wx in [262.0, 288.0, 346.0, 372.0]:
 		draw_rect(Rect2(wx - 3, 252, 6, 18), Color("ffd166") if int(t * 0.7 + wx) % 6 != 0 else Color("3a2a14"))
 	draw_colored_polygon(PackedVector2Array([Vector2(314, 280), Vector2(314, 268), Vector2(320, 262), Vector2(326, 268), Vector2(326, 280)]), Color(1.0, 0.7, 0.35, 0.5 * glow_a))
 	# near rooftops and ground
-	var sil := Color("07040d")
+	var sil := Color("0a1017")
 	draw_rect(Rect2(0, 270, 640, 90), sil)
 	for rx in [20.0, 175.0, 440.0, 600.0]:
 		_tower(rx, 275, 16, 48 + fmod(rx, 30.0), sil, true)
 	# fog
 	for i in 5:
 		var drift := fmod(t * (5.0 + i * 2.0) + i * 140.0, 800.0) - 80.0
-		draw_rect(Rect2(drift, 252 + i * 7, 200, 12), Color(0.5, 0.45, 0.75, 0.06 + 0.02 * (i % 2)))
+		draw_rect(Rect2(drift, 252 + i * 7, 200, 12), Color(0.5, 0.58, 0.59, 0.06 + 0.02 * (i % 2)))
 	# ledge with the travellers
 	draw_rect(Rect2(60, 306, 130, 54), Color("14101c"))
 	draw_rect(Rect2(60, 306, 130, 2), Color("353a48"))
@@ -201,12 +210,11 @@ func _draw() -> void:
 	draw_rect(Rect2(0, 346, 640, 14), Color(0, 0, 0, 0.35))
 	# title
 	_glow_text(Vector2(320, 70 + 4.0 * (1.0 - intro)), "ECHOES OF MU", 46, Color("ffcfd3"), Color("f0515f"))
-	var sh := fmod(t * 0.5, 2.4)
-	_text(Vector2(320, 98), "A Gothic Journey Through the Old World", 13, Color("d9959b", intro))
-	_text(Vector2(320, 114), "EDINBURGH   ·   PRAGUE   ·   and beyond", 9, Color("b06c72", intro * (0.6 + 0.3 * sin(t * 1.5))))
-	draw_rect(Rect2(250, 154 + 0, 140, 8 + items.size() * 24 - 4), Color(0.02, 0.01, 0.05, 0.55))
+	_text(Vector2(320, 98), "A Gothic Journey Through the Old World", 13, Color(UI.PAPER, intro))
+	_text(Vector2(320, 114), "EDINBURGH   ·   PRAGUE   ·   and beyond", 9, Color(UI.GOLD, intro * (0.6 + 0.3 * sin(t * 1.5))))
+	UI.panel(self, Rect2(236, 151, 168, 15 + items.size() * 24), 0.9)
 	for i in items.size():
-		var sc := Color("ffd166") if i == sel else Color("b58388")
+		var sc := UI.LIGHT if i == sel else UI.PAPER.darkened(0.28)
 		_text(Vector2(320, 176 + i * 24), ("✦ " if i == sel else "") + items[i] + (" ✦" if i == sel else ""), 18, sc)
 	var li := int(t / 6.0) % LINES.size()
 	var la := clampf(minf(fmod(t, 6.0), 6.0 - fmod(t, 6.0)) * 1.2, 0.0, 1.0)

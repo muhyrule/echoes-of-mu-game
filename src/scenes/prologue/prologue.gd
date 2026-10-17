@@ -89,6 +89,7 @@ func _ready() -> void:
 	add_child(post)
 	Audio.play_music("prologue")
 	layer_a.art = PLATES[0].art
+	layer_a.duration = _dur(0)
 	layer_b.modulate.a = 0.0
 
 
@@ -117,6 +118,7 @@ func _process(delta: float) -> void:
 	if into > 0.0 and idx + 1 < PLATES.size():
 		var k := clampf(into / XFADE, 0.0, 1.0)
 		layer_b.art = PLATES[idx + 1].art
+		layer_b.duration = _dur(idx + 1)
 		layer_b.t = k * 2.0
 		layer_b.modulate.a = k * k * (3.0 - 2.0 * k)
 	else:
@@ -131,6 +133,8 @@ func _process(delta: float) -> void:
 		t = XFADE
 		typed = 0.0
 		layer_a.art = PLATES[idx].art
+		layer_a.duration = _dur(idx)
+		layer_a.t = t
 		layer_b.modulate.a = 0.0
 	if idx == PLATES.size() - 1 and t > d - XFADE:
 		layer_a.modulate.a = clampf((d - t) / XFADE, 0.0, 1.0)
@@ -163,6 +167,9 @@ func _draw_ui() -> void:
 	var full: String = pl.text
 	ui.draw_multiline_string(font, Vector2(180, 835), full.substr(0, int(typed)), HORIZONTAL_ALIGNMENT_LEFT, 1560, 32, 8, Color(0.9, 0.88, 0.94, fa))
 	ui.draw_string(font, Vector2(0, 1056), "Enter: complete / next    Shift: hasten    Esc: skip    (%d / %d)" % [idx + 1, PLATES.size()], HORIZONTAL_ALIGNMENT_RIGHT, 1860, 20, Color(0.7, 0.7, 0.8, 0.6))
+	var progress := clampf(t / d, 0.0, 1.0)
+	ui.draw_line(Vector2(180, 1008), Vector2(1740, 1008), Color(0.55, 0.44, 0.26, 0.2), 1.0)
+	ui.draw_line(Vector2(180, 1008), Vector2(180 + 1560 * progress, 1008), Color(0.72, 0.58, 0.34, 0.6), 2.0)
 
 
 func _frame() -> void:
