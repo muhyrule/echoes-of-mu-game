@@ -18,11 +18,17 @@ const LINES := [
 	"Mu and his companions follow the echoes across a gothic world.",
 	"Each friend carries a story of their own. Not all will walk to the end.",
 ]
+const PostScript = preload("res://src/core/post.gd")
 const FigureScript = preload("res://src/scenes/menu/menu_figure.gd")
 
 
 func _ready() -> void:
 	font = ThemeDB.fallback_font
+	var post := CanvasLayer.new()
+	post.set_script(PostScript)
+	post.set("grit", 1.7)
+	post.set("scratches", 1.0)
+	add_child(post)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	items = ["New Game", "Quit"]
 	if GameState.has_save():
