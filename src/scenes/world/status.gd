@@ -2,6 +2,7 @@ extends Control
 ## Party status, equipment, supplies and relics. Drawn in 640x360 logical units at 3x.
 
 const Art = preload("res://src/core/art.gd")
+const UI = preload("res://src/core/pixel_ui.gd")
 const GOLD := Color("d9b45a")
 const GOLD_D := Color("7a5a24")
 const DIM := Color("987a7d")
@@ -30,8 +31,8 @@ func _ready() -> void:
 	heroes = Gear.active_heroes()
 	portrait = Node2D.new()
 	portrait.set_script(load("res://src/scenes/world/portrait.gd"))
-	portrait.position = Vector2(119, 126) * 3.0
-	portrait.scale = Vector2(7, 7)
+	portrait.position = Vector2(119, 153) * 3.0
+	portrait.scale = Vector2(3, 3)
 	add_child(portrait)
 	_sync()
 	Audio.sfx("door")
@@ -134,11 +135,7 @@ func _txt(pos: Vector2, s: String, size: int, col: Color, right := false) -> voi
 
 
 func _frame(r: Rect2, a := 0.95) -> void:
-	draw_rect(r.grow(1.5), Color(Art.OUT))
-	draw_rect(r, Color(0.05, 0.04, 0.09, a))
-	draw_rect(r.grow(-1.0), Color(0.12, 0.09, 0.2, 0.6), false, 1.0)
-	draw_rect(r, GOLD_D, false, 1.4)
-	draw_rect(r.grow(-1.5), GOLD, false, 0.7)
+	UI.panel(self, r, a)
 
 
 func _stat(y: float, label: String, val: String, col := Color.WHITE) -> void:
@@ -155,7 +152,7 @@ func _draw() -> void:
 	var hero := _hero()
 	for i in heroes.size():
 		var r := Rect2(46 + i * 70, 42, 66, 14)
-		draw_rect(r, Color("323b52") if i == hero_i else Color("1a1426"))
+		draw_rect(r, Color("34424b") if i == hero_i else Color("172129"))
 		draw_rect(r, GOLD if i == hero_i else GOLD_D, false, 0.8)
 		_txt(Vector2(52 + i * 70, 52), Gear.HERO_NAMES[heroes[i]], 9, Color.WHITE if i == hero_i else DIM)
 	_frame(Rect2(44, 62, 150, 238), 0.8)
@@ -174,7 +171,7 @@ func _draw() -> void:
 	_txt(Vector2(52, 282), "Form: %s" % GameState.form.capitalize(), 8, DIM)
 	for i in SECTIONS.size():
 		var r2 := Rect2(204 + i * 84, 62, 80, 14)
-		draw_rect(r2, Color("323b52") if i == section else Color("1a1426"))
+		draw_rect(r2, Color("34424b") if i == section else Color("172129"))
 		draw_rect(r2, GOLD if i == section else GOLD_D, false, 0.8)
 		_txt(Vector2(210 + i * 84, 72), SECTIONS[i], 9, Color.WHITE if i == section else DIM)
 	_frame(Rect2(204, 82, 396, 150), 0.8)

@@ -1,7 +1,7 @@
 extends RefCounted
 ## Ornate gothic bodies for the arena bosses, drawn in world-pixel units (origin at the feet / waterline).
 
-const OUT := Color("0e0a14")
+const OUT := Color("10171e")
 
 
 static func _sm(pts: Array, closed := true, seg := 6) -> PackedVector2Array:
@@ -26,7 +26,16 @@ static func _fl(col: Color, f: float) -> Color:
 
 
 static func _shape(c: CanvasItem, pts: PackedVector2Array, col: Color, f: float, hi := Color(0, 0, 0, 0), lw := 1.4) -> void:
-	c.draw_colored_polygon(pts, _fl(col, f))
+	var bounds := Rect2(pts[0], Vector2.ZERO)
+	for p in pts:
+		bounds = bounds.expand(p)
+	var colours := PackedColorArray()
+	for p in pts:
+		var u := (p.x - bounds.position.x) / maxf(bounds.size.x, 1)
+		var v := (p.y - bounds.position.y) / maxf(bounds.size.y, 1)
+		var shade := clampf(u * 0.4 + v * 0.6, 0, 1)
+		colours.append(_fl(col.lightened(0.22).lerp(col.darkened(0.38), shade), f))
+	c.draw_polygon(pts, colours)
 	_dither(c, pts, f)
 	var cl := pts.duplicate()
 	cl.append(pts[0])
@@ -39,7 +48,7 @@ static func _shape(c: CanvasItem, pts: PackedVector2Array, col: Color, f: float,
 	c.draw_polyline(cl, OUT, lw)
 
 
-# 16-bit style checker dithering: shadow along the bottom of a shape, highlight along the top.
+# Sparse, half-density clusters enrich the large bodies without a coarse checker mask.
 static func _dither(c: CanvasItem, pts: PackedVector2Array, f: float) -> void:
 	if f > 0.0 or pts.size() < 3:
 		return
@@ -48,7 +57,7 @@ static func _dither(c: CanvasItem, pts: PackedVector2Array, f: float) -> void:
 		r = r.expand(p)
 	if r.size.x < 14.0 or r.size.y < 14.0:
 		return
-	var step := 3.0
+	var step := 2.0
 	var yb := r.end.y - r.size.y * 0.32
 	var yt := r.position.y + r.size.y * 0.14
 	var y := r.position.y
@@ -57,10 +66,10 @@ static func _dither(c: CanvasItem, pts: PackedVector2Array, f: float) -> void:
 		var shadow := y >= yb
 		if shadow or y <= yt:
 			var x := r.position.x + (step if row % 2 == 0 else 0.0)
-			var col := Color(0.04, 0.02, 0.1, 0.3) if shadow else Color(1, 1, 1, 0.13)
+			var col := Color(0.05, 0.09, 0.12, 0.16) if shadow else Color(1, 0.95, 0.8, 0.1)
 			while x < r.end.x:
 				if Geometry2D.is_point_in_polygon(Vector2(x + 1.0, y + 1.0), pts):
-					c.draw_rect(Rect2(x, y, 2.0, 2.0), col)
+					c.draw_rect(Rect2(x, y, 1.0, 0.5), col)
 				x += step * 2.0
 		y += step
 		row += 1

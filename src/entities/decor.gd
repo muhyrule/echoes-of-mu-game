@@ -2,6 +2,7 @@ extends Node2D
 ## Seeded environmental detail scattered over open floor: ground clutter, wall-side growth, and slow ambient motion.
 
 const T := 16.0
+const Art = preload("res://src/core/art.gd")
 
 var level: Node2D
 var items: Array = []
@@ -10,7 +11,7 @@ var theme := ""
 
 
 func _ready() -> void:
-	z_index = -1
+	z_index = 0
 	theme = level.theme
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(level.map_name)
@@ -25,6 +26,8 @@ func _ready() -> void:
 			var kinds: Array = _kinds(near_wall, g[y - 1][x] == "#")
 			if roll < (0.16 if near_wall else 0.07) and not kinds.is_empty():
 				items.append({"k": kinds[rng.randi() % kinds.size()], "p": p, "s": rng.randf_range(0.7, 1.3), "r": rng.randf() * TAU})
+			if g[y - 1][x] == "#" and x % 8 == 3 and theme in ["chapel", "vault", "prague"]:
+				items.append({"k": "sconce", "p": Vector2(x * T + 8, y * T - 4), "s": 1.0, "r": 0.0})
 	queue_redraw()
 
 
@@ -37,7 +40,7 @@ func _kinds(near_wall: bool, top_wall: bool) -> Array:
 				return ["rubble", "bones", "moss", "web", "crack"]
 			return ["crack", "bones", "puddle", "rubble", "blood", "puddle"]
 		"chapel":
-			return ["wax", "crack", "petals", "moss"] if near_wall else ["crack", "wax", "petals"]
+			return ["wax", "crack", "petals", "moss", "book"] if near_wall else ["crack", "wax", "petals"]
 		"town_e", "town_p":
 			return ["weeds", "moss", "puddle", "litter"] if near_wall else ["puddle", "litter", "straw", "crack", "puddle", "weeds"]
 	return []
@@ -45,7 +48,7 @@ func _kinds(near_wall: bool, top_wall: bool) -> Array:
 
 func _process(delta: float) -> void:
 	t += delta
-	if theme == "vault" or theme == "prague" or theme == "town_e" or theme == "town_p":
+	if theme in ["vault", "prague", "town_e", "town_p", "chapel"]:
 		queue_redraw()
 
 
@@ -54,6 +57,21 @@ func _draw() -> void:
 		var p: Vector2 = it.p
 		var s: float = it.s
 		match it.k:
+			"sconce":
+				draw_texture_rect(Art.light_texture(), Rect2(p - Vector2(12, 19), Vector2(24, 24)), false, Color(1, 0.64, 0.26, 0.12))
+				draw_rect(Rect2(p + Vector2(-2, -3), Vector2(4, 6)), Color("222c32"))
+				draw_rect(Rect2(p + Vector2(-1, -3), Vector2(1, 6)), Color("ad925d"))
+				draw_rect(Rect2(p + Vector2(-3, -2), Vector2(6, 1)), Color("c9a66a"))
+				draw_rect(Rect2(p + Vector2(-1, -6), Vector2(2, 4)), Color("d0bb8b"))
+				var flicker := snappedf(sin(t * 9 + p.x) * 0.5, 0.5)
+				draw_rect(Rect2(p + Vector2(-1, -9 + flicker), Vector2(2, 3)), Color("d78636"))
+				draw_rect(Rect2(p + Vector2(-0.5, -8 + flicker), Vector2(1, 2)), Color("fff0b6"))
+			"book":
+				draw_rect(Rect2(p, Vector2(5, 4)), Color("36232b"))
+				draw_rect(Rect2(p + Vector2(0, -0.5), Vector2(5, 3)), Color("823a39"))
+				draw_rect(Rect2(p + Vector2(1, 2.5), Vector2(4, 0.5)), Color("d1c5a5"))
+				draw_rect(Rect2(p + Vector2(0.5, 0), Vector2(0.5, 3)), Color("c5a461"))
+				draw_rect(Rect2(p + Vector2(2.5, 0.5), Vector2(0.5, 1.5)), Color("c5a461"))
 			"crack":
 				var a: float = it.r
 				var q := p

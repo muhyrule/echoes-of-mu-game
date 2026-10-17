@@ -2,6 +2,10 @@ extends Control
 ## HUD: hearts, keys, form, location banner, interaction hint, fades, pause, death.
 
 const Art = preload("res://src/core/art.gd")
+const UI = preload("res://src/core/pixel_ui.gd")
+const DOCK_TOP := 306.0
+const DOCK_HEIGHT := 46.0
+const BOTTOM_SAFE := (360.0 - DOCK_TOP) * 3.0
 
 var level: Node2D
 var title_t := 3.0
@@ -72,17 +76,7 @@ const GOLD_L := Color("fff0b0")
 
 
 func _frame(r: Rect2) -> void:
-	draw_rect(r.grow(1.5), Color(Art.OUT))
-	draw_rect(r, Color(0.05, 0.04, 0.09, 0.82))
-	draw_rect(r.grow(-1.0), Color(0.12, 0.09, 0.2, 0.6), false, 1.0)
-	draw_rect(r, GOLD_D, false, 1.4)
-	draw_rect(r.grow(-1.5), GOLD, false, 0.7)
-	for corner in [r.position, Vector2(r.end.x, r.position.y), Vector2(r.position.x, r.end.y), r.end]:
-		var dx := -1.0 if corner.x > r.get_center().x else 1.0
-		var dy := -1.0 if corner.y > r.get_center().y else 1.0
-		draw_arc(corner + Vector2(dx * 4.0, dy * 4.0), 3.4, 0.0, TAU, 10, GOLD, 0.9)
-		draw_circle(corner + Vector2(dx * 4.0, dy * 4.0), 1.1, GOLD_L)
-		draw_line(corner + Vector2(dx * 7.5, dy * 4.0), corner + Vector2(dx * 16.0, dy * 4.0), GOLD, 0.7)
+	UI.panel(self, r, 0.92)
 
 
 func _orb(pos: Vector2, filled: bool, col: Color) -> void:
@@ -124,23 +118,27 @@ func _draw() -> void:
 			draw_rect(r, Color("a8283c") if i < fill else Color("262a34"))
 			if i < fill:
 				draw_rect(Rect2(r.position, Vector2(r.size.x, 2)), Color("e0687a"))
-	_txt(Vector2(12, 46), "Key x%d" % GameState.keys, 12, Color("e6c15a"))
+	_frame(Rect2(pw + 16, 8, 138, 24))
+	_txt(Vector2(pw + 25, 24), "KEYS %d" % GameState.keys, 9, UI.PAPER)
+	_txt(Vector2(pw + 81, 24), "%d G" % GameState.gold, 9, GOLD)
+	_frame(Rect2(8, DOCK_TOP, 624, DOCK_HEIGHT))
 	var lead: String = GameState.lead
-	var lead_cols := {"mu": Color("ffb7bd"), "isolde": Color("ffd890"), "wren": Color("e88d95"), "corvin": Color("e0b860")}
+	var lead_cols := {"mu": Color("cb6264"), "isolde": Color("aabd7e"), "wren": Color("74b3b4"), "corvin": Color("d2b274")}
+	UI.crest(self, Vector2(27, 327), lead, lead_cols.get(lead, GOLD))
 	if GameState.party.is_empty():
 		var fname: String = {"wraith": "Wraith", "gargoyle": "Gargoyle"}.get(GameState.form, "Mu")
 		var hint_q := "  [Q]" if GameState.forms.size() > 1 else ""
-		_txt(Vector2(12, 62), "Form: %s%s" % [fname, hint_q], 12, {"wraith": Color("9fd0ff"), "gargoyle": Color("c2cad8")}.get(GameState.form, Color("ffb7bd")))
+		_txt(Vector2(44, 325), "%s%s" % [fname, hint_q], 11, UI.PAPER)
 	else:
 		var fm := ""
 		if lead == "mu":
 			fm = " (%s) [Q]" % str({"wraith": "Wraith", "gargoyle": "Gargoyle"}.get(GameState.form, "Mu")) if GameState.forms.size() > 1 else ""
-		_txt(Vector2(12, 62), "Hero: %s%s  [C] swap" % [lead.capitalize(), fm], 12, lead_cols.get(lead, Color.WHITE))
-	_txt(Vector2(12, 78), "Gold %d" % GameState.gold, 12, Color("f0d070"))
+		_txt(Vector2(44, 325), "%s%s" % [lead.capitalize(), fm], 10, UI.PAPER)
+	_txt(Vector2(44, 340), "[C] Hero   [Tab] Inventory", 7, GOLD)
 	var pl: Node2D = level.player
 	var gname: String = pl.GUARD_NAME.get(lead, "Guard")
-	_txt(Vector2(12, 108), "[Shift] Roll %s   [V] %s" % ["" if pl.roll_cd <= 0.0 else "%.1fs" % pl.roll_cd, gname], 9, Color("d0a2a7"))
-	var sk_y := 128
+	_txt(Vector2(183, 340), "[Shift] Roll %s   [V] %s" % ["" if pl.roll_cd <= 0.0 else "%.1fs" % pl.roll_cd, gname], 8, UI.PAPER)
+	var sk_i := 0
 	for fid in ["mu", "isolde", "wren", "corvin"]:
 		var fo: Node2D = null
 		if fid == lead:
@@ -150,16 +148,16 @@ func _draw() -> void:
 		if fo != null:
 			var kk: int = fo.KIT[fid].key
 			var rdy: bool = fo.skill_cd <= 0.0
-			var mark := "> " if fid == lead else "  "
-			var lab := "%s%s [%s] %s %s" % [mark, fid.capitalize(), OS.get_keycode_string(kk), fo.KIT[fid].skill, "READY" if rdy else "%ds" % ceili(fo.skill_cd)]
-			_txt(Vector2(12, sk_y), lab, 9, (Color("f0d070") if rdy else Color("8c6b6e")) if fid != lead else (Color("fff0a0") if rdy else Color("c88e93")))
-			sk_y += 16
+			var pos := Vector2(418 + (sk_i % 2) * 108, 318 + (sk_i / 2) * 18)
+			_txt(pos, "%s [%s] %s" % [fid.capitalize(), OS.get_keycode_string(kk), "READY" if rdy else "%ds" % ceili(fo.skill_cd)], 7, lead_cols[fid] if rdy else Color("858b92"))
+			_txt(pos + Vector2(0, 8), fo.KIT[fid].skill, 6, UI.PAPER)
+			sk_i += 1
 	if level.weather != null:
-		_txt(Vector2(12, sk_y), "Weather: %s" % level.weather.label(), 9, Color("a8c0e0"))
-	_txt(Vector2(12, 94), "[1] Tonic %d  [2] Elixir %d  [3] Candle %d" % [int(GameState.supplies.get("tonic", 0)), int(GameState.supplies.get("elixir", 0)), int(GameState.supplies.get("candle", 0))], 9, Color("b8b0c8"))
+		_txt(Vector2(320, 22), level.weather.label(), 8, Color("a8c0d0"), true)
+	_txt(Vector2(183, 324), "[1] Tonic %d  [2] Elixir %d  [3] Candle %d" % [int(GameState.supplies.get("tonic", 0)), int(GameState.supplies.get("elixir", 0)), int(GameState.supplies.get("candle", 0))], 8, UI.PAPER)
 	if banner_t > 0.0:
 		var a := minf(1.0, banner_t)
-		_txt(Vector2(320, 120), banner_title, 22, Color(0.95, 0.88, 1.0, a), true)
+		_txt(Vector2(320, 120), banner_title, 22, Color(UI.PAPER, a), true)
 		_txt(Vector2(320, 144), banner_sub, 13, Color(0.85, 0.64, 0.66, a), true)
 	if hint != "" and not Dialogue.blocking():
 		_txt(Vector2(320, 238), hint, 13, Color(1, 0.95, 0.7), true)

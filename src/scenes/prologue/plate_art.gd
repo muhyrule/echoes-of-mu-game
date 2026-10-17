@@ -484,10 +484,10 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 	var kid := who == "kid"
 	var k := 0.62 if kid else 1.0
 	var echo := who == "echo"
-	var cloak := Color("1c2442")
-	var inner := Color("2c3860")
+	var cloak := Color("353a48")
+	var inner := Color("7a2a2e")
 	var skin := Color("d8b090")
-	var hair := Color("20161a")
+	var hair := Color("a8a6ae")
 	var rim := Color(1.0, 0.72, 0.4, 0.55)
 	match who:
 		"aldous":
@@ -498,10 +498,12 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 		"monk":
 			cloak = Color("1a1416")
 			inner = Color("2a2226")
+			hair = Color("20161a")
 		"bellman":
 			cloak = Color("2a1c18")
 			inner = Color("402a20")
 			skin = Color("b89070")
+			hair = Color("20161a")
 		"smith":
 			cloak = Color("33261f")
 			inner = Color("71533a")
@@ -519,9 +521,9 @@ func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp :
 			skin = Color("c0a088")
 			hair = Color("8a8680")
 		"kid":
-			cloak = Color("2a3450")
-			inner = Color("3c4a70")
-			hair = Color("3a2418")
+			cloak = Color("353a48")
+			inner = Color("7a2a2e")
+			hair = Color("a8a6ae")
 	var at := p + Vector2(0, -34)
 	_tf(at, 0, Vector2(s * k * f, s * k))
 	var ell := PackedVector2Array()

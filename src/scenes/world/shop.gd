@@ -2,6 +2,7 @@ extends Control
 ## Shop, inn and pub screen. Drawn in 640x360 logical units at 3x scale.
 
 const Art = preload("res://src/core/art.gd")
+const UI = preload("res://src/core/pixel_ui.gd")
 
 signal closed
 
@@ -153,11 +154,7 @@ func _txt(pos: Vector2, s: String, size: int, col: Color, right := false) -> voi
 
 
 func _frame(r: Rect2) -> void:
-	draw_rect(r.grow(1.5), Color(Art.OUT))
-	draw_rect(r, Color(0.05, 0.04, 0.09, 0.94))
-	draw_rect(r.grow(-1.0), Color(0.12, 0.09, 0.2, 0.6), false, 1.0)
-	draw_rect(r, GOLD_D, false, 1.4)
-	draw_rect(r.grow(-1.5), GOLD, false, 0.7)
+	UI.panel(self, r)
 
 
 func _delta_txt(label: String, v: int) -> String:

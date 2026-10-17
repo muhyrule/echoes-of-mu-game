@@ -33,6 +33,14 @@ Prague (Ossuary Clock) → Transylvania → Paris Catacombs → Whitby Abbey →
 - Music is synthesized at runtime from original compositions in the styles of Bach (organ fugue), Beethoven/Chopin (nocturne, funeral march), Vivaldi (concerto), Brahms (Hungarian-style dance), plus town themes `edin`, `praha` and `inn`. Nothing is a transcription of an existing score.
 - The window override is 3840x2160 (see `project.godot`); lower it on smaller displays.
 
+## 32-bit-inspired gothic presentation
+- Original cached 32x32 material tiles replace flat floors: cold Edinburgh cobbles, warmer Praha paving, chapel inlays, vault flagstones, timber grain, layered roof tiles, weathered plaster, water and five regional arena materials. Town avenues have drainage grates and the squares have brass-inlaid borders.
+- Character colour ramps, visible hooded faces, blinking, half-step walking poses and moving cloak hems are shared by gameplay, the title screen and the travelling party. Inventory portraits are separate original busts with hero-specific hair, clothing, braid, straps and brass eyepiece, using the equipped armour palette. Mu's silver hair and crimson lining also carry into the prologue.
+- Boss bodies use directional shading and finer texture clusters. World clutter renders above the floor and below actors, with chapel manuscripts and wall candlework.
+- Stepped brass-and-slate panels unify shops, inventory and menus. The compact command bar keeps forms, supplies, guards, party skills and cooldowns visible; camera bounds reserve space so it cannot conceal heroes at the lower map edge.
+- The 1920x1080 canvas and all gameplay/collision data remain intact. Nearest texture sampling, clearer regional lighting and restrained grading replace film blur, colour fringing and crushed blacks; this is an art-direction pass, not a new 3D engine or a complete hand-painted asset set.
+- Presentation regression/capture tool: `godot --fixed-fps 60 -s tools/presentation_test.gd`. Add `-- --capture=/absolute/output/folder` on a graphical display for representative maps, all seven arenas, menus, travel parties and directional/animated hero sheets. Without captures it can also run headlessly.
+
 ## Towns, interiors and secrets
 - Each location is a town first: Edinburgh Old Town and Prague Old Town, reached from the chapel portal. The dungeon gate in each town stays shut until you earn it (Edinburgh: the Warrant of Descent from the Archive, after Duncan vouches for you; Prague: the Keeper's Pass from Lucie, after Old Jiri's rumour).
 - Four enterable buildings per town (E at the door) with interiors, NPCs whose dialogue changes as you progress, and searchable barrels, chests, urns, tomes, graves and statues with hidden items. One secret per town raises max HP. Found items are saved (`GameState.items`).

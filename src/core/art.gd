@@ -2,7 +2,7 @@ extends RefCounted
 ## Procedural art: outlined, shaded characters, creatures, props and light helpers.
 ## Drawn in world units (1 tile = 16); the camera zoom makes every stroke crisp at 1080p.
 
-const OUT := Color("100d17")
+const OUT := Color("111820")
 const PAL_MU := {"coat": Color("353a48"), "accent": Color("7a2a2e"), "skin": Color("c4a083"), "hair": Color("a8a6ae"), "boots": Color("1c1620"), "style": "short", "item": "sheath", "hood": true, "mail": true, "look": "mu"}
 const PAL_WRAITH := {"coat": Color("3a5670"), "accent": Color("9fc4d8"), "skin": Color("a9c0cc"), "hair": Color("7f9fb8"), "boots": Color("1e2e40"), "style": "short", "item": "none", "hood": true, "look": "wraith"}
 const PAL_ISOLDE := {"coat": Color("3e4a38"), "accent": Color("6e4a2e"), "skin": Color("c8a287"), "hair": Color("7a3a24"), "boots": Color("261c16"), "style": "braid", "item": "hammer", "mail": true, "look": "isolde"}
@@ -38,8 +38,30 @@ static func make_light(col: Color, scale: float, energy: float) -> PointLight2D:
 	return l
 
 
-static func shadow(c: CanvasItem, r := 6.5) -> void:
-	c.draw_set_transform(Vector2(0, 5.5), 0.0, Vector2(1.0, 0.4))
+static func pine(c: CanvasItem, p: Vector2, size: float, wind: float, col: Color) -> void:
+	c.draw_rect(Rect2(p + Vector2(-1, -48) * size, Vector2(2, 49) * size), col.lightened(0.035))
+	for branch in 7:
+		var height := -58.0 + branch * 7
+		var reach := 3.0 + branch * 1.6
+		var sway := snappedf(wind * (1.0 - branch / 8.0), 0.5)
+		var points := PackedVector2Array([
+			Vector2(sway, height - 9), Vector2(reach * 0.45 + sway, height - 1),
+			Vector2(reach * 0.32 + sway, height - 1), Vector2(reach + sway, height + 5),
+			Vector2(reach * 0.7 + sway, height + 5), Vector2(reach * 1.15 + sway, height + 8),
+			Vector2(sway, height + 5), Vector2(-reach * 1.15 + sway, height + 8),
+			Vector2(-reach * 0.7 + sway, height + 5), Vector2(-reach + sway, height + 5),
+			Vector2(-reach * 0.32 + sway, height - 1), Vector2(-reach * 0.45 + sway, height - 1),
+		])
+		for i in points.size():
+			points[i] = p + points[i] * size
+		c.draw_colored_polygon(points, col.lightened((branch % 3) * 0.012))
+		for needle in 4:
+			var n := p + Vector2(sway - reach + needle * reach * 0.6, height + 5) * size
+			c.draw_rect(Rect2(n, Vector2(size * 0.5, size)), col.lightened(0.04))
+
+
+static func shadow(c: CanvasItem, r := 6.5, at := Vector2.ZERO, size := 1.0) -> void:
+	c.draw_set_transform(at + Vector2(0, 5.5) * size, 0.0, Vector2(size, size * 0.4))
 	c.draw_circle(Vector2.ZERO, r, Color(0, 0, 0, 0.35))
 	c.draw_circle(Vector2.ZERO, r * 0.7, Color(0, 0, 0, 0.25))
 	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -71,7 +93,7 @@ static func _paint(c: CanvasItem, parts: Array, outline := true) -> void:
 				c.draw_circle(p[1][0], p[1][1], p[2])
 
 
-# SNES-style chunky sprite: big head, bold outline, three-tone pixel shading.
+# Half-unit colour ramps keep cloth and metal readable without a smoothing filter.
 static func _b(parts: Array, sh: Array, x: float, y: float, w: float, h: float, col: Color, shade := true) -> void:
 	parts.append(["r", Rect2(x, y, w, h), col])
 	if shade and w >= 2.0 and h >= 2.0:
@@ -79,6 +101,9 @@ static func _b(parts: Array, sh: Array, x: float, y: float, w: float, h: float, 
 		sh.append([Rect2(x, y, 1.0, h), Color(col.lightened(0.14), col.a)])
 		sh.append([Rect2(x + w - 1.0, y + 1.0, 1.0, h - 1.0), Color(col.darkened(0.3), col.a)])
 		sh.append([Rect2(x, y + h - 1.0, w, 1.0), Color(col.darkened(0.25), col.a)])
+		if w >= 4.0:
+			sh.append([Rect2(x + 1.0, y + 1.0, 0.5, h - 2.0), Color(col.lightened(0.22), col.a)])
+			sh.append([Rect2(x + w - 1.5, y + 1.0, 0.5, h - 2.0), Color(col.darkened(0.15), col.a)])
 		if w >= 5.0 and h >= 5.0:
 			var dk := Color(col.darkened(0.18), col.a)
 			for i in int(h - 2.0):
@@ -89,15 +114,15 @@ static func _b(parts: Array, sh: Array, x: float, y: float, w: float, h: float, 
 					sh.append([Rect2(x + 1.0 + i, y + h - 2.0, 1.0, 1.0), dk])
 
 
-static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving := false, alpha := 1.0, atk := 0.0, yoff := 0.0, roll := 0.0) -> void:
-	shadow(c, 6.0 * (0.8 if roll != 0.0 else 1.0))
+static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving := false, alpha := 1.0, atk := 0.0, yoff := 0.0, roll := 0.0, at := Vector2.ZERO, size := 1.0) -> void:
+	shadow(c, 6.0 * (0.8 if roll != 0.0 else 1.0), at, size)
 	var lunge := f * (1.5 if atk > 0.0 else 0.0)
 	if roll != 0.0:
 		# tumble about the body centre, tucked in
 		var ctr := Vector2(0, -6)
-		c.draw_set_transform(ctr - ctr.rotated(roll) * 0.8 + Vector2(0, yoff + 2.0), roll, Vector2(0.8, 0.8))
+		c.draw_set_transform(at + (ctr - ctr.rotated(roll) * 0.8 + Vector2(0, yoff + 2.0)) * size, roll, Vector2.ONE * size * 0.8)
 	else:
-		c.draw_set_transform(Vector2(0, yoff) + lunge, 0.0, Vector2.ONE)
+		c.draw_set_transform(at + (Vector2(0, yoff) + lunge) * size, 0.0, Vector2.ONE * size)
 	var a := alpha
 	var coat := Color(pal.coat, a)
 	var coat_d := coat.darkened(0.4)
@@ -111,13 +136,20 @@ static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving 
 	var up := (not side) and f.y < 0.0
 	var sx := 1.0 if f.x >= 0.0 else -1.0
 	var ph := t * 11.0
-	var swing := roundf(sin(ph) * 1.6) if moving else 0.0
-	var bob := -1.0 if moving and sin(ph * 2.0) > 0.2 else 0.0
+	var swing := snappedf(sin(ph) * 2.0, 0.5) if moving else 0.0
+	var bob := snappedf(-absf(cos(ph)) * 0.8, 0.5) if moving else snappedf(sin(t * 1.8) * 0.3, 0.5)
 	var parts: Array = []
 	var sh: Array = []
-	var eye := Color(0.06, 0.04, 0.1, a)
+	var eye := Color("18252d", a)
+	var blink := fposmod(t + float(posmod(hash(pal.look), 17)) * 0.19, 4.4) < 0.12
 	var head_col := coat.darkened(0.55) if hood else hair
 	var ink := Color(OUT, a)
+	var hem := snappedf(sin(t * (8.0 if moving else 2.0)) * (1.4 if moving else 0.5), 0.5)
+	var cape := PackedVector2Array([Vector2(-4.5, -8 + bob), Vector2(4.5, -8 + bob), Vector2(6 + hem, 3), Vector2(3 + hem, 5), Vector2(hem, 3.5), Vector2(-4 + hem, 5), Vector2(-6 + hem, 3)])
+	_paint(c, [["p", cape, coat_d]])
+	for fold in 3:
+		var fx := -3.0 + fold * 2.5
+		c.draw_line(Vector2(fx, -6 + bob), Vector2(fx + hem, 3), Color(coat.lightened(0.08), a), 0.5)
 
 	if side:
 		_b(parts, sh, -sx * 5.0 - 1.0, -7.0 + bob, 2.0, 11.0, coat_d)
@@ -146,11 +178,10 @@ static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving 
 		_b(parts, sh, -5.5, -8.0 + bob, 11.0, 2.0, acc)
 		_b(parts, sh, -5.0, -17.0 + bob, 10.0, 9.0, head_col)
 		_b(parts, sh, -5.0, -18.0 + bob, 10.0, 2.0, head_col)
-		_b(parts, sh, -5.5, -7.0 + bob, 11.0, 12.0, coat_d.lightened(0.05))
+		parts.append(["p", cape, coat_d.lightened(0.05)])
 		if style == "braid":
 			_b(parts, sh, -1.0, -10.0 + bob, 2.0, 9.0, hair.darkened(0.1))
 	else:
-		_b(parts, sh, -5.5, -7.0 + bob, 11.0, 12.0, coat_d)
 		_b(parts, sh, -4.0, 3.0 + maxf(0.0, -swing) * 0.5, 3.5, 3.0, boots)
 		_b(parts, sh, 0.5, 3.0 + maxf(0.0, swing) * 0.5, 3.5, 3.0, boots.lightened(0.1))
 		_b(parts, sh, -5.0, -1.0, 10.0, 5.0, coat)
@@ -196,13 +227,24 @@ static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving 
 	if not up and not side:
 		if hood:
 			c.draw_rect(Rect2(-4.0, -15.0 + bob, 8.0, 5.0), Color(0.03, 0.02, 0.06, a))
-			c.draw_rect(Rect2(-3.0, -13.0 + bob, 2.0, 1.0), Color(0.75, 0.9, 1.0, a))
-			c.draw_rect(Rect2(1.0, -13.0 + bob, 2.0, 1.0), Color(0.75, 0.9, 1.0, a))
+			if pal.look == "wraith":
+				c.draw_rect(Rect2(-3.0, -13.0 + bob, 2.0, 1.0), Color("bce7f1", a))
+				c.draw_rect(Rect2(1.0, -13.0 + bob, 2.0, 1.0), Color("bce7f1", a))
+			else:
+				c.draw_rect(Rect2(-3.0, -14.0 + bob, 6.0, 5.0), skin.darkened(0.12))
+				c.draw_rect(Rect2(2.0, -14.0 + bob, 1.0, 5.0), skin.darkened(0.4))
+				c.draw_rect(Rect2(-3.0, -14.5 + bob, 6.0, 1.0), hair)
+				for ex in [-2.0, 1.0]:
+					c.draw_rect(Rect2(ex, -12.5 + bob, 1.0, 0.5 if blink else 1.0), eye)
+					c.draw_rect(Rect2(ex - 0.5, -13.5 + bob, 1.5, 0.5), hair.darkened(0.4))
+				c.draw_rect(Rect2(-0.5, -12.0 + bob, 0.5, 1.5), skin.lightened(0.25))
+				c.draw_rect(Rect2(-1, -9.5 + bob, 2, 0.5), skin.darkened(0.5))
 		else:
-			c.draw_rect(Rect2(-3.5, -13.0 + bob, 1.0, 2.0), eye)
-			c.draw_rect(Rect2(2.5, -13.0 + bob, 1.0, 2.0), eye)
-			c.draw_rect(Rect2(-3.5, -13.0 + bob, 1.0, 1.0), Color(1, 1, 1, 0.8 * a))
-			c.draw_rect(Rect2(2.5, -13.0 + bob, 1.0, 1.0), Color(1, 1, 1, 0.8 * a))
+			c.draw_rect(Rect2(-3.5, -13.0 + bob, 1.5, 0.5 if blink else 1.5), eye)
+			c.draw_rect(Rect2(2.0, -13.0 + bob, 1.5, 0.5 if blink else 1.5), eye)
+			if not blink:
+				c.draw_rect(Rect2(-3.5, -13.0 + bob, 0.5, 0.5), Color("ebdfc3", a))
+				c.draw_rect(Rect2(2.0, -13.0 + bob, 0.5, 0.5), Color("ebdfc3", a))
 			c.draw_rect(Rect2(-4.0, -14.0 + bob, 3.0, 1.0), Color(hair.darkened(0.3), a))
 			c.draw_rect(Rect2(1.0, -14.0 + bob, 3.0, 1.0), Color(hair.darkened(0.3), a))
 			if style != "beard":
@@ -213,7 +255,11 @@ static func person(c: CanvasItem, f: Vector2, t: float, pal: Dictionary, moving 
 	elif side:
 		if hood:
 			c.draw_rect(Rect2(sx * 1.0 - 1.5, -14.0 + bob, 3.5, 4.0), Color(0.03, 0.02, 0.06, a))
-			c.draw_rect(Rect2(sx * 2.0 - 0.5, -13.0 + bob, 1.0, 1.0), Color(0.75, 0.9, 1.0, a))
+			if pal.look != "wraith":
+				c.draw_rect(Rect2(sx * 1.0 - 1, -14.0 + bob, 3, 5), skin.darkened(0.15))
+				c.draw_rect(Rect2(sx * 1.0 - 1, -14.5 + bob, 3, 1), hair)
+				c.draw_rect(Rect2(sx * 3.0 - 0.5, -12.0 + bob, 1, 1.5), skin)
+			c.draw_rect(Rect2(sx * 2.0 - 0.5, -13.0 + bob, 1.0, 0.5 if blink else 1.0), Color("bce7f1", a) if pal.look == "wraith" else eye)
 		else:
 			c.draw_rect(Rect2(sx * 2.0 - 0.5, -13.0 + bob, 1.0, 2.0), eye)
 			c.draw_rect(Rect2(sx * 2.0 - 0.5, -13.0 + bob, 1.0, 1.0), Color(1, 1, 1, 0.8 * a))
@@ -512,9 +558,9 @@ static func _look_extras(parts: Array, sh: Array, pal: Dictionary, side: bool, u
 	match pal.look:
 		"mu":
 			for sg in [-1.0, 1.0]:
-				parts.insert(0, ["p", PackedVector2Array([Vector2(sg * 3.0, 3.0), Vector2(sg * 7.5, 8.5 + sway), Vector2(sg * 5.0, 2.0)]), coat_d])
+				parts.insert(0, ["p", PackedVector2Array([Vector2(sg * 3.0, 1.0), Vector2(sg * 5.5, 2.5), Vector2(sg * 5.0, 6.0 + sway * 0.5), Vector2(sg * 2.5, 6.5 + sway * 0.5)]), coat_d])
 				if not side:
-					parts.append(["p", PackedVector2Array([Vector2(sg * 5.0, -8.0 + bob), Vector2(sg * 8.0, -13.0 + bob), Vector2(sg * 3.0, -8.0 + bob)]), acc.darkened(0.1)])
+					_b(parts, sh, sg * 5.0 - 1.5, -9.0 + bob, 3.0, 2.5, acc)
 		"wraith":
 			for i in 3:
 				parts.append(["p", PackedVector2Array([Vector2(-4.0 + i * 3.0, 4.0), Vector2(-1.0 + i * 3.0, 4.0), Vector2(-2.5 + i * 3.0 + sway, 9.0 + i % 2)]), Color(coat, 0.7 * a)])
