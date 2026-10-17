@@ -5,6 +5,7 @@ const Art = preload("res://src/core/art.gd")
 const PlayerScript = preload("res://src/entities/player.gd")
 const EnemyScript = preload("res://src/entities/enemy.gd")
 const ArenaFxScript = preload("res://src/entities/arena_fx.gd")
+const ArenaMechScript = preload("res://src/entities/arena_mech.gd")
 const GiantScript = preload("res://src/entities/giant.gd")
 const PropScript = preload("res://src/entities/prop.gd")
 const FollowerScript = preload("res://src/entities/follower.gd")
@@ -55,6 +56,7 @@ var theme := "chapel"
 var prefix := ""
 var followers: Dictionary = {}
 var arena_fx: Node2D
+var cam_bob := Vector2.ZERO
 var cracked_props: Array = []
 var hearths: Array = []
 var entries: Array = []
@@ -106,6 +108,10 @@ func _ready() -> void:
 		arena_fx = afx
 		add_child(afx)
 		move_child(afx, 0)
+		var mech := Node2D.new()
+		mech.set_script(ArenaMechScript)
+		mech.set("level", self)
+		add_child(mech)
 	hud.fade = 1.0
 	hud.fade_to(0.0, 0.6)
 	if map_name == "chapel" and not GameState.flag("intro_done"):
@@ -1298,7 +1304,7 @@ func _process(_delta: float) -> void:
 	gt += _delta
 	if cam:
 		shake_amt = maxf(0.0, shake_amt - _delta * 14.0)
-		cam.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_amt
+		cam.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_amt + cam_bob
 	for f in fog:
 		f.position.x += f.get_meta("spd") * _delta
 		if f.position.x > w * TILE + 100:

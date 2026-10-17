@@ -133,11 +133,12 @@ func _physics_process(delta: float) -> void:
 				st = 0.0
 		"idle":
 			facing = to.normalized()
-			move = to.normalized() * speed if dist > 90.0 else Vector2.ZERO
+			move = _stalk(to, dist, 1.9)
 			if st > idle_wait:
 				_begin_attack()
 		"attack":
 			facing = facing.lerp(to.normalized(), 0.04) if winding else facing
+			move = _stalk(to, dist, 0.9 if winding else 1.4)
 		"rush":
 			move = charge_dir * 250.0
 			if is_on_wall() and st > 0.15:
@@ -161,6 +162,14 @@ func _physics_process(delta: float) -> void:
 	if state in ["idle", "attack", "rush", "stun"] and dist < 48.0:
 		player.hurt(1, to.normalized() if dist > 0.1 else Vector2.DOWN)
 	queue_redraw()
+
+
+# Bosses hunt the hero: close in fast, then circle at melee range instead of standing still.
+func _stalk(to: Vector2, dist: float, mult: float) -> Vector2:
+	var dir := to.normalized()
+	if dist > 100.0:
+		return dir * speed * mult
+	return dir.orthogonal() * speed * 0.7 * (1.0 if int(t * 0.4) % 2 == 0 else -1.0)
 
 
 func _pool() -> Array:
