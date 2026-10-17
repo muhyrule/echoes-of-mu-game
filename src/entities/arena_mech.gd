@@ -1,16 +1,19 @@
 extends Node2D
-## Live, per-arena mechanics that make each boss room an opponent of its own: drifting whirlpools, rotating
-## blades, erupting geysers, sweeping carts, crosswinds and creeping miasma. Starts once the boss wakes.
+## Boss-arena mechanics built around waygates. Linked gates teleport heroes across the room; a hero emerging
+## beside the boss lands a portal strike. Every so often the boss channels an arena-wide cataclysm that only the
+## glowing havens around the gates survive; weathering it leaves the boss exposed.
 
 const CFG := {
-	"loch": {"col": Color(0.4, 0.9, 1.0), "whirls": 2, "geyser": [3.6, "water"]},
-	"keep": {"col": Color(0.85, 0.1, 0.2), "sweep": 1, "geyser": [3.2, "stakes"]},
-	"ossuary": {"col": Color(0.55, 1.0, 0.9), "lane": [6.5, "cart"], "geyser": [4.2, "bone"]},
-	"cliff": {"col": Color(0.7, 0.85, 1.0), "gust": true, "geyser": [3.0, "bolt"], "bob": 3.5, "clouds": true},
-	"lazaretto": {"col": Color(0.55, 0.9, 0.3), "miasma": 3, "geyser": [4.4, "pyre"]},
-	"cave": {"col": Color(1.0, 0.5, 0.15), "lane": [7.0, "lava"], "geyser": [2.6, "lava"]},
-	"attic": {"col": Color(0.95, 0.75, 0.35), "sweep": 2},
+	"loch": {"col": Color(0.4, 0.9, 1.0), "gates": 3, "name": "Whirlpool Gate", "cata": "The Loch floods", "line": "The Loch is rising \u2014 reach a whirlpool gate!"},
+	"keep": {"col": Color(0.85, 0.1, 0.2), "gates": 2, "name": "Blood Mirror", "cata": "Blood Moon", "line": "A blood moon rises \u2014 step through a blood mirror!"},
+	"ossuary": {"col": Color(0.55, 1.0, 0.9), "gates": 3, "name": "Lantern Door", "cata": "Judgement Toll", "line": "The Ankou tolls judgement \u2014 shelter at a lantern door!"},
+	"cliff": {"col": Color(0.7, 0.85, 1.0), "gates": 2, "name": "Updraft", "cata": "Great Storm", "line": "The storm breaks \u2014 ride an updraft to the calm!", "gust": true, "bob": 3.5, "clouds": true},
+	"lazaretto": {"col": Color(0.55, 0.9, 0.3), "gates": 2, "name": "Bell Door", "cata": "Pyre of the Plague", "line": "The pyres ignite \u2014 duck through a bell door!"},
+	"cave": {"col": Color(1.0, 0.5, 0.15), "gates": 3, "name": "Fissure", "cata": "Eruption", "line": "The mountain erupts \u2014 leap into a fissure!"},
+	"attic": {"col": Color(0.95, 0.75, 0.35), "gates": 2, "name": "Gear Gate", "cata": "Midnight Chime", "line": "The clock strikes \u2014 cross a gear gate!"},
 }
+const HAVEN := 58.0
+const WARN := 4.2
 
 var level: Node2D
 var cfg: Dictionary = {}
@@ -19,15 +22,15 @@ var live := false
 var boss: Node2D = null
 var center := Vector2.ZERO
 var half := Vector2(300, 200)
-var geysers: Array = []
-var lanes: Array = []
-var geyser_t := 2.0
-var lane_t := 4.0
+var pads: Array = []
+var tp_cd := 0.0
+var cata_t := -1.0
+var cata_wait := 6.0
+var cata_count := 0
 var gust_t := 5.0
 var gust_dir := Vector2.ZERO
 var gust_phase := 0.0
-var miasma_acc := 0.0
-var hits := {}
+var bursts: Array = []
 
 
 func _ready() -> void:
@@ -48,6 +51,17 @@ func _ready() -> void:
 	if n > 0:
 		center = sum / n
 		half = (hi - lo) * 0.5
+	if cfg.is_empty():
+		return
+	var g: int = cfg.gates
+	for i in g:
+		var a := PI * 0.5 + TAU * i / g + (0.0 if g == 3 else PI * 0.5)
+		var pos := center + Vector2(cos(a) * half.x * 0.6, sin(a) * half.y * 0.5 + half.y * 0.1)
+		for k in 12:
+			if not level._is_solid_char(Vector2i(int(pos.x / 16.0), int(pos.y / 16.0))):
+				break
+			pos = pos.lerp(center, 0.12)
+		pads.append(pos)
 
 
 func _find_boss() -> Node2D:
@@ -61,11 +75,6 @@ func _phase() -> int:
 	return int(boss.get("phase")) if boss else 1
 
 
-func _hurt(from: Vector2) -> void:
-	var p: Node2D = level.player
-	p.hurt(1, (p.global_position - from).normalized() if p.global_position != from else Vector2.DOWN)
-
-
 func _process(delta: float) -> void:
 	if cfg.is_empty() or level == null or level.get("player") == null:
 		return
@@ -73,78 +82,35 @@ func _process(delta: float) -> void:
 		queue_redraw()
 		return
 	t += delta
+	tp_cd = maxf(0.0, tp_cd - delta)
 	boss = _find_boss()
 	live = boss != null and boss.state not in ["dormant", "dying"] and not level.player.dead
 	if cfg.has("bob") and level.cam:
 		level.cam_bob = Vector2(sin(t * 0.9) * 1.5, sin(t * 1.3) * float(cfg.bob))
+	for b in bursts.duplicate():
+		b.t += delta
+		if b.t > 0.6:
+			bursts.erase(b)
 	if live:
 		_step(delta)
+	elif cata_t >= 0.0:
+		cata_t = -1.0
 	queue_redraw()
 
 
 func _step(delta: float) -> void:
-	var ph := _phase()
 	var P: Node2D = level.player
 	var pp := P.global_position
-	if cfg.has("whirls"):
-		for i in int(cfg.whirls):
-			var wp := _whirl_pos(i)
-			var d := wp - pp
-			if d.length() < 95.0:
-				P.knock += d.normalized() * 520.0 * delta
-				P.knock = P.knock.limit_length(80.0)
-			if d.length() < 20.0:
-				_hurt(wp)
-	if cfg.has("sweep"):
-		for i in int(cfg.sweep):
-			var seg := _sweep_end(i)
-			var cp := Geometry2D.get_closest_point_to_segment(pp, center, seg)
-			if cp.distance_to(pp) < 11.0 and pp.distance_to(center) > 26.0:
-				_hurt(cp)
-	if cfg.has("miasma"):
-		for i in int(cfg.miasma):
-			if _cloud_pos(i).distance_to(pp) < 48.0 + ph * 4.0:
-				miasma_acc += delta
-				if miasma_acc > 0.7:
-					miasma_acc = 0.0
-					_hurt(_cloud_pos(i))
-	if cfg.has("geyser"):
-		geyser_t -= delta
-		if geyser_t <= 0.0:
-			geyser_t = float(cfg.geyser[0]) - 0.5 * ph + randf_range(0.0, 0.8)
-			var at: Vector2 = pp + Vector2.from_angle(randf() * TAU) * randf_range(0.0, 70.0)
-			at = at.clamp(center - half, center + half)
-			if not level._is_solid_char(Vector2i(int(at.x / 16.0), int(at.y / 16.0))):
-				geysers.append({"p": at, "t": 0.0, "hit": false})
-		for g in geysers.duplicate():
-			g.t += delta
-			if g.t > 1.1 and g.t < 1.6 and not g.hit and g.p.distance_to(pp) < 30.0:
-				g.hit = true
-				_hurt(g.p)
-				level.shake(3.0)
-			if g.t > 1.1 and not g.get("fired", false):
-				g.fired = true
-				level.spark(g.p, cfg.col, 10)
-			if g.t > 1.8:
-				geysers.erase(g)
-	if cfg.has("lane"):
-		lane_t -= delta
-		if lane_t <= 0.0:
-			lane_t = float(cfg.lane[0]) - ph * 0.8
-			var horizontal := randf() < 0.5
-			var line := (pp.y if horizontal else pp.x) + randf_range(-30.0, 30.0)
-			lanes.append({"h": horizontal, "line": line, "t": 0.0, "dir": 1.0 if randf() < 0.5 else -1.0})
-		for l in lanes.duplicate():
-			l.t += delta
-			var lp := _lane_pos(l)
-			if l.t > 1.2 and lp.distance_to(pp) < 26.0:
-				_hurt(lp)
-			if l.t > 1.2 + 2.6:
-				lanes.erase(l)
+	if tp_cd <= 0.0 and P.rolling <= 0.0:
+		for i in pads.size():
+			if pp.distance_to(pads[i]) < 15.0:
+				_teleport(P, i)
+				break
+	_cataclysm(delta, P)
 	if cfg.get("gust", false):
 		gust_t -= delta
 		if gust_t <= 0.0:
-			gust_t = randf_range(6.0, 8.5) - ph * 0.8
+			gust_t = randf_range(6.0, 8.5) - _phase() * 0.8
 			gust_dir = Vector2.RIGHT if randf() < 0.5 else Vector2.LEFT
 			gust_phase = 0.0
 			Audio.sfx("roar")
@@ -157,27 +123,64 @@ func _step(delta: float) -> void:
 				P.knock = P.knock.limit_length(95.0)
 
 
-func _whirl_pos(i: int) -> Vector2:
-	var a := t * 0.45 * (1.0 if i % 2 == 0 else -1.0) + i * PI
-	return center + Vector2(cos(a) * half.x * 0.55, sin(a) * half.y * 0.5)
+func _teleport(P: Node2D, i: int) -> void:
+	var dest: Vector2 = pads[(i + 1) % pads.size()]
+	var out := (center - dest).normalized() * 26.0
+	P.global_position = dest + out
+	P.knock = Vector2.ZERO
+	tp_cd = 1.0
+	Audio.sfx("bell")
+	level.spark(pads[i], cfg.col, 10)
+	level.spark(dest, cfg.col, 14)
+	bursts.append({"p": pads[i], "t": 0.0})
+	bursts.append({"p": dest, "t": 0.0})
+	var near := minf(boss.global_position.distance_to(dest), boss.global_position.distance_to(pads[i]))
+	if near < 120.0 and boss.state in ["idle", "attack", "stun", "rush"]:
+		boss.hurt(3, (boss.global_position - dest).normalized())
+		level.shake(6.0)
+		level.hud.show_notice("Portal strike!")
 
 
-func _sweep_end(i: int) -> Vector2:
-	var a := t * (0.55 + 0.12 * _phase()) * (1.0 if i % 2 == 0 else -1.0) + i * PI * 0.5
-	return center + Vector2.from_angle(a) * minf(half.x, half.y) * 0.95
+func _cataclysm(delta: float, P: Node2D) -> void:
+	if cata_t < 0.0:
+		cata_wait -= delta
+		if cata_wait <= 0.0 and boss.state == "idle":
+			cata_t = 0.0
+			cata_count += 1
+			boss.state = "attack"
+			boss.st = 0.0
+			boss.winding = true
+			boss.queue.clear()
+			Audio.sfx("roar")
+			level.shake(5.0)
+			level.hud.show_notice(str(cfg.line) if cata_count == 1 else str(cfg.cata) + "!")
+		return
+	cata_t += delta
+	if boss.state != "attack":
+		cata_t = -1.0
+		cata_wait = 6.0
+		return
+	if cata_t >= WARN:
+		var safe := _in_haven(P.global_position)
+		cata_t = -1.0
+		cata_wait = 12.0 - 1.5 * _phase()
+		boss.winding = false
+		level.shake(12.0)
+		Audio.sfx("hit")
+		bursts.append({"p": center, "t": -1.0})
+		if not safe:
+			P.hurt(2, Vector2.DOWN)
+			boss._finish(0.0)
+		else:
+			boss._finish(4.5)
+			level.hud.show_notice("The %s is spent \u2014 strike now!" % boss.get("kind").replace("_giant", "").capitalize())
 
 
-func _cloud_pos(i: int) -> Vector2:
-	return center + Vector2(sin(t * 0.21 + i * 2.1) * half.x * 0.7, cos(t * 0.17 + i * 1.3) * half.y * 0.6)
-
-
-func _lane_pos(l: Dictionary) -> Vector2:
-	var travel: float = maxf(0.0, l.t - 1.2) * 280.0
-	var span: float = (half.x if l.h else half.y) + 40.0
-	var along: float = -span * l.dir + travel * l.dir
-	if l.h:
-		return Vector2(center.x + along, l.line)
-	return Vector2(l.line, center.y + along)
+func _in_haven(p: Vector2) -> bool:
+	for q in pads:
+		if p.distance_to(q) < HAVEN:
+			return true
+	return false
 
 
 func _draw() -> void:
@@ -186,122 +189,68 @@ func _draw() -> void:
 	var col: Color = cfg.col
 	if cfg.get("clouds", false):
 		_draw_clouds(col)
-	if cfg.has("whirls"):
-		for i in int(cfg.whirls):
-			_draw_whirl(_whirl_pos(i), col)
-	if cfg.has("sweep"):
-		for i in int(cfg.sweep):
-			_draw_sweep(_sweep_end(i), col)
-	if cfg.has("miasma"):
-		for i in int(cfg.miasma):
-			_draw_cloud(_cloud_pos(i), col)
-	for g in geysers:
-		_draw_geyser(g, col)
-	for l in lanes:
-		_draw_lane(l, col)
+	var warn := cata_t >= 0.0
+	if warn:
+		_draw_cataclysm(col)
+	for q in pads:
+		_draw_gate(q, col, warn)
+	for b in bursts:
+		if b.t >= 0.0:
+			draw_arc(b.p, 10.0 + b.t * 80.0, 0, TAU, 24, Color(col, 0.8 * (1.0 - b.t / 0.6)), 2.0)
+		else:
+			draw_rect(Rect2(center - Vector2(900, 600), Vector2(1800, 1200)), Color(1, 1, 1, 0.5))
 	if gust_dir != Vector2.ZERO:
 		_draw_gust(col)
 
 
-func _draw_whirl(p: Vector2, col: Color) -> void:
+func _cam_center() -> Vector2:
+	var cam: Camera2D = level.cam
+	return cam.get_screen_center_position() if cam else center
+
+
+func _draw_cataclysm(col: Color) -> void:
+	var f := cata_t / WARN
+	var c := _cam_center()
+	var rect := Rect2(c - Vector2(620, 360), Vector2(1240, 720))
+	draw_rect(rect, Color(col.darkened(0.5), 0.12 + 0.32 * f + 0.05 * sin(t * 12.0)))
+	for i in 18:
+		var x := rect.position.x + fmod(i * 71.0 + t * (40.0 + i * 3.0), rect.size.x)
+		var y := rect.position.y + fmod(i * 131.0 + (t * (60.0 + i % 5 * 20.0) if level.arena != "cave" else -t * 60.0), rect.size.y)
+		match level.arena:
+			"loch":
+				draw_line(Vector2(x, y), Vector2(x + 40, y), Color(col, 0.35 * f + 0.1), 2.0)
+			"keep", "lazaretto":
+				draw_line(Vector2(x, y), Vector2(x, y + 14), Color(col, 0.5), 2.0)
+			"cliff":
+				draw_line(Vector2(x, y), Vector2(x - 26, y + 18), Color(col, 0.5), 1.5)
+			_:
+				draw_circle(Vector2(x, y), 2.0 + 2.0 * f, Color(col.lightened(0.3), 0.6))
+	for q in pads:
+		draw_circle(q, HAVEN, Color(0.9, 1.0, 1.0, 0.10 + 0.08 * sin(t * 8.0)))
+		draw_arc(q, HAVEN, 0, TAU, 36, Color(1, 1, 1, 0.9), 2.5)
+		draw_arc(q, HAVEN * (1.0 - fmod(t * 1.2, 1.0)), 0, TAU, 24, Color(col, 0.6), 1.5)
+	draw_arc(_boss_pos(), 30.0 + f * 260.0, 0, TAU, 40, Color(col, 0.4), 3.0)
+
+
+func _boss_pos() -> Vector2:
+	return boss.global_position if boss else center
+
+
+func _draw_gate(p: Vector2, col: Color, warn: bool) -> void:
+	var glow := 0.25 + 0.15 * sin(t * 3.0 + p.x)
+	if warn:
+		glow += 0.35
 	draw_set_transform(p, 0, Vector2(1, 0.6))
-	for k in 5:
-		var r := 16.0 + k * 14.0
-		draw_arc(Vector2.ZERO, r, t * 2.2 + k, t * 2.2 + k + 4.2, 20, Color(col, 0.55 - k * 0.08), 2.0)
-	draw_circle(Vector2.ZERO, 10.0, Color(0.02, 0.1, 0.16, 0.8))
-	draw_arc(Vector2.ZERO, 96.0, 0, TAU, 40, Color(col, 0.08), 1.0)
+	draw_circle(Vector2.ZERO, 20.0, Color(col, glow * 0.6))
+	draw_circle(Vector2.ZERO, 14.0, Color(0.02, 0.03, 0.06, 0.85))
+	for k in 4:
+		draw_arc(Vector2.ZERO, 8.0 + k * 4.0, t * (2.0 + k) + k, t * (2.0 + k) + k + 3.0, 14, Color(col.lightened(0.3), 0.8 - k * 0.15), 2.0)
+	draw_arc(Vector2.ZERO, 22.0, 0, TAU, 28, Color(col, 0.9), 2.0)
 	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
-
-
-func _draw_sweep(e: Vector2, col: Color) -> void:
-	var d := (e - center)
-	var nrm := d.orthogonal().normalized()
-	var arm := PackedVector2Array([center + nrm * 6.0, e + nrm * 3.0, e - nrm * 3.0, center - nrm * 6.0])
-	draw_colored_polygon(arm, Color(col, 0.22))
-	draw_line(center, e, Color(0.1, 0.05, 0.05, 0.9), 5.0)
-	draw_line(center, e, Color(col, 0.95), 2.0)
 	for k in 6:
-		var b := center + d * (0.35 + k * 0.11)
-		draw_colored_polygon(PackedVector2Array([b + nrm * 5.0, b + d.normalized() * 8.0, b - nrm * 5.0]), Color(col.lightened(0.3), 0.95))
-	draw_circle(center, 16.0, Color(0.08, 0.05, 0.06, 0.9))
-	draw_arc(center, 16.0, 0, TAU, 20, col, 2.0)
-	draw_circle(center, 6.0, col)
-
-
-func _draw_cloud(p: Vector2, col: Color) -> void:
-	for k in 9:
-		var a := t * 0.6 + k * 0.7
-		var q := p + Vector2(cos(a) * 26.0, sin(a * 1.3) * 16.0)
-		draw_circle(q, 22.0 + 4.0 * sin(t + k), Color(col, 0.1))
-	draw_circle(p, 38.0, Color(col, 0.12))
-	for k in 6:
-		var u := fmod(t * 0.5 + k * 0.17, 1.0)
-		draw_circle(p + Vector2(sin(k * 3.1 + t) * 26.0, 18.0 - u * 40.0), 2.0, Color(col.lightened(0.4), 0.7 * (1.0 - u)))
-
-
-func _draw_geyser(g: Dictionary, col: Color) -> void:
-	var style: String = cfg.geyser[1]
-	var p: Vector2 = g.p
-	if g.t < 1.1:
-		var f: float = g.t / 1.1
-		draw_set_transform(p, 0, Vector2(1, 0.6))
-		draw_arc(Vector2.ZERO, 28.0, 0, TAU, 24, Color(col, 0.35 + 0.4 * f), 2.0)
-		draw_arc(Vector2.ZERO, 28.0 * f, 0, TAU, 20, Color(col, 0.5), 1.5)
-		draw_circle(Vector2.ZERO, 28.0, Color(col, 0.08 + 0.12 * f))
-		draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
-		return
-	var u: float = clampf((g.t - 1.1) / 0.7, 0.0, 1.0)
-	var h: float = sin(u * PI) * 70.0
-	draw_set_transform(p, 0, Vector2(1, 0.6))
-	draw_circle(Vector2.ZERO, 28.0 * (1.0 - u * 0.4), Color(col, 0.5 * (1.0 - u)))
-	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
-	match style:
-		"stakes", "bone":
-			for k in 5:
-				var x := (k - 2) * 11.0
-				var hh := h * (0.7 + 0.3 * (k % 2))
-				var tip: Color = Color("c8c2b0") if style == "bone" else Color("2a1218")
-				draw_colored_polygon(PackedVector2Array([p + Vector2(x - 4, 0), p + Vector2(x + 4, 0), p + Vector2(x, -hh)]), tip)
-				draw_polyline(PackedVector2Array([p + Vector2(x - 4, 0), p + Vector2(x, -hh), p + Vector2(x + 4, 0)]), col, 1.5)
-		"bolt":
-			var pts := PackedVector2Array()
-			for k in 8:
-				pts.append(p + Vector2(sin(k * 7.0 + g.t * 40.0) * 5.0, -k * 16.0))
-			draw_polyline(pts, Color(1, 1, 1, 1.0 - u), 4.0)
-			draw_polyline(pts, Color(col, 1.0 - u), 2.0)
-		_:
-			for k in 7:
-				var a := -PI * 0.5 + (k - 3) * 0.18
-				var q := p + Vector2.from_angle(a) * h
-				draw_line(p, q, Color(col, 0.7), 5.0 - absf(k - 3) * 0.8)
-				draw_circle(q, 3.0, Color(col.lightened(0.5), 0.9))
-
-
-func _draw_lane(l: Dictionary, col: Color) -> void:
-	var span: float = (half.x if l.h else half.y) + 60.0
-	var a := Vector2(center.x - span, l.line) if l.h else Vector2(l.line, center.y - span)
-	var b := Vector2(center.x + span, l.line) if l.h else Vector2(l.line, center.y + span)
-	if l.t < 1.2:
-		var blink := 0.15 + 0.2 * absf(sin(l.t * 9.0))
-		draw_line(a, b, Color(col, blink), 40.0)
-		draw_line(a, b, Color(col, 0.6), 1.5)
-		return
-	var p := _lane_pos(l)
-	var d := Vector2(l.dir if l.h else 0.0, 0.0 if l.h else l.dir)
-	draw_line(p - d * 60.0, p, Color(col, 0.3), 30.0)
-	if cfg.lane[1] == "cart":
-		draw_rect(Rect2(p - Vector2(24, 14), Vector2(48, 20)), Color("5a4430"))
-		draw_rect(Rect2(p - Vector2(24, 14), Vector2(48, 20)), Color("2a1c10"), false, 2.0)
-		for k in 4:
-			draw_circle(p + Vector2(-16 + k * 11, -16), 5.0, Color("dcd6c4"))
-		draw_circle(p + Vector2(-14, 8), 9.0, Color("3a2c20"))
-		draw_circle(p + Vector2(14, 8), 9.0, Color("3a2c20"))
-		draw_circle(p + Vector2(0, -2), 28.0, Color(col, 0.12))
-	else:
-		draw_circle(p, 26.0, Color(col, 0.45))
-		draw_circle(p, 16.0, Color(1.0, 0.85, 0.4, 0.9))
-		for k in 6:
-			draw_circle(p - d * (k * 12.0) + Vector2(sin(k + t * 8.0) * 4.0, -k * 1.5), 12.0 - k, Color(col, 0.35))
+		var u := fmod(t * 0.7 + k * 0.17, 1.0)
+		draw_circle(p + Vector2(sin(k * 2.0 + t) * 10.0, -u * 36.0), 1.8, Color(col.lightened(0.4), 0.8 * (1.0 - u)))
+	draw_line(p + Vector2(-9, -10), p + Vector2(9, -10), Color(col, 0.0), 1.0)
 
 
 func _draw_gust(col: Color) -> void:
