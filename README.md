@@ -100,3 +100,10 @@ Five further giants, each based on a regional legend, wait behind **Echo Gates**
 - **Cacus of the Aventine** (Rome): fire breath, boulders, cattle stampede lanes, smoke, quakes and a furnace beam.
 
 Each has its own themed arena (`keep`, `ossuary`, `cliff`, `lazaretto`, `cave`), three phases and original ornate art in `src/entities/boss_art2.gd`. Full towns and dungeons for these cities are future chapters.
+
+## Prologue, voice and music
+
+- **Prologue**: New Game opens six illustrated, narrated plates (Enter advances, Esc skips) explaining the Echoes and why Mu's journey begins.
+- **Travel**: the road cutscene shows only the heroes currently in the party, each speaking their own line.
+- **Old gothic voice**: `src/autoload/voice.gd` applies archaic diction to the main cast and regional dialect to townsfolk (Scots in Edinburgh, Bohemian-flavoured in Praha).
+- **Music engine**: 44.1 kHz stereo, per-voice panning, stereo room reverb, new choir/harp/flute/cello/drone voices. Region themes: chapel, Edinburgh, Praha, plus dungeon pieces `vaults` (Edinburgh) and `ossuary` (Praha), `road` for travel and `prologue`.

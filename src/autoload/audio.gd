@@ -1,7 +1,7 @@
 extends Node
 ## Original procedural audio: SFX and looping gothic themes synthesized at runtime.
 
-const RATE := 22050
+const RATE := 44100
 var _sfx_cache: Dictionary = {}
 var _music_cache: Dictionary = {}
 var _pool: Array = []
@@ -14,6 +14,7 @@ const THEME_ALIAS := {
 	"menu": "toccata", "chapel": "moonlight", "crypt": "funeral",
 	"clock": "winter", "boss": "fate", "boss2": "dance",
 	"edin": "edin", "praha": "praha", "inn": "inn",
+	"prologue": "prologue", "road": "road", "vaults": "vaults", "ossuary": "ossuary",
 }
 const TS := 1024
 var _tables: Dictionary = {}
@@ -34,15 +35,20 @@ func _ready() -> void:
 	add_child(_music)
 
 
-func _make(samples: PackedFloat32Array, loop := false) -> AudioStreamWAV:
+func _make(samples: PackedFloat32Array, loop := false, right: PackedFloat32Array = PackedFloat32Array()) -> AudioStreamWAV:
+	var st := right.size() == samples.size() and right.size() > 0
 	var bytes := PackedByteArray()
-	bytes.resize(samples.size() * 2)
+	bytes.resize(samples.size() * (4 if st else 2))
 	for i in samples.size():
-		bytes.encode_s16(i * 2, int(clampf(samples[i], -1.0, 1.0) * 32000.0))
+		if st:
+			bytes.encode_s16(i * 4, int(clampf(samples[i], -1.0, 1.0) * 32000.0))
+			bytes.encode_s16(i * 4 + 2, int(clampf(right[i], -1.0, 1.0) * 32000.0))
+		else:
+			bytes.encode_s16(i * 2, int(clampf(samples[i], -1.0, 1.0) * 32000.0))
 	var s := AudioStreamWAV.new()
 	s.format = AudioStreamWAV.FORMAT_16_BITS
 	s.mix_rate = RATE
-	s.stereo = false
+	s.stereo = st
 	s.data = bytes
 	if loop:
 		s.loop_mode = AudioStreamWAV.LOOP_FORWARD
@@ -161,6 +167,11 @@ func _ensure_tables() -> void:
 		_tables["piano"] = _make_table([1.0, 0.32, 0.12, 0.04])
 		_tables["strings"] = _make_table([1.0, 0.42, 0.2, 0.1, 0.05, 0.03])
 		_tables["pluck"] = _make_table([1.0, 0.5, 0.25, 0.12, 0.06])
+		_tables["choir"] = _make_table([1.0, 0.12, 0.5, 0.08, 0.3, 0.05, 0.12])
+		_tables["harp"] = _make_table([1.0, 0.38, 0.14, 0.06, 0.02])
+		_tables["flute"] = _make_table([1.0, 0.1, 0.05])
+		_tables["cello"] = _make_table([1.0, 0.7, 0.5, 0.35, 0.22, 0.14, 0.08, 0.04])
+		_tables["drone"] = _make_table([1.0, 0.8, 0.55, 0.4, 0.3, 0.2, 0.15, 0.1, 0.06])
 
 
 static func _midi(tok: String) -> int:
@@ -562,6 +573,66 @@ func _score(name: String) -> Dictionary:
 				{"inst": "organ", "vol": 0.07, "seq": pad.strip_edges()},
 				{"inst": "strings", "vol": 0.14, "seq": mel.strip_edges()},
 			])
+		"prologue":
+			# "Candle and Plague" - D minor choir, cello and harp beneath a lone flute; the great bell tolls
+			var chords := ["D4+F4+A4:8", "Bb3+D4+F4:8", "G3+Bb3+D4:8", "A3+C#4+E4:8", "D4+F4+A4:8", "C4+F4+A4:8", "G3+Bb3+D4:8", "A3+C#4+E4:8"]
+			var roots := ["D2:8", "Bb1:8", "G1:8", "A1:8", "D2:8", "F2:8", "G1:8", "A1:8"]
+			var harp_n := ["D3 A3 F4 A4", "Bb2 F3 D4 F4", "G2 D3 Bb3 D4", "A2 E3 C#4 E4", "D3 A3 F4 A4", "F2 C3 A3 C4", "G2 D3 Bb3 D4", "A2 E3 C#4 E4"]
+			var fl := ["D5:3 F5:1 A5:2 G5:1 F5:1", "F5:3 D5:1 Bb4:2 C5:1 D5:1", "G5:3 Bb5:1 A5:2 G5:1 F5:1", "E5:2 G5:1 A5:1 C#6:3 R:1",
+				"D6:3 C6:1 A5:2 F5:2", "A5:3 C6:1 F6:2 E6:1 D6:1", "Bb5:2 A5:2 G5:2 D5:2", "C#5:2 E5:2 A5:2 E5:1 C#5:1"]
+			var hp := ""
+			for h in harp_n:
+				hp += _ap(h, 8, 1, [0, 1, 2, 3, 2, 1, 3, 2]) + " "
+			return _mk(58.0, 64.0, [
+				{"inst": "choir", "vol": 0.22, "pan": -0.25, "seq": _cat(chords)},
+				{"inst": "cello", "vol": 0.26, "pan": -0.5, "seq": _cat(roots)},
+				{"inst": "harp", "vol": 0.2, "pan": 0.4, "seq": hp.strip_edges()},
+				{"inst": "flute", "vol": 0.22, "pan": 0.2, "seq": _cat([_r(16), _cat(fl.slice(2))])},
+				{"inst": "strings", "vol": 0.12, "pan": 0.0, "seq": _cat([_r(32), _tr(_cat(chords.slice(4)), 12)])},
+				{"inst": "bell", "vol": 0.22, "pan": 0.0, "seq": _rep("D3:2 R:14", 4)},
+			])
+		"road":
+			# "Lantern Miles" - E minor travelling air: walking harp ostinato, flute tune, open-fifth drone
+			var chs := ["E3 B3 G4 B3", "G3 D4 B4 D4", "D3 A3 F#4 A3", "A2 E3 C4 E3", "E3 B3 G4 B3", "C3 G3 E4 G3", "D3 A3 F#4 A3", "E3 B3 G4 B3"]
+			var tune := ["B4:1 E5:1 G5:1 F#5:1", "G5:1 B5:1 A5:1 G5:1", "F#5:1 A5:1 D6:1 A5:1", "E5:1 A5:1 C6:1 B5:1",
+				"B5:1.5 G5:.5 E5:1 B4:1", "G5:1 E5:1 C5:1 E5:1", "F#5:1 A5:.5 F#5:.5 D5:2", "E5:3 R:1"]
+			var bass := ["E2:2 B2:2", "G2:2 D3:2", "D2:2 A2:2", "A1:2 E2:2", "E2:2 B2:2", "C2:2 G2:2", "D2:2 A2:2", "E2:4"]
+			var ar := ""
+			for c in chs:
+				ar += _ap(c, 4, 0.5, [0, 1, 2, 3]) + " "
+			var tn := _cat(tune)
+			return _mk(92.0, 64.0, [
+				{"inst": "harp", "vol": 0.18, "pan": 0.35, "seq": _cat([ar.strip_edges(), ar.strip_edges()])},
+				{"inst": "flute", "vol": 0.24, "pan": -0.2, "seq": _cat([_r(4), tn, _tr(tn, 12)])},
+				{"inst": "cello", "vol": 0.22, "pan": -0.45, "seq": _cat([_cat(bass), _cat(bass)])},
+				{"inst": "drone", "vol": 0.07, "pan": 0.0, "seq": "E2+B2:64"},
+				{"inst": "pluck", "vol": 0.1, "pan": -0.55, "seq": _cat([_r(32), _rep("B3:1 R:1", 16)])},
+			])
+		"vaults":
+			# "Beneath the Old Town" - Edinburgh vaults: pibroch-like lament over a D drone, slow bell and drum
+			var vm := ["D5:4 F5:2 E5:1 D5:1", "A4:4 C5:2 D5:2", "F5:3 G5:1 A5:2 G5:1 F5:1", "E5:4 D5:2 A4:2",
+				"D5:2 F5:2 A5:3 G5:1", "Bb5:4 A5:2 G5:2", "F5:2 E5:2 D5:2 C5:2", "D5:8"]
+			return _mk(52.0, 64.0, [
+				{"inst": "drone", "vol": 0.16, "pan": 0.0, "seq": "D2+A2:64"},
+				{"inst": "flute", "vol": 0.24, "pan": 0.25, "seq": _cat(vm)},
+				{"inst": "choir", "vol": 0.18, "pan": -0.3, "seq": "D3+A3+D4:16 Bb2+F3+Bb3:8 G2+D3+G3:8 A2+E3+A3:8 D3+A3+D4:24"},
+				{"inst": "cello", "vol": 0.18, "pan": -0.5, "seq": _cat([_r(16), _tr(_cat(vm.slice(0, 4)), -24)])},
+				{"inst": "bell", "vol": 0.2, "pan": 0.0, "seq": _rep("D3:2 R:14", 4)},
+				{"inst": "timp", "vol": 0.3, "pan": 0.0, "seq": _rep("D2:1 R:7", 8)},
+			])
+		"ossuary":
+			# "The Counted Hours" - Praha ossuary: phrygian cimbalom tremolo over a ticking clock and cello
+			var om := ["A4:2 Bb4:1 A4:1 G#4:2 A4:2", "C5:2 B4:1 A4:1 E4:4", "A4:2 Bb4:1 A4:1 G#4:2 E4:2", "F4:2 E4:2 D4:2 E4:2",
+				"E5:2 F5:1 E5:1 D#5:2 E5:2", "C5:2 D5:1 E5:1 A5:4", "G#5:2 F5:2 E5:2 D5:2", "A4:6 R:2"]
+			var oc := ["A3+C4+E4:8", "A3+C4+E4:8", "A3+C4+E4:8", "D3+F3+A3:8", "E3+G#3+B3:8", "A3+C4+E4:8", "E3+G#3+B3:8", "A3+C4+E4:8"]
+			var ob := ["A1:4 E2:4", "A1:4 E2:4", "A1:4 E2:4", "D2:4 A1:4", "E2:4 B1:4", "A1:4 E2:4", "E2:4 G#2:4", "A1:8"]
+			return _mk(84.0, 64.0, [
+				{"inst": "pluck", "vol": 0.22, "pan": 0.3, "seq": _trem(_cat(om), 0.25)},
+				{"inst": "choir", "vol": 0.14, "pan": -0.3, "seq": _cat(oc)},
+				{"inst": "cello", "vol": 0.24, "pan": -0.5, "seq": _cat(ob)},
+				{"inst": "pluck", "vol": 0.07, "pan": 0.6, "seq": _rep("E6:.5 R:.5", 64)},
+				{"inst": "timp", "vol": 0.28, "pan": 0.0, "seq": _rep("A1:1 R:3", 16)},
+			])
 	return {"bpm": 60.0, "voices": []}
 
 
@@ -579,22 +650,29 @@ func _build_theme(name: String) -> AudioStreamWAV:
 		total_beats = maxf(total_beats, b)
 		parsed.append(seq)
 	var n_total := int(ceilf(total_beats) * spb * RATE)
-	var buf := PackedFloat32Array()
-	buf.resize(n_total)
+	var bl := PackedFloat32Array()
+	var br := PackedFloat32Array()
+	bl.resize(n_total)
+	br.resize(n_total)
 	for vi in sc.voices.size():
 		var v: Dictionary = sc.voices[vi]
+		var pan: float = v.get("pan", 0.0)
+		var ang := (pan + 1.0) * PI * 0.25
+		var gl := cos(ang) * 1.414
+		var gr := sin(ang) * 1.414
 		var pos := 0.0
 		for n in parsed[vi]:
 			var dur: float = n[1] * spb
 			for m in n[0]:
-				_render_note(buf, int(pos * spb * RATE), m, dur, v.inst, v.vol)
+				_render_note(bl, br, gl, gr, int(pos * spb * RATE), m, dur, v.inst, v.vol)
 			pos += n[1]
-	_smooth_and_verb(buf)
-	return _make(buf, true)
+	_smooth_and_verb(bl, br)
+	return _make(bl, true, br)
 
 
 # circular one-pole low-pass: two laps so the filter state at the loop seam is consistent
-static func _lowpass(buf: PackedFloat32Array, a: float) -> void:
+static func _lowpass(buf: PackedFloat32Array, a0: float) -> void:
+	var a := 1.0 - sqrt(1.0 - a0)
 	var n := buf.size()
 	var y := buf[n - 1]
 	for lap in 2:
@@ -604,14 +682,10 @@ static func _lowpass(buf: PackedFloat32Array, a: float) -> void:
 				buf[i] = y
 
 
-# tone smoothing, cheap comb/allpass room tail wrapped around the loop, then soft limiting
-func _smooth_and_verb(buf: PackedFloat32Array) -> void:
-	var n := buf.size()
-	_lowpass(buf, 0.38)
-	_lowpass(buf, 0.5)
-	var wet := PackedFloat32Array()
-	wet.resize(n)
-	for cfg in [[int(0.0297 * RATE), 0.66], [int(0.0371 * RATE), 0.64], [int(0.0411 * RATE), 0.62], [int(0.0437 * RATE), 0.6]]:
+static func _comb_bank(src: PackedFloat32Array, cfgs: Array, damp: float, level: float, wet: PackedFloat32Array) -> void:
+	var n := src.size()
+	var da := 1.0 - sqrt(1.0 - damp)
+	for cfg in cfgs:
 		var d: int = cfg[0]
 		var g: float = cfg[1]
 		var y := PackedFloat32Array()
@@ -622,43 +696,55 @@ func _smooth_and_verb(buf: PackedFloat32Array) -> void:
 				var j := i - d
 				if j < 0:
 					j += n
-				lp += 0.45 * (y[j] - lp)
-				y[i] = buf[i] + g * lp
+				lp += da * (y[j] - lp)
+				y[i] = src[i] + g * lp
 		for i in n:
-			wet[i] += y[i] * 0.16
-	# a longer, darker tap pair adds a slow bloom
-	for cfg in [[int(0.113 * RATE), 0.56], [int(0.167 * RATE), 0.52]]:
-		var d: int = cfg[0]
-		var g: float = cfg[1]
-		var y := PackedFloat32Array()
-		y.resize(n)
-		var lp := 0.0
-		for lap in 3:
-			for i in n:
-				var j := i - d
-				if j < 0:
-					j += n
-				lp += 0.26 * (y[j] - lp)
-				y[i] = buf[i] + g * lp
-		for i in n:
-			wet[i] += y[i] * 0.14
-	_lowpass(wet, 0.3)
+			wet[i] += y[i] * level
+
+
+# tone smoothing, stereo comb room tails wrapped around the loop, then soft limiting
+func _smooth_and_verb(bl: PackedFloat32Array, br: PackedFloat32Array) -> void:
+	var n := bl.size()
+	for b in [bl, br]:
+		_lowpass(b, 0.38)
+		_lowpass(b, 0.5)
+	var mid := PackedFloat32Array()
+	mid.resize(n)
+	for i in n:
+		mid[i] = (bl[i] + br[i]) * 0.5
+	var wl := PackedFloat32Array()
+	var wr := PackedFloat32Array()
+	wl.resize(n)
+	wr.resize(n)
+	var short_l := [[int(0.0297 * RATE), 0.66], [int(0.0371 * RATE), 0.64], [int(0.0411 * RATE), 0.62], [int(0.0437 * RATE), 0.6]]
+	var short_r := [[int(0.0313 * RATE), 0.66], [int(0.0353 * RATE), 0.64], [int(0.0427 * RATE), 0.62], [int(0.0461 * RATE), 0.6]]
+	var long_l := [[int(0.113 * RATE), 0.58], [int(0.167 * RATE), 0.54], [int(0.211 * RATE), 0.5]]
+	var long_r := [[int(0.127 * RATE), 0.58], [int(0.181 * RATE), 0.54], [int(0.233 * RATE), 0.5]]
+	_comb_bank(mid, short_l, 0.45, 0.16, wl)
+	_comb_bank(mid, long_l, 0.26, 0.13, wl)
+	_comb_bank(mid, short_r, 0.45, 0.16, wr)
+	_comb_bank(mid, long_r, 0.26, 0.13, wr)
+	_lowpass(wl, 0.3)
+	_lowpass(wr, 0.3)
 	var pre := int(0.022 * RATE)
-	var dry := buf.duplicate()
+	var dl := bl.duplicate()
+	var dr := br.duplicate()
 	for i in n:
 		var j := i - pre
 		if j < 0:
 			j += n
-		buf[i] = dry[i] * 0.78 + wet[j] * 1.1
+		bl[i] = dl[i] * 0.78 + wl[j] * 1.1
+		br[i] = dr[i] * 0.78 + wr[j] * 1.1
 	var peak := 0.001
 	for i in n:
-		peak = maxf(peak, absf(buf[i]))
+		peak = maxf(peak, maxf(absf(bl[i]), absf(br[i])))
 	var k := 0.8 / peak
 	for i in n:
-		buf[i] = tanh(buf[i] * k * 1.25) * 0.78
+		bl[i] = tanh(bl[i] * k * 1.25) * 0.78
+		br[i] = tanh(br[i] * k * 1.25) * 0.78
 
 
-func _render_note(buf: PackedFloat32Array, start: int, midi: int, dur: float, inst: String, vol: float) -> void:
+func _render_note(bl: PackedFloat32Array, br: PackedFloat32Array, gl: float, gr: float, start: int, midi: int, dur: float, inst: String, vol: float) -> void:
 	var f := 440.0 * pow(2.0, float(midi - 69) / 12.0)
 	var rel := 0.2
 	match inst:
@@ -666,10 +752,15 @@ func _render_note(buf: PackedFloat32Array, start: int, midi: int, dur: float, in
 		"strings": rel = 0.3
 		"piano": rel = 0.18
 		"pluck": rel = 0.1
+		"choir": rel = 0.5
+		"harp": rel = 0.25
+		"flute": rel = 0.12
+		"cello": rel = 0.25
+		"drone": rel = 0.6
 	var n := int((dur + rel) * RATE)
 	if inst == "bell" or inst == "timp":
 		n = int(2.2 * RATE) if inst == "bell" else int(0.7 * RATE)
-	var total := buf.size()
+	var total := bl.size()
 	var phase := 0.0
 	var tb: PackedFloat32Array = _tables.get(inst, _tables["organ"])
 	var att := 0.02
@@ -678,13 +769,18 @@ func _render_note(buf: PackedFloat32Array, start: int, midi: int, dur: float, in
 		"organ": att = 0.05
 		"piano": att = 0.012
 		"pluck": att = 0.008
+		"choir": att = 0.3
+		"harp": att = 0.006
+		"flute": att = 0.07
+		"cello": att = 0.09
+		"drone": att = 0.5
 	# lower voices sit rounder and quieter, bright ones stay clear
 	var gain := vol
 	if f < 140.0:
 		gain *= 0.8
 	var vphase := fmod(float(start) * 0.37, TAU)
 	gain *= 1.0 + 0.05 * sin(TAU * float(start) / RATE / 7.0)
-	var chorus := inst == "strings" or inst == "organ"
+	var chorus := inst == "strings" or inst == "organ" or inst == "choir" or inst == "cello" or inst == "drone"
 	var detune := 1.0 + (0.0017 if inst == "strings" else 0.0021)
 	var phase2 := 0.25
 	for i in n:
@@ -700,8 +796,10 @@ func _render_note(buf: PackedFloat32Array, start: int, midi: int, dur: float, in
 				v = sin(TAU * f * 1.6 * t * (1.0 + 0.3 * exp(-t * 18.0))) * exp(-t * 6.0) * ta * 0.8
 			_:
 				var vib := 1.0
-				if inst == "strings":
+				if inst == "strings" or inst == "cello":
 					vib += 0.003 * sin(TAU * 5.0 * t + vphase) * minf(t / 0.5, 1.0)
+				elif inst == "choir" or inst == "flute":
+					vib += 0.005 * sin(TAU * 5.4 * t + vphase) * minf(t / 0.7, 1.0)
 				phase += f * vib / RATE
 				var ph := (phase - floorf(phase)) * TS
 				var i0 := int(ph) % TS
@@ -718,10 +816,18 @@ func _render_note(buf: PackedFloat32Array, start: int, midi: int, dur: float, in
 					env *= 0.55 * exp(-t * 4.5) + 0.45 * exp(-t * 1.4)
 				elif inst == "pluck":
 					env *= exp(-t * 6.0)
+				elif inst == "harp":
+					env *= 0.6 * exp(-t * 3.2) + 0.4 * exp(-t * 0.9)
+				elif inst == "flute":
+					v += (randf() - 0.5) * 0.06 * minf(t / 0.1, 1.0)
+				elif inst == "choir":
+					v *= 1.0 + 0.1 * sin(TAU * 0.35 * t + vphase)
 				elif inst == "strings":
 					v *= 1.0 + 0.04 * sin(TAU * 4.3 * t + vphase)
 				if t > dur:
 					var rk := clampf((t - dur) / rel, 0.0, 1.0)
 					env *= 0.5 + 0.5 * cos(PI * rk)
 				v *= env
-		buf[(start + i) % total] += v * gain
+		var o := (start + i) % total
+		bl[o] += v * gain * gl
+		br[o] += v * gain * gr

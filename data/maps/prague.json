@@ -1,7 +1,7 @@
 {
  "title": "Prague \u2014 The Ossuary Clock",
  "subtitle": "Where every hour is counted in bone",
- "music": "clock",
+ "music": "ossuary",
  "theme": "prague",
  "spawns": {
   "start": "@"

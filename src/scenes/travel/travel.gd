@@ -8,6 +8,44 @@ var done := false
 var kind := "road"
 var dest_name := ""
 var lines: Array = []
+var cast: Array = ["mu"]
+const COLORS := {
+	"mu": [Color("2a3a5a"), Color("d0a888"), Color("1a1420")],
+	"isolde": [Color("6a2a3a"), Color("e0b898"), Color("d8c8a0")],
+	"wren": [Color("2a4a3a"), Color("c89878"), Color("3a2410")],
+	"corvin": [Color("3a3a4a"), Color("8a8a96"), Color("14141c")],
+}
+const NAMES := {"mu": "Mu", "isolde": "Isolde", "wren": "Wren", "corvin": "Corvin"}
+const TALK := {
+	"edin": {
+		"narr": "A haar rolls off the Firth, and the Old Town broods above like a crow upon a gibbet.",
+		"mu": "Mark the bells beneath the stones. They toll for none that live.",
+		"isolde": "I know this air, Mu. 'Tis the smell of candles guttering in a locked chapel.",
+		"wren": "Narrow closes, many shadows. A body might vanish here and none would ask.",
+		"corvin": "By my reckoning, three hundred lamps and not one of them honest.",
+	},
+	"prague": {
+		"narr": "Cart-ruts and church bells carry across the Vltava; a hundred spires lean to hear the travellers.",
+		"mu": "Praha sleeps lightly. I feel the Echo stir beneath her cobbles.",
+		"isolde": "Pray quietly here. The very saints in the niches seem to listen.",
+		"wren": "Mark the spires, how they lean. I like them not, and I like them well.",
+		"corvin": "So many clocks! Yet every one doth tell a different hour of the dead.",
+	},
+	"echo": {
+		"narr": "The gate hums with a borrowed memory, and something old remembers being worshipped.",
+		"mu": "Steady now. The Echo will not hold us long.",
+		"isolde": "God keep us, for the dead have long memories.",
+		"wren": "Stay close to the light. I can hear it breathing.",
+		"corvin": "Courage, friends. I have faced worse. I think.",
+	},
+	"back": {
+		"narr": "The company turns homeward toward the chapel bells; fewer words now, and more miles.",
+		"mu": "Home is whatever door shall still open for us.",
+		"isolde": "A hearth, a psalm, and sleep. I ask no more of the night.",
+		"wren": "My feet ache, yet my purse is lighter. A fair bargain.",
+		"corvin": "The chapel! Would that it served a decent supper.",
+	},
+}
 var stars: Array = []
 var font: Font
 var fade := 1.0
@@ -19,23 +57,29 @@ func _ready() -> void:
 	var to: String = GameState.journey_to
 	var from: String = GameState.journey_from
 	var target := to if from == "chapel" else from
+	cast = ["mu"]
+	for h in GameState.party:
+		if COLORS.has(h):
+			cast.append(h)
+	var route := "back"
 	if target.ends_with("_arena"):
 		kind = "echo"
 		dest_name = "Through the Echo Gate"
-		lines = ["The gate hums with a borrowed memory.", "Something old remembers being worshipped here.", "Steady. The echo will not hold for long."]
+		route = "echo"
 	elif target == "edinburgh":
 		kind = "edinburgh"
-		dest_name = "The road to Edinburgh"
-		lines = ["Wind off the Firth. Wet cobbles, wetter boots.", "Isolde hums a hymn she half remembers.", "Corvin counts lamplights. Wren counts exits.", "Beneath the Old Town, something is ringing."]
+		dest_name = "The Road to Auld Reekie"
+		route = "edin"
 	else:
 		kind = "prague"
-		dest_name = "The road to Prague"
-		lines = ["Cart-ruts and church bells across the Vltava.", "Wren swears the spires lean closer at night.", "Corvin has never seen so many clocks.", "Even the hours are counted in bone here."]
-		if from != "chapel":
-			dest_name = "The road back to the Chapel"
-	if from != "chapel" and not target.ends_with("_arena"):
-		dest_name = "The road back to the Chapel"
-		lines = ["The party turns toward the chapel bells.", "Fewer words now; more miles.", "Home is whatever door will still open."]
+		dest_name = "The Road to Golden Praha"
+		route = "prague"
+	if from != "chapel" and route != "echo":
+		dest_name = "The Road Homeward to the Chapel"
+		route = "back"
+	lines = _compose(route)
+	if route != "echo":
+		Audio.play_music("road")
 	for i in 90:
 		stars.append(Vector3(randf(), randf() * 0.5, randf()))
 
@@ -145,9 +189,17 @@ func _skyline() -> void:
 			draw_circle(Vector2(x0 + 360, base - 160), 50.0, Color(0.6, 0.3, 0.9, 0.3 + 0.6 * rise))
 
 
+func _compose(route: String) -> Array:
+	var t: Dictionary = TALK[route]
+	var out: Array = [["", t.narr]]
+	for h in cast:
+		out.append([NAMES[h], t[h]])
+	return out
+
+
 func _party() -> void:
-	var cols := [Color("2a3a5a"), Color("5a3a1a"), Color("2a1a4a"), Color("3a3a2a")]
-	for i in 4:
+	for i in cast.size():
+		var pal: Array = COLORS[cast[i]]
 		var x := 560.0 - i * 78.0
 		var bob := absf(sin(t * 6.0 + i * 0.7)) * 5.0
 		var y := 910.0 + (i % 2) * 14.0 - bob
@@ -157,9 +209,9 @@ func _party() -> void:
 		var sw := sin(t * 6.0 + i * 0.7) * 9.0
 		draw_line(Vector2(x - 6, y), Vector2(x - 6 + sw, y + 30), Color("0b0b12"), 7.0)
 		draw_line(Vector2(x + 6, y), Vector2(x + 6 - sw, y + 30), Color("0b0b12"), 7.0)
-		draw_colored_polygon(PackedVector2Array([Vector2(x - 16, y - 50), Vector2(x + 16, y - 50), Vector2(x + 20, y + 6), Vector2(x - 20, y + 6)]), cols[i])
-		draw_circle(Vector2(x + 2, y - 64), 13.0, Color("d0a888") if i != 3 else Color("8a8a96"))
-		draw_arc(Vector2(x + 2, y - 66), 14.0, PI, TAU, 10, Color("1a1420"), 7.0)
+		draw_colored_polygon(PackedVector2Array([Vector2(x - 16, y - 50), Vector2(x + 16, y - 50), Vector2(x + 20, y + 6), Vector2(x - 20, y + 6)]), pal[0])
+		draw_circle(Vector2(x + 2, y - 64), 13.0, pal[1])
+		draw_arc(Vector2(x + 2, y - 66), 14.0, PI, TAU, 10, pal[2], 7.0)
 	var lp := Vector2(560.0 + 34.0, 880.0 - absf(sin(t * 6.0)) * 5.0)
 	draw_line(lp + Vector2(0, -20), lp + Vector2(0, 20), Color("2a2018"), 3.0)
 	for r in 5:
@@ -187,4 +239,7 @@ func _caption() -> void:
 	var lt := fmod(t, per) / per
 	var la := sin(clampf(lt, 0.0, 1.0) * PI)
 	la = clampf(la * 2.2, 0.0, 1.0)
-	draw_string(font, Vector2(0, 1030), lines[idx], HORIZONTAL_ALIGNMENT_CENTER, 1920, 30, Color(0.85, 0.85, 0.95, la))
+	var ln: Array = lines[idx]
+	if ln[0] != "":
+		draw_string(font, Vector2(0, 985), ln[0], HORIZONTAL_ALIGNMENT_CENTER, 1920, 28, Color(0.95, 0.78, 0.45, la))
+	draw_string(font, Vector2(0, 1030), ln[1], HORIZONTAL_ALIGNMENT_CENTER, 1920, 30, Color(0.85, 0.85, 0.95, la))

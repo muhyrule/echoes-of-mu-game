@@ -2,7 +2,7 @@
  "theme": "vault",
  "title": "Edinburgh \u2014 The South Bridge Vaults",
  "subtitle": "Beneath the Old Town, something is ringing",
- "music": "crypt",
+ "music": "vaults",
  "spawns": {
   "start": "@"
  },
