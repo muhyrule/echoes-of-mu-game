@@ -246,7 +246,11 @@ func _draw() -> void:
 	if hero == "":
 		return
 	var st: Dictionary = Gear.styled(hero, pal)
-	Art.person(self, facing, t, st, moving, 1.0, atk_anim, 0.0)
+	var rp: float = target.get("roll_ang") if puppet and target != null else 0.0
+	Art.person(self, facing, t, st, moving, 1.0, atk_anim, 0.0, rp)
+	if puppet and target != null:
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		target.draw_guard(self)
 	if atk_anim > 0.0 and hero in ["isolde", "mu"]:
 		var a := facing.angle()
 		var k := 1.0 - atk_anim / 0.22

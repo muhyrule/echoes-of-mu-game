@@ -66,6 +66,10 @@ Each dungeon ends in a gate to its own arena map, holding a colossal multi-phase
 
 Arenas are themed to their boss: the Kelpie fights in a flooded cistern of the Nor' Loch (animated rippling water, kelp, drowned pillars) and the Golem in the dusty attic of the Old-New Synagogue (floorboards, rafters, clay shards, light shafts). The boss name shows on the health bar only for the first few seconds of the fight, so it never blocks the view.
 
+Arena motion: heroes, the boss and every strike kick up ripples, puddles and splashing droplets (water in the loch, dust in the attic); embers rise in the attic and swells drift across the loch.
+
+New boss attacks (all telegraphed): Kelpie – **Tide** (a wall of water sweeping the arena with one safe gap), **Whirlpool** (pulls you toward a damaging core, phase 2+), geysers with rising steam; Golem – **Quake** (stomp shockwave rings plus dust blasts), **Ember Beam** (a rotating furnace beam, phase 2+).
+
 Both bosses come from real regional folklore:
 
 - **Nor' Loch Kelpie** (Drowned Cistern, Edinburgh): the Scottish water-horse that lures travellers onto its back and drowns them. Tide rings with a gap to slip through, weedy mane lashes, water geysers, drowned-light summons, charging rush.
@@ -81,3 +85,18 @@ Isolde, Wren and Corvin now fight beside Mu with automatic attacks (Isolde's mau
 Press `C` to cycle the hero you control (Mu, Isolde, Wren, Corvin). The hero you leave goes automatic (auto-attack plus skills) and the new one takes over with their own attack and skill key. Only Mu can shift forms (Q). Each hero's craft solves puzzles: in the Vaults' cistern gallery, three seals answer only to Isolde's Bell Toll, Wren's thrown daggers and Corvin's clockwork bolts, and together open a hidden reliquary. Mu gains `7` Moon Cleave when auto-controlled.
 
 Bosses gained 16-bit style checker-dither shading, scale/brick/filigree detail, and heroes have refined signature gear.
+
+## Dodge roll, guard and parry
+- `Shift` (or `U`): a true tumbling roll with brief invulnerability and an afterimage trail. Mu rolls farthest, Wren fastest, Isolde and Corvin are heavier.
+- Hold `V` (or `O`) to guard (slower movement, no attacks). A hit in the first moments is a perfect parry with a unique counter: Mu *Moonlit Parry* (crescent), Isolde *Bell Ward* (shockwave), Wren *Shadow Slip* (blink + brief invulnerability), Corvin *Aegis Plate* (brass ward). Three blocks in quick succession break the guard.
+- Footstep and splash effects are specific to each arena: ripples in the loch and on the storm cliffs, dust in the attic, blood specks in the keep, bone dust in the ossuary, green smoke in the lazzaretto and ash in the cave.
+
+## Echo Gates: the remaining legends
+Five further giants, each based on a regional legend, wait behind **Echo Gates** on the north wall of the chapel. Each gate opens after the previous giant falls (the first after Prague):
+- **Strigoi of Poenari** (Transylvania): stake volleys, blood rings, mist-step slams, bats, draining whirlpools.
+- **Ankou, reaper of the ossuary** (Brittany / Paris): scythe sweeps, falling bone, death-cart lanes, soul orbs, knells.
+- **Barghest of Whitby** (Yorkshire): howl cones, pounces, lightning strikes, ghost-fire spokes.
+- **Il Medico della Peste** (Venice): miasma, lancet fans, censer sweeps, plague rats. Venice has no single well-documented monster, so this uses a real historical figure, the 1630 plague doctor.
+- **Cacus of the Aventine** (Rome): fire breath, boulders, cattle stampede lanes, smoke, quakes and a furnace beam.
+
+Each has its own themed arena (`keep`, `ossuary`, `cliff`, `lazaretto`, `cave`), three phases and original ornate art in `src/entities/boss_art2.gd`. Full towns and dungeons for these cities are future chapters.

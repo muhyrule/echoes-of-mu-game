@@ -130,8 +130,18 @@ func run() -> void:
 			stair = e
 	check(stair != null, "vaults end in a stair to the belfry arena")
 
-	for kind in ["kelpie_giant", "golem_giant"]:
-		var arena_name := "vault_arena" if kind == "kelpie_giant" else "prague_arena"
+	var boss_set := {
+		"kelpie_giant": ["vault_arena", ["toll", "lash", "drop", "rush", "summon", "tide", "whirl"]],
+		"golem_giant": ["prague_arena", ["cogs", "hands", "vents", "rush", "rift", "quake", "beam"]],
+		"strigoi_giant": ["keep_arena", ["stakes", "bloodring", "mist", "bats", "drain", "rush"]],
+		"ankou_giant": ["ossuary_arena", ["scythe", "bonerain", "cart", "souls", "knell", "rush"]],
+		"barghest_giant": ["cliff_arena", ["howl", "pounce", "lightning", "hellfire", "rush"]],
+		"plague_giant": ["lazaretto_arena", ["miasma", "lancet", "censer", "rats", "knell", "rush"]],
+		"cacus_giant": ["cave_arena", ["breath", "boulders", "stampede", "smoke", "quake", "beam", "rush"]],
+	}
+	for kind in boss_set:
+		var arena_name: String = boss_set[kind][0]
+		var atk_list: Array = boss_set[kind][1]
 		lv = await load_level(arena_name)
 		await frames(5)
 		check(lv.entries.size() == 1, kind + " arena has a retreat door")
@@ -147,7 +157,7 @@ func run() -> void:
 		check(boss.state != "dormant", kind + " wakes")
 		var seen := {}
 		for i in 2:
-			for a in (["toll", "lash", "drop", "rush", "summon"] if kind == "kelpie_giant" else ["cogs", "hands", "vents", "rush", "rift"]):
+			for a in atk_list:
 				if boss.has_method("_a_" + a):
 					boss.phase = 3
 					boss.state = "idle"
@@ -156,7 +166,7 @@ func run() -> void:
 					boss.call("_a_" + a)
 					seen[a] = true
 					await frames(60)
-		check(seen.size() == 5, kind + " every attack pattern runs without error")
+		check(seen.size() == atk_list.size(), kind + " every attack pattern runs without error")
 		boss.state = "idle"
 		boss.queue.clear()
 		boss.fx.clear()

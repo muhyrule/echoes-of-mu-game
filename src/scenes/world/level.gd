@@ -5,6 +5,7 @@ const Art = preload("res://src/core/art.gd")
 const PlayerScript = preload("res://src/entities/player.gd")
 const EnemyScript = preload("res://src/entities/enemy.gd")
 const ArenaFxScript = preload("res://src/entities/arena_fx.gd")
+const ArenaMechScript = preload("res://src/entities/arena_mech.gd")
 const GiantScript = preload("res://src/entities/giant.gd")
 const PropScript = preload("res://src/entities/prop.gd")
 const FollowerScript = preload("res://src/entities/follower.gd")
@@ -54,6 +55,8 @@ var gt := 0.0
 var theme := "chapel"
 var prefix := ""
 var followers: Dictionary = {}
+var arena_fx: Node2D
+var cam_bob := Vector2.ZERO
 var cracked_props: Array = []
 var hearths: Array = []
 var entries: Array = []
@@ -102,8 +105,13 @@ func _ready() -> void:
 		var afx := Node2D.new()
 		afx.set_script(ArenaFxScript)
 		afx.set("level", self)
+		arena_fx = afx
 		add_child(afx)
 		move_child(afx, 0)
+		var mech := Node2D.new()
+		mech.set_script(ArenaMechScript)
+		mech.set("level", self)
+		add_child(mech)
 	hud.fade = 1.0
 	hud.fade_to(0.0, 0.6)
 	if map_name == "chapel" and not GameState.flag("intro_done"):
@@ -193,7 +201,7 @@ func _make_object(c: Vector2i, d: Dictionary) -> void:
 
 func spawn_enemy(kind: String, pos: Vector2) -> void:
 	var e := CharacterBody2D.new()
-	e.set_script(GiantScript if kind in ["kelpie_giant", "golem_giant"] else EnemyScript)
+	e.set_script(GiantScript if kind.ends_with("_giant") else EnemyScript)
 	e.setup(kind, self)
 	e.position = pos
 	entities.add_child(e)
@@ -861,6 +869,9 @@ func _draw_arena_cell(r: Rect2, x: int, y: int, ch: String) -> void:
 	var o := r.position
 	var hv := (x * 73856093 ^ y * 19349663) & 0xffff
 	var loch := arena == "loch"
+	if arena not in ["loch", "attic"]:
+		_draw_themed_cell(r, x, y, ch, hv)
+		return
 	if ch == "#":
 		if _is_solid_char(Vector2i(x, y + 1)):
 			draw_rect(r, Color("0a1217") if loch else Color("120c08"))
@@ -944,6 +955,117 @@ func _draw_arena_cell(r: Rect2, x: int, y: int, ch: String) -> void:
 		for k in 2:
 			draw_rect(Rect2(o + Vector2(4, 3 + k * 7), Vector2(8, 2)), Color("3a3640"))
 			draw_rect(Rect2(o + Vector2(4, 3 + k * 7), Vector2(8, 1)), Color("6a6674"))
+
+
+const ARENA_PAL := {
+	"keep": {"wall": "4a1c26", "line": "2a0e16", "hi": "8a3a48", "deep": "14080c", "fa": "2e1418", "fb": "281016", "pil": "6a2a34"},
+	"ossuary": {"wall": "6a6252", "line": "3a3428", "hi": "a89e84", "deep": "14120e", "fa": "26221c", "fb": "201c16", "pil": "8a826e"},
+	"cliff": {"wall": "3a4250", "line": "1e242e", "hi": "6a7888", "deep": "0c1016", "fa": "262c34", "fb": "20262e", "pil": "586270"},
+	"lazaretto": {"wall": "4a5a3e", "line": "26301e", "hi": "88a068", "deep": "0e140a", "fa": "2a3226", "fb": "242c20", "pil": "6a7a58"},
+	"cave": {"wall": "3e2a24", "line": "1e1410", "hi": "7a5a48", "deep": "0e0806", "fa": "2a1c18", "fb": "241814", "pil": "5a4036"},
+}
+
+
+func _draw_themed_cell(r: Rect2, x: int, y: int, ch: String, hv: int) -> void:
+	var o := r.position
+	var P: Dictionary = ARENA_PAL[arena]
+	if ch == "#":
+		if _is_solid_char(Vector2i(x, y + 1)):
+			draw_rect(r, Color(P.deep))
+			return
+		draw_rect(r, Color(P.wall))
+		draw_rect(Rect2(o.x, o.y, TILE, 1), Color(P.hi))
+		match arena:
+			"ossuary":
+				for i in 2:
+					for k in 2:
+						var sc := o + Vector2(4 + k * 8, 4 + i * 6)
+						draw_circle(sc, 3.2, Color("d8d0bc"))
+						draw_rect(Rect2(sc + Vector2(-1.6, 2), Vector2(3.2, 2)), Color("d8d0bc"))
+						draw_circle(sc + Vector2(-1.2, 0), 0.9, Color(P.line))
+						draw_circle(sc + Vector2(1.2, 0), 0.9, Color(P.line))
+			"keep":
+				for i in 3:
+					draw_rect(Rect2(o.x, o.y + 3 + i * 5, TILE, 1), Color(P.line))
+					draw_rect(Rect2(o.x + (hv >> (i * 2)) % 12, o.y + 3 + i * 5 - 4, 1, 5), Color(P.line))
+				if hv % 4 == 0:
+					draw_rect(Rect2(o.x + 6, o.y + 2, 2, 11), Color(0.55, 0.06, 0.1, 0.8))
+					draw_rect(Rect2(o.x + 5, o.y + 11, 4, 3), Color(0.65, 0.08, 0.12, 0.8))
+			"cliff":
+				for i in 3:
+					draw_rect(Rect2(o.x, o.y + 4 + i * 4, TILE, 1), Color(P.line))
+				if hv % 3 == 0:
+					draw_rect(Rect2(o.x + 3, o.y + 2, 5, 11), Color(0.2, 0.32, 0.18, 0.6))
+				draw_line(o + Vector2(2 + hv % 8, 2), o + Vector2(6 + hv % 8, 13), Color(P.line), 1.0)
+			"lazaretto":
+				for i in 2:
+					draw_rect(Rect2(o.x, o.y + 5 + i * 6, TILE, 1), Color(P.line))
+				draw_rect(Rect2(o.x + hv % 10, o.y + 1, 5, 4), Color(0.7, 0.72, 0.6, 0.3))
+				if hv % 3 == 1:
+					draw_rect(Rect2(o.x + 3, o.y + 6, 3, 8), Color(0.45, 0.7, 0.25, 0.5))
+			"cave":
+				draw_colored_polygon(PackedVector2Array([o + Vector2(0, 4), o + Vector2(8, 2 + hv % 4), o + Vector2(16, 5), o + Vector2(16, 13), o + Vector2(0, 14)]), Color(P.wall).lightened(0.06))
+				draw_line(o + Vector2(2, 3), o + Vector2(14, 12), Color(P.line), 1.0)
+				if hv % 3 == 0:
+					draw_line(o + Vector2(2, 14), o + Vector2(8, 10), Color(1.0, 0.45, 0.1, 0.8), 1.0)
+		draw_rect(Rect2(o.x, o.y + 13, TILE, 3), Color(0, 0, 0, 0.3))
+		return
+	draw_rect(r, Color(P.fa) if (x + y) % 2 == 0 else Color(P.fb))
+	match arena:
+		"keep":
+			if hv % 4 == 0:
+				draw_rect(Rect2(o.x + 2, o.y + 2, 12, 12), Color(0.08, 0.03, 0.05, 0.4))
+			if hv % 9 == 1:
+				draw_circle(o + Vector2(8, 9), 5.0, Color(0.45, 0.04, 0.08, 0.7))
+				draw_circle(o + Vector2(7, 8), 2.5, Color(0.7, 0.1, 0.14, 0.7))
+			if hv % 13 == 2:
+				draw_line(o + Vector2(2, 2), o + Vector2(14, 14), Color(0.05, 0.02, 0.03), 1.0)
+		"ossuary":
+			if hv % 4 == 0:
+				draw_rect(Rect2(o.x + 1, o.y + 1, 14, 14), Color(0.35, 0.32, 0.26, 0.25))
+			if hv % 6 == 1:
+				draw_line(o + Vector2(3, 12), o + Vector2(12, 8), Color("c8c0a8"), 2.0)
+				draw_circle(o + Vector2(3, 12), 1.6, Color("d8d0b8"))
+				draw_circle(o + Vector2(12, 8), 1.6, Color("d8d0b8"))
+			if hv % 13 == 4:
+				draw_circle(o + Vector2(8, 8), 3.4, Color("c8c0a8"))
+				draw_circle(o + Vector2(7, 7.6), 0.9, Color(P.line))
+				draw_circle(o + Vector2(9.2, 7.6), 0.9, Color(P.line))
+		"cliff":
+			if hv % 4 == 0:
+				draw_rect(Rect2(o.x + 1, o.y + 1, 14, 14), Color(0.3, 0.36, 0.42, 0.3))
+				draw_rect(Rect2(o.x + 1, o.y + 1, 14, 1), Color(0.55, 0.65, 0.75, 0.2))
+			if hv % 7 == 3:
+				draw_rect(Rect2(o.x + 3, o.y + 6, 9, 5), Color(0.18, 0.26, 0.34, 0.7))
+				draw_rect(Rect2(o.x + 4, o.y + 7, 5, 1), Color(0.6, 0.75, 0.9, 0.4))
+			if hv % 11 == 5:
+				draw_line(o + Vector2(4, 14), o + Vector2(4, 8), Color("3a5a2a"), 1.0)
+				draw_line(o + Vector2(7, 14), o + Vector2(8, 7), Color("3a5a2a"), 1.0)
+		"lazaretto":
+			if hv % 4 == 0:
+				draw_rect(Rect2(o.x + 1, o.y + 1, 14, 14), Color(0.35, 0.45, 0.28, 0.2))
+			if hv % 8 == 3:
+				draw_circle(o + Vector2(8, 8), 5.0, Color(0.3, 0.5, 0.2, 0.45))
+			if hv % 6 == 1:
+				for k in 4:
+					draw_line(o + Vector2(2 + k * 3, 14), o + Vector2(5 + k * 3, 9 - k % 2), Color("8aa860"), 1.0)
+		"cave":
+			if hv % 4 == 0:
+				draw_rect(Rect2(o.x + 1, o.y + 1, 14, 14), Color(0.1, 0.06, 0.05, 0.35))
+			if hv % 6 == 2:
+				draw_line(o + Vector2(0, 8), o + Vector2(7, 6), Color(1.0, 0.4, 0.08, 0.85), 2.0)
+				draw_line(o + Vector2(7, 6), o + Vector2(14, 10), Color(1.0, 0.6, 0.15, 0.85), 1.0)
+			if hv % 9 == 4:
+				draw_circle(o + Vector2(8, 8), 3.0, Color(0.5, 0.45, 0.4, 0.5))
+	if y > 0 and grid[y - 1][x] == "#":
+		draw_rect(Rect2(o.x, o.y, TILE, 4), Color(0, 0, 0, 0.35))
+	if ch == "o":
+		draw_rect(Rect2(o + Vector2(2, 14), Vector2(12, 2)), Color(0, 0, 0, 0.4))
+		draw_rect(Rect2(o + Vector2(4, 0), Vector2(8, 15)), Color(Art.OUT))
+		draw_rect(Rect2(o + Vector2(5, 0), Vector2(6, 14)), Color(P.pil))
+		draw_rect(Rect2(o + Vector2(5, 0), Vector2(2, 14)), Color(P.hi))
+		for k in 2:
+			draw_rect(Rect2(o + Vector2(4, 3 + k * 7), Vector2(8, 2)), Color(P.line))
 
 
 func _house_base(x: int, y: int) -> int:
@@ -1182,7 +1304,7 @@ func _process(_delta: float) -> void:
 	gt += _delta
 	if cam:
 		shake_amt = maxf(0.0, shake_amt - _delta * 14.0)
-		cam.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_amt
+		cam.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_amt + cam_bob
 	for f in fog:
 		f.position.x += f.get_meta("spd") * _delta
 		if f.position.x > w * TILE + 100:

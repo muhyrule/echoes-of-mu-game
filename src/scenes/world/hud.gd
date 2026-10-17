@@ -137,7 +137,10 @@ func _draw() -> void:
 			fm = " (%s) [Q]" % str({"wraith": "Wraith", "gargoyle": "Gargoyle"}.get(GameState.form, "Mu")) if GameState.forms.size() > 1 else ""
 		_txt(Vector2(12, 62), "Hero: %s%s  [C] swap" % [lead.capitalize(), fm], 12, lead_cols.get(lead, Color.WHITE))
 	_txt(Vector2(12, 78), "Gold %d" % GameState.gold, 12, Color("f0d070"))
-	var sk_y := 110
+	var pl: Node2D = level.player
+	var gname: String = pl.GUARD_NAME.get(lead, "Guard")
+	_txt(Vector2(12, 108), "[Shift] Roll %s   [V] %s" % ["" if pl.roll_cd <= 0.0 else "%.1fs" % pl.roll_cd, gname], 9, Color("b8b0d0"))
+	var sk_y := 128
 	for fid in ["mu", "isolde", "wren", "corvin"]:
 		var fo: Node2D = null
 		if fid == lead:

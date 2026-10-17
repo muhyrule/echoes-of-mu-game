@@ -10,7 +10,7 @@
  },
  "ascii": [
   "############################################################################",
-  "########################...............................#####################",
+  "########################..5.....6.....7.....8.....9....#####################",
   "##..............########............c..c...............#####..............##",
   "##..c...........########...c.........A..........c......#####..c...........##",
   "##..............########............,,,,...............#####..............##",
@@ -60,5 +60,42 @@
   "########################............,,,,...............#####################",
   "########################............,,,,...............#####################",
   "############################################################################"
- ]
+ ],
+ "doors": {
+  "5": {
+   "map": "keep_arena",
+   "label": "Echo Gate: Poenari Keep",
+   "style": "gate",
+   "requires": "prague_done",
+   "locked": "echo_gate_locked"
+  },
+  "6": {
+   "map": "ossuary_arena",
+   "label": "Echo Gate: Paris Ossuary",
+   "style": "gate",
+   "requires": "strigoi_done",
+   "locked": "echo_gate_locked"
+  },
+  "7": {
+   "map": "cliff_arena",
+   "label": "Echo Gate: Whitby Cliffs",
+   "style": "gate",
+   "requires": "ankou_done",
+   "locked": "echo_gate_locked"
+  },
+  "8": {
+   "map": "lazaretto_arena",
+   "label": "Echo Gate: Venetian Lazzaretto",
+   "style": "gate",
+   "requires": "barghest_done",
+   "locked": "echo_gate_locked"
+  },
+  "9": {
+   "map": "cave_arena",
+   "label": "Echo Gate: Aventine Cave",
+   "style": "gate",
+   "requires": "plague_done",
+   "locked": "echo_gate_locked"
+  }
+ }
 }
