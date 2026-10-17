@@ -20,7 +20,7 @@ const TS := 1024
 var _tables: Dictionary = {}
 var _thread: Thread
 var _building := ""
-var _pending := ""
+var _queue: Array = []
 
 
 func _ready() -> void:
@@ -111,21 +111,30 @@ func play_music(name: String) -> void:
 		_music.stream = _music_cache[name]
 		_music.play()
 	else:
-		_pending = name
+		_queue.erase(name)
+		_queue.push_front(name)
 		_try_build()
 
 
 func stop_music() -> void:
 	_current = ""
-	_pending = ""
 	_music.stop()
 
 
+func preload_music(names: Array) -> void:
+	for n in names:
+		if THEME_ALIAS.has(n) and not _music_cache.has(n) and n != _building and not _queue.has(n):
+			_queue.append(n)
+	_try_build()
+
+
 func _try_build() -> void:
-	if _thread != null or _pending == "" or _music_cache.has(_pending):
+	if _thread != null or _queue.is_empty():
 		return
-	_building = _pending
-	_pending = ""
+	_building = _queue.pop_front()
+	if _music_cache.has(_building):
+		_try_build()
+		return
 	_thread = Thread.new()
 	_thread.start(_build_theme.bind(THEME_ALIAS[_building]))
 
