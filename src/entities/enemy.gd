@@ -33,6 +33,13 @@ func setup(k: String, lvl: Node2D) -> void:
 		"bat":
 			hp = 1
 			speed = 60.0
+		"skeleton":
+			hp = 4
+			speed = 36.0
+			hit_radius = 9.0
+		"wisp":
+			hp = 2
+			speed = 48.0
 		"warden", "revenant":
 			hp = 16 if k == "warden" else 24
 			speed = 34.0 if k == "warden" else 38.0
@@ -46,7 +53,7 @@ func setup(k: String, lvl: Node2D) -> void:
 func _ready() -> void:
 	add_to_group("enemies")
 	collision_layer = 4
-	collision_mask = 1 if kind == "bat" else 3
+	collision_mask = 1 if kind == "bat" or kind == "wisp" else 3
 	var shape := CollisionShape2D.new()
 	var c := CircleShape2D.new()
 	c.radius = 10.0 if is_boss else 5.0
@@ -79,6 +86,27 @@ func _physics_process(delta: float) -> void:
 		"bat":
 			var wob := Vector2(cos(t * 3.1), sin(t * 4.3)) * 40.0
 			move = (to.normalized() * speed + wob) if dist < 140.0 else wob * 0.5
+		"skeleton":
+			if state == "windup":
+				if st > 0.5:
+					state = "charge"
+					st = 0.0
+					charge_dir = to.normalized()
+			elif state == "charge":
+				move = charge_dir * 170.0
+				if st > 0.4:
+					state = "chase"
+					st = -0.8
+			else:
+				state = "chase"
+				if dist < 150.0:
+					move = to.normalized() * speed
+					if dist < 60.0 and st > 1.2:
+						state = "windup"
+						st = 0.0
+		"wisp":
+			var orbit := Vector2(-to.y, to.x).normalized() * 30.0
+			move = (to.normalized() * speed * (0.4 if dist < 50.0 else 1.0) + orbit) if dist < 170.0 else Vector2(cos(t * 1.7), sin(t * 2.3)) * 20.0
 		"warden", "revenant":
 			move = _warden_ai(delta, to, dist)
 	velocity = move + knock
@@ -155,6 +183,10 @@ func _draw() -> void:
 		"bat":
 			draw_set_transform(Vector2(0, sin(t * 6.0) * 2.0 - 6.0), 0.0, Vector2.ONE)
 			Art.bat(self, t, flash)
+		"skeleton":
+			_draw_skeleton()
+		"wisp":
+			_draw_wisp()
 		"warden", "revenant":
 			var dormant := state == "dormant"
 			if dormant:
@@ -163,3 +195,47 @@ func _draw() -> void:
 				Art.colossus(self, facing, t, flash, state == "windup")
 			else:
 				Art.warden(self, facing, t, flash, state == "windup")
+
+
+func _draw_skeleton() -> void:
+	var fl := flash > 0.0
+	var bone := Color(1, 1, 1) if fl else Color(0.86, 0.84, 0.74)
+	var sh := Color(0.55, 0.52, 0.48)
+	var lean := 3.0 if state == "windup" else 0.0
+	var sw := sin(t * 8.0) * 2.0 if velocity.length() > 5.0 else 0.0
+	draw_set_transform(Vector2(0, 0), 0, Vector2(1, 0.5))
+	draw_circle(Vector2(0, 11), 8.0, Color(0, 0, 0, 0.35))
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
+	draw_line(Vector2(-2, 4), Vector2(-2 + sw, 11), bone, 1.6)
+	draw_line(Vector2(2, 4), Vector2(2 - sw, 11), bone, 1.6)
+	draw_rect(Rect2(-4, -4, 8, 8), Color(0.12, 0.1, 0.12))
+	for k in 3:
+		draw_line(Vector2(-4, -3 + k * 3), Vector2(4, -3 + k * 3), bone, 1.2)
+	draw_line(Vector2(0, -5), Vector2(0, 4), sh, 1.2)
+	draw_circle(Vector2(lean * facing.x, -9), 5.0, bone)
+	draw_rect(Rect2(lean * facing.x - 3, -6, 6, 3), bone)
+	draw_circle(Vector2(lean * facing.x - 2, -10), 1.5, Color(0.1, 0.0, 0.0))
+	draw_circle(Vector2(lean * facing.x + 2, -10), 1.5, Color(0.1, 0.0, 0.0))
+	draw_circle(Vector2(lean * facing.x - 2, -10), 0.7, Color(1, 0.3, 0.2))
+	draw_circle(Vector2(lean * facing.x + 2, -10), 0.7, Color(1, 0.3, 0.2))
+	var tip := Vector2(facing.x * (14.0 + (6.0 if state == "charge" else 0.0)), -2)
+	draw_line(Vector2(facing.x * 5, -1), tip, Color(0.7, 0.72, 0.8), 2.0)
+	draw_line(Vector2(facing.x * 5, -1), Vector2(facing.x * 7, -1), Color(0.5, 0.35, 0.2), 3.0)
+	if state == "windup":
+		draw_circle(Vector2(0, -2), 12.0, Color(1, 0.3, 0.2, 0.2))
+
+
+func _draw_wisp() -> void:
+	var fl := flash > 0.0
+	var b := sin(t * 3.0) * 3.0 - 8.0
+	draw_set_transform(Vector2(0, 0), 0, Vector2(1, 0.5))
+	draw_circle(Vector2(0, 14 - b * 0.3), 5.0, Color(0, 0, 0, 0.25))
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
+	draw_circle(Vector2(0, b), 14.0, Color(0.3, 0.55, 1.0, 0.12))
+	draw_circle(Vector2(0, b), 9.0, Color(0.4, 0.7, 1.0, 0.25))
+	for k in 4:
+		var a := t * 2.0 + k * 1.57
+		draw_circle(Vector2(0, b) + Vector2.from_angle(a) * 9.0 - facing * (k * 1.5), 1.5, Color(0.7, 0.9, 1.0, 0.7))
+	draw_colored_polygon(PackedVector2Array([Vector2(-4, b + 2), Vector2(0, b - 8), Vector2(4, b + 2), Vector2(0, b + 6)]), Color(1, 1, 1) if fl else Color(0.65, 0.88, 1.0))
+	draw_circle(Vector2(-1.5, b - 1), 1.0, Color(0.05, 0.1, 0.3))
+	draw_circle(Vector2(1.5, b - 1), 1.0, Color(0.05, 0.1, 0.3))

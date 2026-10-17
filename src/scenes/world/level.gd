@@ -5,6 +5,7 @@ const Art = preload("res://src/core/art.gd")
 const PlayerScript = preload("res://src/entities/player.gd")
 const EnemyScript = preload("res://src/entities/enemy.gd")
 const ArenaFxScript = preload("res://src/entities/arena_fx.gd")
+const DungeonScript = preload("res://src/entities/dungeon.gd")
 const ArenaMechScript = preload("res://src/entities/arena_mech.gd")
 const GiantScript = preload("res://src/entities/giant.gd")
 const PropScript = preload("res://src/entities/prop.gd")
@@ -57,6 +58,7 @@ var prefix := ""
 var followers: Dictionary = {}
 var arena_fx: Node2D
 var cam_bob := Vector2.ZERO
+var dungeon: Node2D = null
 var cracked_props: Array = []
 var hearths: Array = []
 var entries: Array = []
@@ -112,6 +114,11 @@ func _ready() -> void:
 		mech.set_script(ArenaMechScript)
 		mech.set("level", self)
 		add_child(mech)
+	if meta.has("dungeon"):
+		dungeon = Node2D.new()
+		dungeon.set_script(DungeonScript)
+		dungeon.set("level", self)
+		add_child(dungeon)
 	hud.fade = 1.0
 	hud.fade_to(0.0, 0.6)
 	if map_name == "chapel" and not GameState.flag("intro_done"):
@@ -690,6 +697,8 @@ func _build_hero_puzzle() -> void:
 
 func hero_hit(src: String, pos: Vector2, rad: float) -> bool:
 	var hit := false
+	if dungeon and dungeon.hit(src, pos, rad):
+		hit = true
 	for sp in seals:
 		if not is_instance_valid(sp) or sp.lit or sp.kind != SEAL_FOR.get(src, ""):
 			continue
