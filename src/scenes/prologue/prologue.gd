@@ -158,7 +158,7 @@ func _draw_ui() -> void:
 	_frame()
 	ui.draw_rect(Rect2(0, 0, 1920, 100), Color(0, 0, 0, 0.92))
 	ui.draw_rect(Rect2(0, 770, 1920, 310), Color(0, 0, 0, 0.88))
-	ui.draw_rect(Rect2(0, 770, 1920, 2), Color(0.62, 0.5, 0.78, 0.6))
+	ui.draw_rect(Rect2(0, 770, 1920, 2), Color(0.78, 0.62, 0.3, 0.7))
 	ui.draw_string(font, Vector2(0, 66), pl.title, HORIZONTAL_ALIGNMENT_CENTER, 1920, 44, Color(0.92, 0.82, 0.55, fa))
 	var full: String = pl.text
 	ui.draw_multiline_string(font, Vector2(180, 835), full.substr(0, int(typed)), HORIZONTAL_ALIGNMENT_LEFT, 1560, 32, 8, Color(0.9, 0.88, 0.94, fa))
@@ -166,37 +166,38 @@ func _draw_ui() -> void:
 
 
 func _frame() -> void:
-	var gold := Color(0.78, 0.62, 0.3, 0.75)
-	var dark := Color(0.02, 0.01, 0.02, 0.38)
-	for side in 2:
-		var sg := 1.0 if side == 0 else -1.0
-		var ox := 0.0 if side == 0 else 1920.0
-		var pts := PackedVector2Array([Vector2(ox, 100), Vector2(960, 100)])
-		var arch := PackedVector2Array()
-		arch.clear()
-		for k in 25:
-			var u := 1.0 - k / 24.0
-			arch.append(Vector2(ox + sg * (120.0 + 840.0 * u), 770.0 - 640.0 * pow(u, 0.45)))
-		for q in arch:
-			pts.append(q)
-		pts.append(Vector2(ox + sg * 120.0, 770))
-		pts.append(Vector2(ox, 770))
-		ui.draw_colored_polygon(pts, dark)
-		ui.draw_polyline(arch, gold, 3.0)
-		var inner := PackedVector2Array()
-		for q in arch:
-			inner.append(q + Vector2(sg * 16.0, 14.0))
-		ui.draw_polyline(inner, Color(gold, 0.4), 2.0)
-		ui.draw_line(Vector2(ox + sg * 120.0, 770), Vector2(ox + sg * 120.0, 700), gold, 3.0)
-		for r in 3:
-			var c := Vector2(ox + sg * (70.0 + r * 0.0), 230.0 + r * 190.0)
-			ui.draw_arc(c, 34.0, 0, TAU, 20, gold, 2.5)
-			ui.draw_arc(c, 14.0, 0, TAU, 12, Color(gold, 0.6), 2.0)
-			for k in 8:
-				var a := k * TAU / 8.0
-				ui.draw_line(c + Vector2(cos(a), sin(a)) * 14.0, c + Vector2(cos(a), sin(a)) * 34.0, Color(gold, 0.6), 1.5)
-		ui.draw_colored_polygon(PackedVector2Array([Vector2(ox + sg * 40.0, 770), Vector2(ox + sg * 70.0, 700), Vector2(ox + sg * 100.0, 770)]), Color(gold, 0.5))
-	ui.draw_colored_polygon(PackedVector2Array([Vector2(930, 150), Vector2(960, 104), Vector2(990, 150), Vector2(960, 140)]), gold)
-	for k in 24:
-		var fx := 120.0 + k * 72.0
-		ui.draw_colored_polygon(PackedVector2Array([Vector2(fx, 770), Vector2(fx + 12, 752), Vector2(fx + 24, 770)]), Color(gold, 0.45))
+	var gold := Color(0.78, 0.62, 0.3, 0.85)
+	var soft := Color(gold, 0.45)
+	var x0 := 22.0
+	var x1 := 1898.0
+	var y0 := 108.0
+	var y1 := 764.0
+	ui.draw_rect(Rect2(x0, y0, x1 - x0, y1 - y0), gold, false, 3.0)
+	ui.draw_rect(Rect2(x0 + 9, y0 + 9, x1 - x0 - 18, y1 - y0 - 18), soft, false, 1.5)
+	for sx in 2:
+		for sy in 2:
+			var cx := x0 if sx == 0 else x1
+			var cy := y0 if sy == 0 else y1
+			var dx := 1.0 if sx == 0 else -1.0
+			var dy := 1.0 if sy == 0 else -1.0
+			var c := Vector2(cx + dx * 46.0, cy + dy * 46.0)
+			for k in 4:
+				var a := k * TAU / 4.0 + PI / 4.0
+				ui.draw_arc(c + Vector2(cos(a), sin(a)) * 11.0, 11.0, 0, TAU, 14, gold, 2.0)
+			ui.draw_circle(c, 4.0, gold)
+			ui.draw_line(Vector2(cx, cy + dy * 46.0), Vector2(cx + dx * 120.0, cy + dy * 46.0), soft, 1.5)
+			ui.draw_line(Vector2(cx + dx * 46.0, cy), Vector2(cx + dx * 46.0, cy + dy * 120.0), soft, 1.5)
+			var tip := Vector2(cx + dx * 150.0, cy)
+			ui.draw_polyline(PackedVector2Array([Vector2(cx + dx * 96.0, cy), Vector2(cx + dx * 123.0, cy + dy * 22.0), tip]), gold, 2.0)
+			ui.draw_polyline(PackedVector2Array([Vector2(cx, cy + dy * 96.0), Vector2(cx + dx * 22.0, cy + dy * 123.0), Vector2(cx, cy + dy * 150.0)]), gold, 2.0)
+	for sy in 2:
+		var ey := y0 if sy == 0 else y1
+		var dy := 1.0 if sy == 0 else -1.0
+		ui.draw_polyline(PackedVector2Array([Vector2(900, ey), Vector2(930, ey + dy * 30.0), Vector2(960, ey + dy * 58.0), Vector2(990, ey + dy * 30.0), Vector2(1020, ey)]), gold, 2.5)
+		ui.draw_polyline(PackedVector2Array([Vector2(924, ey), Vector2(960, ey + dy * 38.0), Vector2(996, ey)]), soft, 1.5)
+		ui.draw_circle(Vector2(960, ey + dy * 66.0), 4.0, gold)
+		for k in 6:
+			var fx := 300.0 + k * 100.0
+			if k >= 3:
+				fx += 420.0
+			ui.draw_circle(Vector2(fx, ey + dy * 4.0), 3.0, soft)

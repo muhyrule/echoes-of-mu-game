@@ -4,6 +4,7 @@ extends Control
 var art := "age"
 var t := 0.0
 var zoom := 1.0
+var pan := Vector2.ZERO
 var stars: Array = []
 
 
@@ -15,7 +16,9 @@ func _ready() -> void:
 
 func _draw() -> void:
 	zoom = 1.0 + 0.07 * clampf(t / 24.0, 0.0, 1.0)
+	pan = Vector2(-(clampf(t / 24.0, 0.0, 1.0) - 0.5) * 70.0, 0.0)
 	plate(clampf(t / 24.0, 0.0, 1.0))
+	_cine()
 	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
 
 
@@ -24,7 +27,7 @@ const CEN := Vector2(960, 420)
 
 
 func _tf(p := Vector2.ZERO, r := 0.0, sc := Vector2.ONE) -> void:
-	draw_set_transform(OFF + CEN * (1.0 - zoom) + p * zoom, r, sc * zoom)
+	draw_set_transform(OFF + pan + CEN * (1.0 - zoom) + p * zoom, r, sc * zoom)
 
 
 func _sky(a: Color, b: Color) -> void:
@@ -143,6 +146,163 @@ func _skyline(y: float, col: Color, glow: bool, clock: bool) -> void:
 		draw_line(Vector2(960, y - 330), Vector2(960, y - 380), Color("c8a050"), 3.0)
 
 
+func _cine() -> void:
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
+	for k in 4:
+		var sx := fposmod(300.0 + k * 520.0 + t * 12.0, 2200.0) - 150.0
+		draw_colored_polygon(PackedVector2Array([Vector2(sx, 100), Vector2(sx + 90, 100), Vector2(sx - 160, 770), Vector2(sx - 290, 770)]), Color(1.0, 0.85, 0.6, 0.025 + 0.012 * sin(t * 0.7 + k)))
+	for i in 70:
+		var fx := fposmod(i * 131.0 + t * (6.0 + i % 7) + sin(t * 0.6 + i) * 30.0, 1920.0)
+		var fy := fposmod(i * 71.0 - t * (4.0 + i % 5), 670.0) + 100.0
+		var tw := 0.5 + 0.5 * sin(t * 1.3 + i * 2.1)
+		draw_circle(Vector2(fx, fy), 1.2 + (i % 3) * 0.7, Color(1.0, 0.9, 0.75, 0.10 + 0.2 * tw))
+	for k in 14:
+		var a := 0.30 * pow(1.0 - k / 14.0, 2.0)
+		draw_rect(Rect2(0, 100 + k * 9, 1920, 9), Color(0, 0, 0, a))
+		draw_rect(Rect2(0, 770 - (k + 1) * 9, 1920, 9), Color(0, 0, 0, a))
+		draw_rect(Rect2(k * 14, 100, 14, 670), Color(0, 0, 0, a))
+		draw_rect(Rect2(1920 - (k + 1) * 14, 100, 14, 670), Color(0, 0, 0, a))
+	draw_rect(Rect2(0, 100, 1920, 670), Color(0.0, 0.0, 0.0, 0.03 + 0.02 * sin(t * 23.0)))
+
+
+# who: mu, kid, aldous, monk, bellman, echo, keeper. f = facing (+1 right, -1 left).
+func _person(p: Vector2, s: float, who: String, f := 1.0, mood := "calm", lamp := false, ph := 0.0) -> void:
+	var sw := sin(t * 1.7 + ph)
+	var br := sin(t * 1.9 + ph) * 1.6
+	var kid := who == "kid"
+	var k := 0.62 if kid else 1.0
+	_tf(p + Vector2(0, -34), 0, Vector2(s * k * f, s * k))
+	var cloak := Color("1c2442")
+	var inner := Color("2c3860")
+	var skin := Color("d8b090")
+	var hair := Color("20161a")
+	match who:
+		"aldous":
+			cloak = Color("2a2430")
+			inner = Color("40343c")
+			skin = Color("c8a080")
+			hair = Color("c8c4c0")
+		"monk":
+			cloak = Color("1a1416")
+			inner = Color("2a2226")
+		"bellman":
+			cloak = Color("2a1c18")
+			inner = Color("402a20")
+			skin = Color("b89070")
+		"echo":
+			cloak = Color(0.45, 0.06, 0.08, 0.6)
+			inner = Color(0.7, 0.12, 0.12, 0.5)
+			skin = Color(0.85, 0.5, 0.45, 0.7)
+			hair = Color(0.3, 0.04, 0.05, 0.7)
+		"keeper":
+			cloak = Color("2e2a24")
+			inner = Color("463e34")
+			skin = Color("c0a088")
+			hair = Color("8a8680")
+		"kid":
+			cloak = Color("2a3450")
+			inner = Color("3c4a70")
+			hair = Color("3a2418")
+	var hem := sw * 7.0
+	draw_colored_polygon(PackedVector2Array([Vector2(-26, -128 + br), Vector2(26, -128 + br), Vector2(44 + hem, 0), Vector2(14, 6), Vector2(-14, 6), Vector2(-44 + hem, 0)]), cloak)
+	draw_colored_polygon(PackedVector2Array([Vector2(-8, -128 + br), Vector2(10, -128 + br), Vector2(22 + hem * 0.6, 0), Vector2(-6, 4)]), inner)
+	for fold in 4:
+		draw_line(Vector2(-20 + fold * 12, -100 + br), Vector2(-30 + fold * 18 + hem, -2), Color(0, 0, 0, 0.3), 2.0)
+	draw_line(Vector2(-26, -126 + br), Vector2(-34, -70 + br), cloak, 14.0)
+	draw_circle(Vector2(-33, -62 + br), 5.5, skin)
+	if who == "aldous" or who == "keeper":
+		draw_line(Vector2(27, -126 + br), Vector2(40, -88 + br), cloak, 12.0)
+		draw_line(Vector2(14, -126 + br), Vector2(24, -80 + br), Color(0.9, 0.9, 0.9, 0.0), 1.0)
+		draw_line(Vector2(40, -88), Vector2(46, -150), Color("5a4630"), 4.0)
+		draw_circle(Vector2(41, -84 + br), 5.5, skin)
+	elif lamp:
+		draw_line(Vector2(27, -124 + br), Vector2(46, -96 + br), cloak, 12.0)
+		draw_circle(Vector2(48, -92 + br), 5.5, skin)
+		draw_line(Vector2(48, -92), Vector2(48, -78), Color("5a4630"), 2.0)
+		for r in 6:
+			draw_circle(Vector2(48, -66), 190.0 - r * 30.0, Color(1.0, 0.75, 0.4, 0.035))
+		draw_rect(Rect2(41, -78, 14, 22), Color("3a2a18"))
+		draw_rect(Rect2(44, -75, 8, 16), Color(1.0, 0.82, 0.5, 0.85 + 0.15 * sin(t * 9.0 + ph)))
+	else:
+		draw_line(Vector2(27, -124 + br), Vector2(38, -78 + br), cloak, 12.0)
+		draw_circle(Vector2(39, -73 + br), 5.5, skin)
+	if who == "mu" or who == "kid":
+		draw_line(Vector2(-4, -126), Vector2(14, -40), Color("6a5030"), 3.0)
+		draw_line(Vector2(30, -60), Vector2(30, 6), Color("c0c4d0"), 4.0)
+		draw_rect(Rect2(24, -62, 12, 5), Color("a88838"))
+	draw_rect(Rect2(-7, -138 + br, 14, 14), skin.darkened(0.2))
+	var hc := Vector2(0, -152 + br + sin(t * 1.1 + ph) * 0.8)
+	if who == "monk":
+		draw_colored_polygon(PackedVector2Array([Vector2(-34, -118 + br), Vector2(-26, -168 + br), Vector2(0, -192 + br), Vector2(26, -168 + br), Vector2(34, -118 + br)]), cloak.lightened(0.05))
+		draw_circle(hc + Vector2(4, 2), 20.0, Color("070406") if who == "monk" else Color(0.2, 0.0, 0.0, 0.8))
+		var gl := 0.7 + 0.3 * sin(t * 3.0 + ph)
+		var gc := Color(1.0, 0.35, 0.25, gl)
+		for e in 2:
+			draw_circle(hc + Vector2(-2 + e * 14, 0), 6.0, Color(gc, 0.25))
+			draw_circle(hc + Vector2(-2 + e * 14, 0), 2.8, gc)
+		return _done()
+	draw_circle(hc, 22.0, skin)
+	draw_arc(hc, 22.0, -PI * 0.5 - 0.3, PI * 0.5 + 0.3, 14, skin.darkened(0.3), 5.0)
+	draw_arc(hc + Vector2(-3, 1), 21.0, PI * 0.65, PI * 1.1, 8, skin.lightened(0.2), 3.0)
+	draw_circle(hc + Vector2(-16, 8), 4.0, Color(0.85, 0.4, 0.35, 0.18))
+	draw_circle(hc + Vector2(14, 8), 4.0, Color(0.85, 0.4, 0.35, 0.18))
+	draw_circle(hc + Vector2(-23, 0), 4.5, skin.darkened(0.1))
+	draw_colored_polygon(PackedVector2Array([Vector2(hc.x - 1, hc.y - 3), Vector2(hc.x + 5, hc.y + 10), Vector2(hc.x - 1, hc.y + 11), Vector2(hc.x - 4, hc.y + 7)]), skin.darkened(0.2))
+	var blink := fmod(t + ph * 2.0, 4.2) < 0.13
+	var look := Vector2(1.2 * sin(t * 0.5 + ph), 0.0)
+	for e in 2:
+		var ec := hc + Vector2(-8.0 + e * 17.0, -2)
+		if blink:
+			draw_line(ec - Vector2(5, 0), ec + Vector2(5, 0), Color("1a1010"), 2.0)
+			continue
+		draw_colored_polygon(PackedVector2Array([ec + Vector2(-6, 0), ec + Vector2(-2, -4), ec + Vector2(3, -4), ec + Vector2(6, 0), ec + Vector2(2, 3.5), ec + Vector2(-3, 3.5)]), Color("f0e8e0"))
+		draw_circle(ec + look, 2.9, Color("ff4030") if who == "echo" else (Color("6a6050") if who == "aldous" else Color("5a7898")))
+		draw_circle(ec + look, 1.5, Color("0a0808"))
+		draw_circle(ec + look + Vector2(-1.0, -1.2), 0.9, Color.WHITE)
+		draw_line(ec + Vector2(-6, -4), ec + Vector2(6, -4), Color("20141a"), 1.6)
+	var bl := Vector2(-8, -9)
+	var br2 := Vector2(9, -9)
+	var tilt := 0.0
+	match mood:
+		"worry":
+			tilt = -3.0
+		"stern":
+			tilt = 3.0
+		"awe":
+			tilt = -2.0
+			bl.y -= 3.0
+			br2.y -= 3.0
+	draw_line(hc + bl + Vector2(-6, tilt * -0.5), hc + bl + Vector2(6, tilt * 0.5), hair.darkened(0.1), 2.6)
+	draw_line(hc + br2 + Vector2(-6, tilt * 0.5), hc + br2 + Vector2(6, tilt * -0.5), hair.darkened(0.1), 2.6)
+	var talk := 0.5 + 0.5 * sin(t * 9.0)
+	match mood:
+		"worry":
+			draw_arc(hc + Vector2(3, 20), 5.0, PI * 1.15, PI * 1.85, 8, Color("5a2828"), 2.0)
+		"awe":
+			draw_circle(hc + Vector2(3, 17), 2.0 + talk * 1.6, Color("3a1418"))
+		"stern":
+			draw_line(hc + Vector2(-3, 17), hc + Vector2(9, 17), Color("5a2828"), 2.2)
+		"talk":
+			draw_colored_polygon(PackedVector2Array([hc + Vector2(-3, 16), hc + Vector2(9, 16), hc + Vector2(7, 16 + 1 + talk * 4), hc + Vector2(-1, 16 + 1 + talk * 4)]), Color("4a1c20"))
+		_:
+			draw_arc(hc + Vector2(3, 14), 5.0, PI * 0.2, PI * 0.8, 8, Color("5a2828"), 2.0)
+	if who == "aldous" or who == "keeper":
+		draw_colored_polygon(PackedVector2Array([hc + Vector2(-18, 8), hc + Vector2(20, 8), hc + Vector2(12, 40 + sw * 2.0), hc + Vector2(0, 52), hc + Vector2(-12, 40)]), Color("d4d0cc"))
+		draw_arc(hc, 24.0, PI * 0.9, TAU * 1.0 + PI * 0.1, 16, hair, 9.0)
+	elif who == "bellman":
+		draw_colored_polygon(PackedVector2Array([hc + Vector2(-26, -8), hc + Vector2(-16, -30), hc + Vector2(16, -30), hc + Vector2(26, -8), hc + Vector2(38, -2), hc + Vector2(-38, -2)]), Color("1a1210"))
+	else:
+		draw_arc(hc, 23.0, PI * 1.02, PI * 2.0 + 0.1, 16, hair, 9.0)
+		draw_colored_polygon(PackedVector2Array([hc + Vector2(-22, -8), hc + Vector2(0, -26), hc + Vector2(22, -10), hc + Vector2(8, -14), hc + Vector2(-6, -12)]), hair)
+		draw_line(hc + Vector2(-22, -4), hc + Vector2(-28 + sw * 3.0, 18), hair, 5.0)
+	_done()
+
+
+func _done() -> void:
+	_tf()
+
+
+
 func plate(p: float) -> void:
 	_tf()
 	var drift := (p - 0.5) * 60.0
@@ -190,6 +350,7 @@ func plate(p: float) -> void:
 			draw_colored_polygon(PackedVector2Array([fig + Vector2(-70, -100), fig + Vector2(70, -100), fig + Vector2(110, 260), fig + Vector2(-110, 260)]), Color(1.0, 0.4, 0.32, 0.1 + 0.12 * pulse))
 			draw_line(fig + Vector2(-60, -60), fig + Vector2(-130, 40), Color(1.0, 0.4, 0.32, 0.2), 6.0)
 			draw_line(fig + Vector2(60, -60), fig + Vector2(120, -170), Color(1.0, 0.4, 0.32, 0.2), 6.0)
+			_person(Vector2(960, 850), 2.7, "echo", 1.0, "worry", false, 0.5)
 		"bellward":
 			_sky(Color("0a0c1a"), Color("34385a"))
 			_ground(850.0, Color("07070d"))
@@ -234,7 +395,7 @@ func plate(p: float) -> void:
 		"gift":
 			_sky(Color("0a0e1c"), Color("304060"))
 			_ground(860.0, Color("06070c"))
-			_hero(Vector2(960, 880), 2.2, false)
+			_person(Vector2(960, 880), 2.5, "mu", 1.0, "awe")
 			for k in 4:
 				var a0 := t * 0.8 + k * TAU / 4.0
 				var pc: Color = [Color("ff9a40"), Color("ff3a30"), Color("ffd070"), Color("d02a40")][k]
@@ -251,12 +412,12 @@ func plate(p: float) -> void:
 			draw_rect(Rect2(640, 520, 130, 330), Color("2a1c10"))
 			draw_circle(Vector2(705, 520), 65.0, Color("2a1c10"))
 			draw_rect(Rect2(660, 540, 90, 310), Color(1.0, 0.7, 0.35, 0.55))
-			_hero(Vector2(1120, 890), 1.9, false)
-			draw_colored_polygon(PackedVector2Array([Vector2(1450, 890), Vector2(1470, 560), Vector2(1550, 560), Vector2(1570, 890)]), Color("2a2438"))
-			draw_circle(Vector2(1510, 520), 36.0, Color("c0a890"))
-			draw_arc(Vector2(1510, 512), 38.0, PI, TAU, 12, Color("c8c8d0"), 14.0)
-			draw_line(Vector2(1450, 700), Vector2(1260, 690), Color("2a2438"), 12.0)
-			draw_line(Vector2(1230, 650), Vector2(1230, 790), Color("c8c8d8"), 8.0)
+			_person(Vector2(1080, 890), 2.2, "mu", 1.0, "worry")
+			_person(Vector2(1500, 890), 2.2, "aldous", -1.0, "talk", false, 2.0)
+			var bl := Vector2(1300, 700 + sin(t * 1.5) * 6.0)
+			draw_line(bl, bl + Vector2(-110, 0), Color("d0d4e0"), 7.0)
+			draw_rect(Rect2(bl.x - 6, bl.y - 28, 10, 56), Color("a88838"))
+			draw_circle(bl + Vector2(-60, 0), 40.0, Color(1.0, 0.3, 0.2, 0.08 + 0.05 * sin(t * 3.0)))
 		"carts":
 			_sky(Color("0c0a10"), Color("3a2c30"))
 			_moon(Vector2(500, 230), 60.0, Color("c8c0b8"))
@@ -270,6 +431,7 @@ func plate(p: float) -> void:
 				draw_arc(Vector2(cx + 60 + w * 180, 800), 40.0, 0, TAU, 16, Color("3a2c20"), 5.0)
 			for k in 5:
 				draw_circle(Vector2(cx + 40 + k * 55, 690), 20.0, Color("2a2420"))
+			_person(Vector2(cx + 400, 830), 1.8, "bellman", 1.0, "stern", true)
 			draw_circle(Vector2(cx + 330, 720), 12.0, Color("e8a040"))
 			for r in 4:
 				draw_circle(Vector2(cx + 330, 720), 50.0 + r * 28.0, Color(1.0, 0.65, 0.3, 0.04))
@@ -284,6 +446,7 @@ func plate(p: float) -> void:
 				draw_line(Vector2(330, 520 - b * 14), Vector2(330 + (b % 2 * 2 - 1) * (90 - b * 8), 440 - b * 28), Color("050408"), 6.0)
 			for i in 6:
 				_crow(Vector2(1000 + i * 90 + sin(t * 0.6 + i) * 60.0, 300 + (i % 3) * 50 + cos(t * 0.5 + i) * 20.0), i * 1.3)
+			_person(Vector2(1100, 840), 2.1, "keeper", -1.0, "worry", false, 5.0)
 			_fog(840.0, 0.09)
 		"cloister":
 			_sky(Color("06060a"), Color("14141c"))
@@ -294,6 +457,7 @@ func plate(p: float) -> void:
 			_ground(760.0, Color("0c0c12"))
 			var gx := 480.0 + fposmod(t * 30.0, 900.0)
 			draw_colored_polygon(PackedVector2Array([Vector2(gx - 40, 740), Vector2(gx + 40, 740), Vector2(gx + 56, 340), Vector2(gx - 56, 340)]), Color(1.0, 0.4, 0.32, 0.14))
+			_person(Vector2(gx, 760), 2.3, "echo", 1.0, "talk", false, 1.0)
 			draw_circle(Vector2(gx, 300), 36.0, Color(1.0, 0.4, 0.32, 0.22))
 			draw_arc(Vector2(gx, 300), 60.0 + sin(t * 3.0) * 8.0, 0, TAU, 24, Color(1.0, 0.3, 0.25, 0.3), 3.0)
 		"kinds":
@@ -333,6 +497,8 @@ func plate(p: float) -> void:
 			for k in 4:
 				draw_arc(Vector2(500, 500), 80.0 + fposmod(t * 90.0 + k * 90.0, 360.0), 0, TAU, 40, Color(1.0, 0.8, 0.5, 0.25), 3.0)
 			_rose(Vector2(960, 330), 100.0, Color(0.9, 0.7, 0.35, 0.7))
+			for m in 3:
+				_person(Vector2(740 + m * 220.0, 860), 2.1, "monk", 1.0, "calm", false, m * 1.7)
 		"snowchapel":
 			_sky(Color("101420"), Color("485068"))
 			_moon(Vector2(1500, 230), 56.0, Color("e8eaf0"))
@@ -344,6 +510,7 @@ func plate(p: float) -> void:
 				var sx := fposmod(i * 83.0 + sin(t + i) * 30.0, 1960.0)
 				var sy := fposmod(i * 57.0 + t * (60.0 + (i % 5) * 18.0), 1000.0)
 				draw_circle(Vector2(sx, sy), 2.0 + (i % 3), Color(1, 1, 1, 0.7))
+			_person(Vector2(1100, 880), 2.1, "keeper", -1.0, "calm", true, 2.5)
 		"crack":
 			_sky(Color("0a0408"), Color("2a0c12"))
 			_ground(880.0, Color("050204"))
@@ -354,6 +521,8 @@ func plate(p: float) -> void:
 			for k in 14:
 				var u := fposmod(t * 0.3 + k * 0.071, 1.0)
 				draw_circle(Vector2(900 + k * 18.0, 560.0 - u * 400.0), 4.0, Color(1.0, 0.3, 0.2, 0.7 * (1.0 - u)))
+			_person(Vector2(440, 880), 2.2, "aldous", 1.0, "awe", false, 1.0)
+			_person(Vector2(1480, 880), 2.2, "kid", -1.0, "worry", false, 2.0)
 		"edin":
 			_sky(Color("101420"), Color("7a6a72"))
 			_moon(Vector2(1500, 230), 56.0, Color("d8d0c8"))
@@ -365,12 +534,14 @@ func plate(p: float) -> void:
 			for i in 6:
 				var u := fposmod(t * 0.08 + i * 0.17, 1.0)
 				draw_circle(Vector2(1000 + i * 120.0 + u * 60.0, 640.0 - u * 400.0), 40.0 + u * 70.0, Color(0.5, 0.5, 0.52, 0.12 * (1.0 - u)))
+			_person(Vector2(1240, 880), 1.9, "keeper", -1.0, "stern", true, 1.0)
 			_fog(850.0, 0.08)
 		"praha":
 			_sky(Color("140e12"), Color("8a5a40"))
 			_moon(Vector2(400, 230), 52.0, Color("e8d0a8"))
 			_skyline(780.0, Color("0c0808"), true, true)
 			_ground(820.0, Color("060404"))
+			_person(Vector2(1240, 880), 1.9, "bellman", -1.0, "stern", true, 2.0)
 			_fog(850.0, 0.07)
 		"belfry":
 			_sky(Color("0a0a10"), Color("1a1a24"))
@@ -380,12 +551,12 @@ func plate(p: float) -> void:
 			_rose(Vector2(960, 300), 160.0, Color(0.85, 0.6, 0.35, 0.5))
 			_bell(Vector2(1300, 380), 1.6, Color("a87830"), 0.0)
 			_ground(860.0, Color("0a0a10"))
-			_hero(Vector2(560, 880), 1.9, false, true)
+			_person(Vector2(560, 880), 2.7, "kid", 1.0, "awe")
 			draw_circle(Vector2(560, 770), 18.0 + sin(t * 3.0) * 3.0, Color(1.0, 0.4, 0.3, 0.2))
 		"price":
 			_sky(Color("0a0408"), Color("2a1018"))
 			_ground(880.0, Color("050204"))
-			_hero(Vector2(700, 890), 2.4, false)
+			_person(Vector2(700, 890), 2.6, "mu", 1.0, "worry")
 			for i in 12:
 				var fx := 1100.0 + (i % 4) * 150.0
 				var fy := 420.0 + (i / 4) * 180.0 + sin(t + i) * 12.0
@@ -410,6 +581,7 @@ func plate(p: float) -> void:
 			draw_rect(Rect2(690, 796, 30, 14), Color("8a6a50"))
 			for r in 4:
 				draw_circle(Vector2(705, 780), 60.0 + r * 30.0, Color(1.0, 0.8, 0.5, 0.05))
+			_person(Vector2(880, 830), 2.0, "aldous", -1.0, "awe", false, 3.0)
 			_tf(Vector2(1180, 290), sin(t * 3.0) * 0.12, Vector2.ONE)
 			draw_circle(Vector2.ZERO, 36.0, Color("c8a050"))
 			draw_circle(Vector2(0, 10), 14.0, Color("14101c"))
@@ -419,7 +591,8 @@ func plate(p: float) -> void:
 			_moon(Vector2(500, 300), 60.0, Color("e8d8c8"))
 			_chapel(1320.0, 830.0, 1.5, true)
 			_ground(830.0, Color("0c0a10"))
-			_hero(Vector2(560, 860), 1.8, false, true)
+			_person(Vector2(500, 860), 2.6, "kid", 1.0, "awe")
+			_person(Vector2(800, 860), 2.2, "aldous", -1.0, "talk", false, 1.0)
 			for i in 9:
 				var u := fposmod(t * 0.2 + i * 0.11, 1.0)
 				var q := Vector2(1100 + sin(t + i) * 40.0, 780.0 - u * 460.0)
@@ -431,6 +604,7 @@ func plate(p: float) -> void:
 			_chapel(560.0, 880.0, 1.7, true)
 			_spires(900.0, Color("0a0508"), 900.0 + drift)
 			_ground(880.0, Color("060306"))
+			_person(Vector2(1000, 880), 1.9, "aldous", 1.0, "worry", false, 4.0)
 			var swing := sin(t * 3.0) * 0.25
 			_tf(Vector2(1500, 280), swing, Vector2.ONE)
 			draw_line(Vector2.ZERO, Vector2(0, 60), Color("2a2018"), 6.0)
@@ -445,7 +619,7 @@ func plate(p: float) -> void:
 			_ground(820.0, Color("0a0810"))
 			draw_colored_polygon(PackedVector2Array([Vector2(820, 1080), Vector2(1100, 1080), Vector2(1020, 820), Vector2(900, 820)]), Color("141018"))
 			var wob := absf(sin(t * 5.0)) * 4.0
-			_hero(Vector2(960, 900 - wob - p * 40.0), 1.5 - p * 0.4, true)
+			_person(Vector2(960, 900 - wob - p * 40.0), 2.3 - p * 0.8, "mu", 1.0, "stern", true)
 			_chapel(360.0, 830.0, 1.0, true)
 
 
