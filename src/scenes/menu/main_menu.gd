@@ -48,6 +48,7 @@ func _ready() -> void:
 		fg.scale = Vector2(6, 6)
 		add_child(fg)
 	Audio.play_music("menu")
+	Audio.preload_music(["prologue", "chapel", "road"])
 
 
 func _process(delta: float) -> void:

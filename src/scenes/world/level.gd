@@ -101,6 +101,7 @@ func _ready() -> void:
 	_spawn_followers()
 
 	Audio.play_music(meta.get("music", "crypt"))
+	Audio.preload_music(["road", "edin", "praha", "vaults", "ossuary"])
 	GameState.refresh_stats()
 	if map_name == "chapel":
 		GameState.hp = GameState.max_hp
