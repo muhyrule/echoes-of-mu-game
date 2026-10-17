@@ -4,7 +4,7 @@ extends Control
 const Art = preload("res://src/core/art.gd")
 const GOLD := Color("d9b45a")
 const GOLD_D := Color("7a5a24")
-const DIM := Color("8a8498")
+const DIM := Color("987a7d")
 const GOOD := Color("8adf8a")
 const BAD := Color("e07a7a")
 const SECTIONS := ["Equipment", "Supplies", "Relics"]
@@ -155,7 +155,7 @@ func _draw() -> void:
 	var hero := _hero()
 	for i in heroes.size():
 		var r := Rect2(46 + i * 70, 42, 66, 14)
-		draw_rect(r, Color("3a2a52") if i == hero_i else Color("1a1426"))
+		draw_rect(r, Color("323b52") if i == hero_i else Color("1a1426"))
 		draw_rect(r, GOLD if i == hero_i else GOLD_D, false, 0.8)
 		_txt(Vector2(52 + i * 70, 52), Gear.HERO_NAMES[heroes[i]], 9, Color.WHITE if i == hero_i else DIM)
 	_frame(Rect2(44, 62, 150, 238), 0.8)
@@ -170,11 +170,11 @@ func _draw() -> void:
 	_txt(Vector2(52, 232), "Armour", 8, DIM)
 	_txt(Vector2(52, 242), String(ai.name), 9, Color("c8d0e0"))
 	_txt(Vector2(52, 258), "Role", 8, DIM)
-	_txt(Vector2(52, 268), _role(hero), 8, Color("d9c9ff"))
+	_txt(Vector2(52, 268), _role(hero), 8, Color("ffb7bd"))
 	_txt(Vector2(52, 282), "Form: %s" % GameState.form.capitalize(), 8, DIM)
 	for i in SECTIONS.size():
 		var r2 := Rect2(204 + i * 84, 62, 80, 14)
-		draw_rect(r2, Color("3a2a52") if i == section else Color("1a1426"))
+		draw_rect(r2, Color("323b52") if i == section else Color("1a1426"))
 		draw_rect(r2, GOLD if i == section else GOLD_D, false, 0.8)
 		_txt(Vector2(210 + i * 84, 72), SECTIONS[i], 9, Color.WHITE if i == section else DIM)
 	_frame(Rect2(204, 82, 396, 150), 0.8)
@@ -187,7 +187,7 @@ func _draw() -> void:
 		var e: Dictionary = es[i]
 		var y := 88.0 + (i - first) * 20.0
 		if i == sel_c:
-			draw_rect(Rect2(208, y, 388, 18), Color("2e2248"))
+			draw_rect(Rect2(208, y, 388, 18), Color("2a3248"))
 			draw_rect(Rect2(208, y, 388, 18), GOLD, false, 0.8)
 		var label := ""
 		var tag := ""

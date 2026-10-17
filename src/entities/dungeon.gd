@@ -200,9 +200,9 @@ func _draw_spike(s: Dictionary) -> void:
 func _draw_blade(b: Dictionary) -> void:
 	var off := disarmed.has(b.g)
 	draw_line(b.a, b.b, Color(0.05, 0.05, 0.08), 4.0)
-	draw_line(b.a, b.b, Color(0.4, 0.38, 0.45), 1.2)
-	draw_circle(b.a, 3.5, Color(0.3, 0.28, 0.34))
-	draw_circle(b.b, 3.5, Color(0.3, 0.28, 0.34))
+	draw_line(b.a, b.b, Color(0.39, 0.41, 0.45), 1.2)
+	draw_circle(b.a, 3.5, Color(0.29, 0.31, 0.34))
+	draw_circle(b.b, 3.5, Color(0.29, 0.31, 0.34))
 	var p := _blade_pos(b)
 	if off:
 		draw_circle(p, 9.0, Color(0.25, 0.25, 0.3))
@@ -232,7 +232,7 @@ func _draw_gate(p: Vector2) -> void:
 
 func _draw_brazier(b: Dictionary) -> void:
 	var p: Vector2 = b.p
-	var tint: Color = {"bolt": Color(0.9, 0.75, 0.35), "dagger": Color(0.65, 0.5, 0.95), "bell": Color(1.0, 0.85, 0.4)}.get(b.src, Color.WHITE)
+	var tint: Color = {"bolt": Color(0.9, 0.75, 0.35), "dagger": Color(0.95, 0.41, 0.46), "bell": Color(1.0, 0.85, 0.4)}.get(b.src, Color.WHITE)
 	draw_rect(Rect2(p + Vector2(-5, 2), Vector2(10, 5)), Color(0.05, 0.04, 0.06))
 	draw_rect(Rect2(p + Vector2(-4, 0), Vector2(8, 3)), Color(0.35, 0.3, 0.28))
 	draw_arc(p + Vector2(0, -1), 5.0, 0, PI, 10, tint, 1.2)

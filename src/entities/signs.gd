@@ -14,8 +14,8 @@ const ICONS := {
 const TINT := {
 	"reeds": Color("6a9a5a"), "chisel": Color("b0b0bc"), "mug": Color("d8a040"), "book": Color("a05a3a"),
 	"candle": Color("f0d890"), "flask": Color("7ac8a0"), "shield": Color("8aa0d0"), "sword": Color("d0d4e0"),
-	"lantern": Color("f0b050"), "skull": Color("e8e4d0"), "raven": Color("9a8ad0"), "clock": Color("e0c060"),
-	"compass": Color("d0b070"), "loaf": Color("d89a50"), "retort": Color("c070d0"), "anvil": Color("a8a8b8"),
+	"lantern": Color("f0b050"), "skull": Color("e8e4d0"), "raven": Color("d07980"), "clock": Color("e0c060"),
+	"compass": Color("d0b070"), "loaf": Color("d89a50"), "retort": Color("d05c66"), "anvil": Color("a8a8b8"),
 	"rose": Color("e05070"), "tower": Color("c0b090"), "anchor": Color("70a0d0"), "mask": Color("e0e0f0"),
 	"flame": Color("f08040"),
 }
@@ -132,7 +132,7 @@ func _plaque(icon: String) -> void:
 		"retort":
 			draw_circle(o + Vector2(-1, 2), 4.0, c)
 			draw_line(o + Vector2(1, -1), o + Vector2(6, -5), c, 1.6)
-			draw_circle(o + Vector2(-1, 2), 2.0, Color("e8d0f8"))
+			draw_circle(o + Vector2(-1, 2), 2.0, Color("f8c0c5"))
 		"anvil":
 			draw_rect(Rect2(o + Vector2(-6, -3), Vector2(12, 3)), c)
 			draw_rect(Rect2(o + Vector2(-2, 0), Vector2(4, 4)), c.darkened(0.2))

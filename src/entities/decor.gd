@@ -70,7 +70,7 @@ func _draw() -> void:
 			"rubble":
 				for i in 4:
 					var o := Vector2(sin(i * 1.9 + p.y), cos(i * 2.3 + p.x)) * 3.0
-					draw_rect(Rect2(p + o, Vector2(2.0, 1.6) * s), Color(0.28, 0.27, 0.32).lightened(0.05 * i))
+					draw_rect(Rect2(p + o, Vector2(2.0, 1.6) * s), Color(0.28, 0.29, 0.32).lightened(0.05 * i))
 			"moss":
 				for i in 5:
 					draw_circle(p + Vector2(sin(i * 2.4 + p.x), cos(i * 1.7)) * 3.0, 1.5, Color(0.2, 0.34, 0.2, 0.55))
@@ -83,7 +83,7 @@ func _draw() -> void:
 			"chain":
 				var sw := sin(t * 1.1 + p.x) * 1.5
 				for i in 4:
-					draw_rect(Rect2(p + Vector2(sw * i * 0.3 - 1, i * 3.5 - 3), Vector2(2, 2.6)), Color(0.38, 0.36, 0.42))
+					draw_rect(Rect2(p + Vector2(sw * i * 0.3 - 1, i * 3.5 - 3), Vector2(2, 2.6)), Color(0.37, 0.39, 0.42))
 			"blood":
 				draw_circle(p, 3.0 * s, Color(0.35, 0.03, 0.05, 0.5))
 				draw_circle(p + Vector2(3, 1), 1.6 * s, Color(0.35, 0.03, 0.05, 0.5))

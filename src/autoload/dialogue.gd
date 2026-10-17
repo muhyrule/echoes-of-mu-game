@@ -38,7 +38,7 @@ func _build_ui() -> void:
 	_panel.size = Vector2(1776, 246)
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.08, 0.06, 0.12, 0.94)
-	sb.border_color = Color(0.62, 0.5, 0.78)
+	sb.border_color = Color(0.78, 0.43, 0.46)
 	sb.set_border_width_all(2)
 	sb.set_corner_radius_all(3)
 	_panel.add_theme_stylebox_override("panel", sb)

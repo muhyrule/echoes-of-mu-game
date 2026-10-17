@@ -471,7 +471,7 @@ func _a_bats() -> void:
 		Audio.sfx("roar")
 		var a := (_pp() - global_position).angle()
 		for i in 7:
-			fx.shot(global_position, Vector2.from_angle(a - 0.9 + 0.3 * i) * (130.0 + 10.0 * phase), 7.0, 3.2, 1, Color("3a1428"), "orb")
+			fx.shot(global_position, Vector2.from_angle(a - 0.9 + 0.3 * i) * (130.0 + 10.0 * phase), 7.0, 3.2, 1, Color("3a0d11"), "orb")
 		var bats := 0
 		for e in get_tree().get_nodes_in_group("enemies"):
 			if e.kind == "bat":

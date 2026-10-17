@@ -112,15 +112,15 @@ func _ridge(base: float, amp: float, sp: float, col: Color, seed_: float, step :
 func _draw() -> void:
 	var sky_a := Color("141830")
 	var sky_b := Color("4a4a78")
-	var glow := Color("6a4a5a")
+	var glow := Color("6a4245")
 	match kind:
 		"prague":
-			sky_b = Color("3a2c3c")
+			sky_b = Color("3c2729")
 			glow = Color("a07040")
 		"echo":
-			sky_a = Color("0c0618")
-			sky_b = Color("3a1a5a")
-			glow = Color("8a4ac0")
+			sky_a = Color("14040a")
+			sky_b = Color("4a0e18")
+			glow = Color("c03541")
 	for i in 27:
 		draw_rect(Rect2(0, i * 40, 1920, 41), sky_a.lerp(sky_b, float(i) / 26.0))
 	for s in stars:
@@ -128,7 +128,7 @@ func _draw() -> void:
 		draw_circle(Vector2(s.x * 1920.0, s.y * 1080.0), 1.0 + s.z, Color(1, 1, 1, 0.25 + 0.5 * tw))
 	var moon := Vector2(1450, 210)
 	draw_circle(moon, 90.0, Color(glow, 0.1))
-	draw_circle(moon, 52.0, Color("d8d8e8") if kind != "echo" else Color("c8a0f0"))
+	draw_circle(moon, 52.0, Color("d8d8e8") if kind != "echo" else Color("f08c95"))
 	draw_circle(moon + Vector2(14, -8), 44.0, sky_b.lerp(sky_a, 0.2))
 	draw_circle(moon, 52.0, Color(1, 1, 1, 0.0))
 	_ridge(640.0, 160.0, 6.0, sky_b.lerp(Color("26264a"), 0.5), 1.0)
@@ -184,9 +184,9 @@ func _skyline() -> void:
 			for i in 5:
 				var a := t * 0.5 + i
 				var c := Vector2(x0 + 360, base - 120)
-				draw_arc(c, 60.0 + i * 38.0, a, a + 4.2, 40, Color(0.7, 0.4, 1.0, 0.2 + 0.4 * rise), 4.0)
+				draw_arc(c, 60.0 + i * 38.0, a, a + 4.2, 40, Color(1.00, 0.29, 0.35, 0.2 + 0.4 * rise), 4.0)
 			draw_rect(Rect2(x0 + 300, base - 220, 120, 260), col)
-			draw_circle(Vector2(x0 + 360, base - 160), 50.0, Color(0.6, 0.3, 0.9, 0.3 + 0.6 * rise))
+			draw_circle(Vector2(x0 + 360, base - 160), 50.0, Color(0.90, 0.19, 0.26, 0.3 + 0.6 * rise))
 
 
 func _compose(route: String) -> Array:

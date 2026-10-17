@@ -238,7 +238,7 @@ func _parry(from_dir: Vector2) -> void:
 	guard_hits = 0
 	Audio.sfx("bell")
 	var hero: String = GameState.lead
-	var col: Color = {"mu": Color(0.8, 0.9, 1.0), "isolde": Color(1.0, 0.85, 0.4), "wren": Color(0.6, 0.45, 0.95), "corvin": Color(0.9, 0.75, 0.35)}.get(hero, Color.WHITE)
+	var col: Color = {"mu": Color(0.8, 0.9, 1.0), "isolde": Color(1.0, 0.85, 0.4), "wren": Color(0.95, 0.35, 0.41), "corvin": Color(0.9, 0.75, 0.35)}.get(hero, Color.WHITE)
 	var rad: float = {"mu": 62.0, "isolde": 90.0, "wren": 50.0, "corvin": 80.0}.get(hero, 60.0)
 	if level:
 		level.shake(4.0)
@@ -281,7 +281,7 @@ func draw_guard(c: CanvasItem) -> void:
 			var a: float = clampf(0.35 - tr.t * 1.2, 0.0, 0.35)
 			c.draw_circle(to_local(tr.p) + Vector2(0, -5), 5.0, Color(1, 1, 1, a))
 	var hero: String = GameState.lead
-	var col: Color = {"mu": Color(0.8, 0.9, 1.0), "isolde": Color(1.0, 0.85, 0.4), "wren": Color(0.6, 0.45, 0.95), "corvin": Color(0.9, 0.75, 0.35)}.get(hero, Color.WHITE)
+	var col: Color = {"mu": Color(0.8, 0.9, 1.0), "isolde": Color(1.0, 0.85, 0.4), "wren": Color(0.95, 0.35, 0.41), "corvin": Color(0.9, 0.75, 0.35)}.get(hero, Color.WHITE)
 	if guard_stun > 0.0:
 		c.draw_arc(Vector2(0, -6), 10.0, t * 10.0, t * 10.0 + 4.0, 10, Color(1, 0.5, 0.4, 0.8), 1.5)
 	if guarding:

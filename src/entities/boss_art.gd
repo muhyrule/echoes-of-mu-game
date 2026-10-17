@@ -151,7 +151,7 @@ static func golem(c: CanvasItem, t: float, ph: int, flash: float, winding: bool,
 	var clay := Color("8a6048")
 	var clay_d := Color("56382a")
 	var clay_l := Color("a87c5c")
-	var stone := Color("5a5260")
+	var stone := Color("604c4e")
 	var gold := Color("d8a848")
 	var glow := Color(1.0, 0.62, 0.2) if ph < 3 else Color(1.0, 0.32 + 0.2 * sin(t * 10.0), 0.15)
 	var br := sin(t * 1.8) * 1.2
@@ -165,16 +165,16 @@ static func golem(c: CanvasItem, t: float, ph: int, flash: float, winding: bool,
 		_shape(c, leg, clay_d, f)
 		var greave := PackedVector2Array([Vector2(s * 10, -40), Vector2(s * 34, -40), Vector2(s * 35, -18 + lift * 0.5), Vector2(s * 22, -8 + lift * 0.5), Vector2(s * 9, -18 + lift * 0.5)])
 		_shape(c, greave, stone, f)
-		_arch(c, s * 22, -18 + lift * 0.5, 7.0, 18.0, Color(0.1, 0.08, 0.14), Color("8a8094"))
+		_arch(c, s * 22, -18 + lift * 0.5, 7.0, 18.0, Color(0.1, 0.08, 0.14), Color("947779"))
 		for k in 3:
-			c.draw_line(Vector2(s * (14 + k * 8), -40), Vector2(s * (14 + k * 8), -34), Color("8a8094"), 1.0)
+			c.draw_line(Vector2(s * (14 + k * 8), -40), Vector2(s * (14 + k * 8), -34), Color("947779"), 1.0)
 		c.draw_circle(Vector2(s * 22, -42), 3.0, gold)
 	# tassets / skirt with hanging chains
 	var skirt := PackedVector2Array([Vector2(-44, -52), Vector2(44, -52), Vector2(40, -36), Vector2(-40, -36)])
 	_shape(c, skirt, stone, f)
 	for i in 7:
 		var x := -36.0 + i * 12.0
-		_arch(c, x, -36, 5.0, 12.0, Color(0.1, 0.08, 0.14), Color("8a8094"))
+		_arch(c, x, -36, 5.0, 12.0, Color(0.1, 0.08, 0.14), Color("947779"))
 	c.draw_line(Vector2(-44, -52), Vector2(44, -52), gold, 2.0)
 	# torso
 	var torso := _sm([Vector2(-50, -52), Vector2(50, -52), Vector2(60, -94), Vector2(46, -124), Vector2(-46, -124), Vector2(-60, -94)], true, 5)
@@ -216,8 +216,8 @@ static func golem(c: CanvasItem, t: float, ph: int, flash: float, winding: bool,
 		c.draw_polyline(PackedVector2Array(pts), Color(glow, ca * 0.4), 4.0)
 		c.draw_polyline(PackedVector2Array(pts), Color(1.0, 0.85, 0.5, ca), 1.2)
 	# chains across chest
-	_chain(c, Vector2(-56, -112), Vector2(0, -58), 14.0, 13, Color("8a8094"))
-	_chain(c, Vector2(56, -112), Vector2(0, -58), 14.0, 13, Color("8a8094"))
+	_chain(c, Vector2(-56, -112), Vector2(0, -58), 14.0, 13, Color("947779"))
+	_chain(c, Vector2(56, -112), Vector2(0, -58), 14.0, 13, Color("947779"))
 	# arms
 	var raise := 0.0
 	if winding:
@@ -247,10 +247,10 @@ static func golem(c: CanvasItem, t: float, ph: int, flash: float, winding: bool,
 			_poly(c, [fist + Vector2(kx - 2, 12), fist + Vector2(kx + 2, 12), fist + Vector2(kx, 20)], stone, f, 1.0)
 		# pauldron with gothic spires
 		var pd := _sm([sh + Vector2(-s * 14, 6), sh + Vector2(s * 22, 8), sh + Vector2(s * 24, -10), sh + Vector2(s * 6, -22), sh + Vector2(-s * 14, -14)], true, 4)
-		_shape(c, pd, stone, f, Color("a098b0"))
+		_shape(c, pd, stone, f, Color("b08d90"))
 		for k in 3:
 			var bx: float = sh.x + s * (-8 + k * 11)
-			_poly(c, [Vector2(bx - 4, sh.y - 16 + k * 2), Vector2(bx + 4, sh.y - 16 + k * 2), Vector2(bx + s * 1.5, sh.y - 36 + k * 4)], Color("7a7288"), f, 1.2)
+			_poly(c, [Vector2(bx - 4, sh.y - 16 + k * 2), Vector2(bx + 4, sh.y - 16 + k * 2), Vector2(bx + s * 1.5, sh.y - 36 + k * 4)], Color("88696c"), f, 1.2)
 		c.draw_circle(sh + Vector2(s * 6, -2), 4.0, gold)
 		c.draw_circle(sh + Vector2(s * 6, -2), 2.0, glow)
 		_rivets(c, sh + Vector2(-s * 10, 2), sh + Vector2(s * 20, 4), 5, gold)
@@ -330,8 +330,8 @@ static func golem(c: CanvasItem, t: float, ph: int, flash: float, winding: bool,
 			c.draw_rect(Rect2(s2 * 24 - 0.5, gy - 3, 1, 3), Color(glow, 0.65))
 		for q in 4:
 			var qa := q * TAU / 4.0 + PI / 4.0
-			c.draw_circle(Vector2(s2 * 22, -26) + Vector2.from_angle(qa) * 3.0, 1.6, Color("2c2634"))
-			c.draw_circle(Vector2(s2 * 22, -26) + Vector2.from_angle(qa) * 3.0, 0.9, Color("9a90a8"))
+			c.draw_circle(Vector2(s2 * 22, -26) + Vector2.from_angle(qa) * 3.0, 1.6, Color("292c34"))
+			c.draw_circle(Vector2(s2 * 22, -26) + Vector2.from_angle(qa) * 3.0, 0.9, Color("a88588"))
 	# mossy patches and swaying shoulder chains
 	for k in 8:
 		var mp := Vector2(-40 + fmod(k * 29.0, 80.0), -60 - fmod(k * 17.0, 40.0))
@@ -341,7 +341,7 @@ static func golem(c: CanvasItem, t: float, ph: int, flash: float, winding: bool,
 		for j in 6:
 			var cp := Vector2(s2 * 40 + sin(t * 1.6 + j * 0.6 + s2) * 1.5, -112 + j * 6.0)
 			c.draw_circle(cp, 2.0, OUT)
-			c.draw_circle(cp, 1.2, Color("8a8094") if j % 2 == 0 else Color("5a5260"))
+			c.draw_circle(cp, 1.2, Color("947779") if j % 2 == 0 else Color("604c4e"))
 	# loose dust motes
 	for k in 6:
 		var u := fmod(t * 0.4 + k * 0.17, 1.0)

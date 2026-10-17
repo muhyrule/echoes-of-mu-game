@@ -42,7 +42,7 @@ static func barghest(c: CanvasItem, t: float, ph: int, f: float, winding: bool, 
 	var fur := Color("23202f")
 	var fur_l := Color("4c4770")
 	var fur_d := Color("0a0810")
-	var ghost := Color(0.55, 0.9, 1.0) if ph < 3 else Color(0.8, 0.6, 1.0)
+	var ghost := Color(0.55, 0.9, 1.0) if ph < 3 else Color(1.00, 0.51, 0.55)
 	var bone := Color("d8d8e0")
 	var iron := Color("7a7a8c")
 	var eye := Color(1.0, 0.4, 0.15) if exposed <= 0.0 else Color(1.0, 0.95, 0.5)
@@ -130,7 +130,7 @@ static func barghest(c: CanvasItem, t: float, ph: int, f: float, winding: bool, 
 	for i in 10:
 		var a := -2.6 + i * 0.36
 		var p0 := Vector2(72, -118 - rear * 0.5)
-		BA._poly(c, [p0 + Vector2.from_angle(a - 0.12) * 22.0, p0 + Vector2.from_angle(a) * (44.0 + (i % 2) * 8.0), p0 + Vector2.from_angle(a + 0.12) * 22.0], Color("3e3856") if i % 2 == 0 else fur_l, f, 1.0)
+		BA._poly(c, [p0 + Vector2.from_angle(a - 0.12) * 22.0, p0 + Vector2.from_angle(a) * (44.0 + (i % 2) * 8.0), p0 + Vector2.from_angle(a + 0.12) * 22.0], Color("3e4556") if i % 2 == 0 else fur_l, f, 1.0)
 	# spiked iron collar
 	var col_a := Vector2(86, -140 - rear)
 	var col_b := Vector2(92, -104 - rear * 0.3)
@@ -193,7 +193,7 @@ static func barghest(c: CanvasItem, t: float, ph: int, f: float, winding: bool, 
 
 static func _paw(c: CanvasItem, p: Vector2, s: float, f: float, bone: Color, ghost: Color, t: float) -> void:
 	c.draw_colored_polygon(BA._ellipse(p + Vector2(5, 0), 12.0 * s, 5.0 * s), OUT)
-	c.draw_colored_polygon(BA._ellipse(p + Vector2(5, -0.5), 10.6 * s, 4.0 * s), BA._fl(Color("2a263a"), f))
+	c.draw_colored_polygon(BA._ellipse(p + Vector2(5, -0.5), 10.6 * s, 4.0 * s), BA._fl(Color("2a2e3a"), f))
 	c.draw_circle(p + Vector2(4, 2), 4.0, Color(ghost, 0.3 + 0.1 * sin(t * 5.0)))
 	for j in 4:
 		var bx := p.x + 8.0 + j * 3.0
@@ -204,7 +204,7 @@ static func _paw(c: CanvasItem, p: Vector2, s: float, f: float, bone: Color, gho
 
 static func plague(c: CanvasItem, t: float, ph: int, f: float, winding: bool, exposed: float, moving: bool) -> void:
 	var coat := Color("2a2430")
-	var coat_l := Color("504560")
+	var coat_l := Color("4a5060")
 	var wax := Color("5a4a3a")
 	var gold := Color("c8a858")
 	var bone := Color("eee6d2")
@@ -260,7 +260,7 @@ static func plague(c: CanvasItem, t: float, ph: int, f: float, winding: bool, ex
 	for k in 5:
 		var hp := Vector2(-20.0 + k * 9.0, -66)
 		c.draw_line(hp, hp + Vector2(0, 10), Color("5a7a3a"), 2.0)
-		c.draw_circle(hp + Vector2(0, 11), 1.6, Color("8a5aa0"))
+		c.draw_circle(hp + Vector2(0, 11), 1.6, Color("a04b53"))
 	BA._poly(c, [Vector2(14, -64), Vector2(26, -64), Vector2(20, -54), Vector2(26, -44), Vector2(14, -44), Vector2(20, -54)], Color(0.9, 0.85, 0.6, 0.85), f, 0.8)
 	c.draw_line(Vector2(13, -64), Vector2(27, -64), gold, 1.6)
 	c.draw_line(Vector2(13, -44), Vector2(27, -44), gold, 1.6)
@@ -328,17 +328,17 @@ static func plague(c: CanvasItem, t: float, ph: int, f: float, winding: bool, ex
 	# wide-brimmed hat with a raven feather
 	c.draw_colored_polygon(BA._ellipse(Vector2(0, hy - 6), 40.0, 8.5), OUT)
 	c.draw_colored_polygon(BA._ellipse(Vector2(0, hy - 7), 38.0, 7.0), Color("1c1824"))
-	c.draw_arc(Vector2(0, hy - 8), 36.0, 0.2, 2.9, 12, Color("3a3248"), 1.2)
+	c.draw_arc(Vector2(0, hy - 8), 36.0, 0.2, 2.9, 12, Color("363b48"), 1.2)
 	BA._poly(c, [Vector2(-17, hy - 7), Vector2(-13, hy - 28), Vector2(13, hy - 28), Vector2(17, hy - 7)], Color("1c1824"), f, 1.2)
 	c.draw_rect(Rect2(-17, hy - 13, 34, 4), gold)
 	var fe := PackedVector2Array([Vector2(8, hy - 26), Vector2(26, hy - 46), Vector2(40, hy - 54), Vector2(30, hy - 40), Vector2(14, hy - 24)])
-	c.draw_colored_polygon(fe, Color("2a2438"))
+	c.draw_colored_polygon(fe, Color("282c38"))
 	c.draw_polyline(fe, OUT, 1.2)
 	# perched raven on the shoulder
 	var rv := Vector2(-30, -134 + br)
 	c.draw_colored_polygon(BA._ellipse(rv, 9.0, 6.0), OUT)
-	c.draw_colored_polygon(BA._ellipse(rv, 7.6, 4.8), Color("2a2438"))
-	c.draw_circle(rv + Vector2(-7, -5), 3.4, Color("2a2438"))
+	c.draw_colored_polygon(BA._ellipse(rv, 7.6, 4.8), Color("282c38"))
+	c.draw_circle(rv + Vector2(-7, -5), 3.4, Color("282c38"))
 	BA._poly(c, [rv + Vector2(-9, -6), rv + Vector2(-16, -4), rv + Vector2(-9, -3)], gold, f, 0.6)
 	c.draw_circle(rv + Vector2(-8, -6), 0.7, Color(1, 0.9, 0.4))
 	for i in 3:
@@ -509,7 +509,7 @@ static func strigoi(c: CanvasItem, t: float, ph: int, f: float, winding: bool, e
 	var cloak_l := Color("7a2a44")
 	var lining := Color("a82438")
 	var skin := Color("d4ccd8")
-	var skin_d := Color("8a7c92")
+	var skin_d := Color("927275")
 	var gold := Color("d0a858")
 	var armor := Color("2a2230")
 	var eye := Color(1.0, 0.25, 0.25) if exposed <= 0.0 else Color(1.0, 0.9, 0.4)
@@ -535,9 +535,9 @@ static func strigoi(c: CanvasItem, t: float, ph: int, f: float, winding: bool, e
 	# armoured greaves and long pointed sabatons
 	for s in [-1.0, 1.0]:
 		var lift: float = sin(t * 3.0 + s) * 3.0 if moving else 0.0
-		_limb(c, [Vector2(s * 10, -76), Vector2(s * 14, -44), Vector2(s * 13, -10 + lift)], [18.0, 14.0, 11.0], armor, Color("5a4a68"), f)
+		_limb(c, [Vector2(s * 10, -76), Vector2(s * 14, -44), Vector2(s * 13, -10 + lift)], [18.0, 14.0, 11.0], armor, Color("505768"), f)
 		c.draw_circle(Vector2(s * 14, -44), 8.0, OUT)
-		c.draw_circle(Vector2(s * 14, -44), 6.6, BA._fl(Color("4a3e58"), f))
+		c.draw_circle(Vector2(s * 14, -44), 6.6, BA._fl(Color("434958"), f))
 		BA._poly(c, [Vector2(s * 4, -10 + lift), Vector2(s * 22, -10 + lift), Vector2(s * 40, 0 + lift), Vector2(s * 20, 4 + lift), Vector2(s * 4, 4 + lift)], armor, f, 1.2)
 		c.draw_line(Vector2(s * 8, -22 + lift * 0.5), Vector2(s * 18, -22 + lift * 0.5), gold, 1.4)
 	# vast bat-wing cloak with ribbed membranes
@@ -552,11 +552,11 @@ static func strigoi(c: CanvasItem, t: float, ph: int, f: float, winding: bool, e
 		c.draw_polyline(PackedVector2Array([Vector2(s * 56, -178 - rear), tip, Vector2(s * 92, -140 - rear * 0.5)]), gold, 1.8)
 	# armoured, gaunt torso: breastplate with a chiselled crest
 	var torso := BA._sm([Vector2(-24, -66), Vector2(24, -66), Vector2(30, -102), Vector2(28, -134 + br), Vector2(-28, -134 + br), Vector2(-30, -102)], true, 4)
-	BA._shape(c, torso, armor, f, Color("5a4a68"))
+	BA._shape(c, torso, armor, f, Color("505768"))
 	for k in 5:
 		c.draw_arc(Vector2(0, -124 + k * 9 + br * 0.3), 15.0 - k, 0.15, PI - 0.15, 8, Color(0.8, 0.74, 0.8, 0.6), 1.3)
 	c.draw_line(Vector2(0, -132), Vector2(0, -74), gold, 1.4)
-	BA._poly(c, [Vector2(-10, -128 + br), Vector2(10, -128 + br), Vector2(6, -112 + br), Vector2(0, -104 + br), Vector2(-6, -112 + br)], Color("3a2c44"), f, 1.2)
+	BA._poly(c, [Vector2(-10, -128 + br), Vector2(10, -128 + br), Vector2(6, -112 + br), Vector2(0, -104 + br), Vector2(-6, -112 + br)], Color("442629"), f, 1.2)
 	c.draw_circle(Vector2(-14, -96 + br), 7.0, Color(eye, 0.25 + 0.1 * sin(t * 4.0)))
 	c.draw_circle(Vector2(-14, -96 + br), 3.2, OUT)
 	c.draw_line(Vector2(-14, -104 + br), Vector2(-14, -88 + br), Color(eye, 0.9), 1.2)
@@ -574,7 +574,7 @@ static func strigoi(c: CanvasItem, t: float, ph: int, f: float, winding: bool, e
 	BA._chain(c, Vector2(18, -66), Vector2(10, -46), 6.0, 5, gold)
 	# spiked pauldrons and the high collar
 	for s in [-1.0, 1.0]:
-		BA._poly(c, [Vector2(s * 20, -134 + br), Vector2(s * 44, -140 + br), Vector2(s * 50, -118), Vector2(s * 26, -114)], Color("3a2c44"), f, 1.4)
+		BA._poly(c, [Vector2(s * 20, -134 + br), Vector2(s * 44, -140 + br), Vector2(s * 50, -118), Vector2(s * 26, -114)], Color("442629"), f, 1.4)
 		BA._poly(c, [Vector2(s * 38, -138 + br), Vector2(s * 54, -158 + br - rear * 0.4), Vector2(s * 46, -128)], Color("8a8898"), f, 1.0)
 		BA._poly(c, [Vector2(s * 8, -130 + br), Vector2(s * 30, -172 + br - rear * 0.4), Vector2(s * 24, -126 + br)], lining, f, 1.2)
 		c.draw_line(Vector2(s * 12, -132 + br), Vector2(s * 29, -166 + br - rear * 0.4), cloak_l, 1.2)
@@ -583,7 +583,7 @@ static func strigoi(c: CanvasItem, t: float, ph: int, f: float, winding: bool, e
 		var sh := Vector2(s * 36, -126 + br)
 		var el := Vector2(s * (56 + rear), -100 - rear * 1.5)
 		var hand := Vector2(s * (50 + rear * 2.0), -70 - rear * 3.0 + sin(t * 2.0 + s) * 3.0)
-		_limb(c, [sh, el, hand], [14.0, 12.0, 9.0], Color("2e2234"), Color("5a4a68"), f)
+		_limb(c, [sh, el, hand], [14.0, 12.0, 9.0], Color("341e20"), Color("505768"), f)
 		c.draw_rect(Rect2(el.lerp(hand, 0.5) + Vector2(-6, -3), Vector2(12, 5)), gold)
 		c.draw_circle(hand, 6.0, OUT)
 		c.draw_circle(hand, 5.0, BA._fl(skin_d, f))
@@ -744,7 +744,7 @@ static func ankou(c: CanvasItem, t: float, ph: int, f: float, winding: bool, exp
 	c.draw_line(Vector2(-9, hy + 19.4), Vector2(9, hy + 19.4), OUT, 1.0)
 	c.draw_colored_polygon(BA._ellipse(Vector2(0, hy - 2), 40.0, 7.5), OUT)
 	c.draw_colored_polygon(BA._ellipse(Vector2(0, hy - 3), 38.0, 6.0), Color("2a2630"))
-	c.draw_arc(Vector2(0, hy - 4), 35.0, 0.2, 2.9, 12, Color("464058"), 1.2)
+	c.draw_arc(Vector2(0, hy - 4), 35.0, 0.2, 2.9, 12, Color("454a58"), 1.2)
 	BA._poly(c, [Vector2(-15, hy - 3), Vector2(-12, hy - 24), Vector2(12, hy - 24), Vector2(15, hy - 3)], Color("2a2630"), f, 1.2)
 	c.draw_rect(Rect2(-15, hy - 9, 30, 3.4), gold)
 	c.draw_circle(Vector2(0, hy - 7), 2.4, Color("d8d0a8"))
