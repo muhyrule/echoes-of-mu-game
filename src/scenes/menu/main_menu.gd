@@ -88,7 +88,7 @@ func _choose(item: String) -> void:
 				get_tree().change_scene_to_file(GameState.LEVEL_SCENE)
 		"New Game":
 			GameState.new_game()
-			get_tree().change_scene_to_file(GameState.LEVEL_SCENE)
+			get_tree().change_scene_to_file("res://src/scenes/prologue/Prologue.tscn")
 		"Quit":
 			get_tree().quit()
 

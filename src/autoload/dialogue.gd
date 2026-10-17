@@ -1,6 +1,8 @@
 extends CanvasLayer
 ## Dialogue box. Lines come from res://data/dialogue.json: {id: [{who, text, set?}]}.
 
+const Voice = preload("res://src/autoload/voice.gd")
+
 signal finished
 
 var active := false
@@ -14,6 +16,7 @@ var _name_label: Label
 var _text: Label
 var _prompt: Label
 var _chars := 0.0
+var _ctx := ""
 
 
 func _ready() -> void:
@@ -71,6 +74,7 @@ func play(id: String) -> void:
 	if not data.has(id):
 		push_warning("Missing dialogue: " + id)
 		return
+	_ctx = id
 	await play_lines(data[id])
 
 
@@ -88,7 +92,7 @@ func _show_line() -> void:
 	var line: Dictionary = _lines[_i]
 	var who: String = line.get("who", "")
 	_name_label.text = who
-	_text.text = line.get("text", "")
+	_text.text = Voice.speak(line.get("text", ""), who, _ctx)
 	_text.add_theme_color_override("font_color", Color(0.7, 0.72, 0.85) if who == "" else Color(0.92, 0.9, 0.96))
 	_text.visible_characters = 0
 	_chars = 0.0
