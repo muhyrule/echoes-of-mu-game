@@ -103,7 +103,7 @@ Each has its own themed arena (`keep`, `ossuary`, `cliff`, `lazaretto`, `cave`),
 
 ## Prologue, voice and music
 
-- **Prologue**: New Game opens six illustrated, narrated plates (Enter advances, Esc skips) explaining the Echoes and why Mu's journey begins.
+- **Prologue**: New Game opens 24 original animated story plates explaining the Echoes and Mu's calling. Vaulted interiors, regional reliquaries, candlelit masonry and weathered exteriors accompany staged moments: the foundling's rescue, young Mu hearing the walls, borrowed memories and Aldous passing on the blade. Camera moves and story beats scale to each plate's reading time. Enter reveals text, then advances; Shift hastens; Esc skips. The thin ornamental border leaves the illustration visible.
 - **Travel**: the road cutscene shows only the heroes currently in the party, each speaking their own line.
 - **Old gothic voice**: `src/autoload/voice.gd` applies archaic diction to the main cast and regional dialect to townsfolk (Scots in Edinburgh, Bohemian-flavoured in Praha).
 - **Music engine**: 44.1 kHz stereo, per-voice panning, stereo room reverb, new choir/harp/flute/cello/drone voices. Region themes: chapel, Edinburgh, Praha, plus dungeon pieces `vaults` (Edinburgh) and `ossuary` (Praha), `road` for travel and `prologue`.
