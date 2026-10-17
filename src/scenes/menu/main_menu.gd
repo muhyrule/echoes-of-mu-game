@@ -26,6 +26,8 @@ func _ready() -> void:
 	font = ThemeDB.fallback_font
 	var post := CanvasLayer.new()
 	post.set_script(PostScript)
+	post.set("grit", 1.7)
+	post.set("scratches", 1.0)
 	add_child(post)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	items = ["New Game", "Quit"]

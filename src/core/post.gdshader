@@ -3,7 +3,8 @@ shader_type canvas_item;
 
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
 uniform float time = 0.0;
-uniform float grit = 1.7;
+uniform float grit = 1.2;
+uniform float scratches = 0.0;
 uniform vec3 shadow_tint = vec3(0.05, 0.07, 0.14);
 uniform vec3 high_tint = vec3(1.04, 0.97, 0.88);
 
@@ -33,13 +34,13 @@ void fragment() {
 	col = mix(vec3(l), col, 0.78 - 0.1 * grit);
 	col = (col - 0.5) * (1.0 + 0.22 * grit) + 0.5;
 	col = max(col - 0.03 * grit, vec3(0.0));
-	col = pow(col, vec3(1.12));
+	col = pow(col, vec3(1.0 + 0.07 * grit));
 	col = mix(col * high_tint, col + shadow_tint * (1.0 - smoothstep(0.0, 0.5, l)), 1.0 - smoothstep(0.0, 0.6, l));
 
 	float sc = hash(vec2(floor(uv.x * 640.0), floor(time * 12.0)));
-	col -= step(0.9975, sc) * 0.18 * grit * (0.4 + l);
+	col -= step(0.9975, sc) * 0.18 * scratches * (0.4 + l);
 	float dirt = hash(floor(uv * vec2(240.0, 135.0)) + floor(time * 2.0));
-	col *= 1.0 - step(0.985, dirt) * 0.12 * grit;
+	col *= 1.0 - step(0.985, dirt) * 0.12 * scratches;
 	float vig = smoothstep(0.18, 0.62, r2 * 1.9);
 	col *= 1.0 - vig * 0.72;
 	float g = hash(uv * vec2(1920.0, 1080.0) + fract(time) * 100.0) - 0.5;

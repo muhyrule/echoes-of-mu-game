@@ -128,8 +128,27 @@ func load_game() -> bool:
 	return true
 
 
+const JOURNEY_HUBS := ["chapel", "edinburgh", "prague_town"]
+var journey_from := ""
+var journey_to := ""
+
+
+func _is_journey(a: String, b: String) -> bool:
+	if a == b:
+		return false
+	var ha: bool = JOURNEY_HUBS.has(a) or a.ends_with("_arena") and a != "vault_arena" and a != "prague_arena"
+	var hb: bool = JOURNEY_HUBS.has(b) or b.ends_with("_arena") and b != "vault_arena" and b != "prague_arena"
+	return ha and hb and (a == "chapel" or b == "chapel")
+
+
 func change_map(map_name: String, spawn_name := "start") -> void:
+	var prev := current_map
 	current_map = map_name
 	spawn = spawn_name
 	save_game()
+	if _is_journey(prev, map_name):
+		journey_from = prev
+		journey_to = map_name
+		get_tree().change_scene_to_file("res://src/scenes/travel/Travel.tscn")
+		return
 	get_tree().change_scene_to_file(LEVEL_SCENE)

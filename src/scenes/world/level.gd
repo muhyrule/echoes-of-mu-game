@@ -8,6 +8,7 @@ const ArenaFxScript = preload("res://src/entities/arena_fx.gd")
 const DungeonScript = preload("res://src/entities/dungeon.gd")
 const SignsScript = preload("res://src/entities/signs.gd")
 const PostScript = preload("res://src/core/post.gd")
+const DecorScript = preload("res://src/entities/decor.gd")
 const ArenaMechScript = preload("res://src/entities/arena_mech.gd")
 const GiantScript = preload("res://src/entities/giant.gd")
 const PropScript = preload("res://src/entities/prop.gd")
@@ -116,6 +117,12 @@ func _ready() -> void:
 		mech.set_script(ArenaMechScript)
 		mech.set("level", self)
 		add_child(mech)
+	if not arena_fx:
+		var dc := Node2D.new()
+		dc.set_script(DecorScript)
+		dc.set("level", self)
+		add_child(dc)
+		move_child(dc, 0)
 	if meta.has("doors"):
 		var sg := Node2D.new()
 		sg.set_script(SignsScript)
@@ -371,7 +378,7 @@ func _setup_atmosphere() -> void:
 	var tint := CanvasModulate.new()
 	tint_node = tint
 	tint.color = {"vault": Color(0.38, 0.4, 0.56), "prague": Color(0.46, 0.46, 0.52), "chapel": Color(0.55, 0.5, 0.62), "town_e": Color(0.5, 0.52, 0.68), "town_p": Color(0.62, 0.56, 0.58), "interior": Color(0.78, 0.68, 0.62)}[theme]
-	tint.color *= Color(0.86, 0.86, 0.9, 1.0)
+	tint.color *= Color(1.12, 1.12, 1.1, 1.0)
 	tint_base = tint.color
 	add_child(tint)
 	var lamp := Art.make_light(Color("ffd9a0"), 2.0, 1.0)
